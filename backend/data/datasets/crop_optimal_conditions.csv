@@ -1,0 +1,38 @@
+crop,temp_min,temp_max,rain_min,rain_max,humidity_min,humidity_max,ph_min,ph_max,sm_min,sm_max,light_min,light_max,green_min,green_max,category,notes
+Maiz,18,30,60,150,50,80,5.8,7.0,0.22,0.4,25000,60000,55,82,Grano,Sensible a heladas; critico en floracion
+Frijol,15,27,30,100,45,75,6.0,7.0,0.2,0.38,20000,50000,52,80,Grano,No tolera encharcamiento; sensible a alta humedad en vaina
+Arroz,20,35,100,200,70,90,5.5,7.0,0.35,0.55,30000,65000,58,85,Grano,Requiere suelos con buena capacidad de retencion hidrica
+Trigo,10,24,25,75,40,70,6.0,7.5,0.18,0.35,15000,45000,50,78,Grano,Altiplano guatemalteco; sensible a roya en humedad alta
+Sorgo,21,35,40,100,40,75,5.5,7.5,0.18,0.38,28000,65000,50,78,Grano,Alta tolerancia a sequia; bajo costo de produccion
+Avena,8,22,30,80,50,75,5.5,7.0,0.18,0.35,12000,40000,50,78,Grano,Tierras altas; sensible a temperaturas extremas
+Tomate,18,27,25,75,55,75,6.0,7.0,0.22,0.4,20000,50000,52,80,Hortaliza,Alta humedad favorece tizon tardio; riego controlado
+Papa,10,20,40,100,55,80,5.0,6.5,0.22,0.42,15000,40000,55,82,Hortaliza,Susceptible a Phytophthora; pH bajo esencial
+Zanahoria,10,22,30,70,50,75,6.0,7.0,0.2,0.38,15000,40000,50,78,Hortaliza,Suelos sueltos sin piedras; raiz bifurcada en compactados
+Cebolla,13,24,20,60,45,70,6.0,7.0,0.18,0.35,15000,45000,48,76,Hortaliza,Bulbificacion afectada por fotoperiodo; evitar exceso agua
+Repollo,10,20,30,80,60,80,6.0,7.5,0.22,0.4,12000,38000,55,82,Hortaliza,Clima fresco; requiere calcio para cabeza compacta
+Brocoli,10,20,30,70,60,80,6.0,7.0,0.22,0.4,12000,38000,55,82,Hortaliza,Altiplano 1800-3000 msnm; exportacion principal Guatemala
+Coliflor,10,20,30,70,60,80,6.0,7.5,0.22,0.4,12000,38000,52,80,Hortaliza,Similar al brocoli; intolerante a altas temperaturas
+Lechuga,10,20,30,60,60,80,6.0,7.0,0.2,0.38,8000,30000,55,82,Hortaliza,Bolting prematuro con altas temperaturas
+Espinaca,8,20,25,60,60,80,6.0,7.5,0.2,0.38,8000,28000,58,85,Hortaliza,Alta demanda de nitrogeno; sensible a suelos acidos
+Pepino,18,30,30,80,60,80,6.0,7.0,0.22,0.42,20000,50000,55,82,Hortaliza,Sensible a heladas; alta evapotranspiracion
+Chile,18,28,30,80,60,75,6.0,7.0,0.22,0.4,18000,48000,52,80,Hortaliza,Bacteriosis con lluvia excesiva; importante en Guatemala
+Berenjena,20,30,30,80,55,75,6.0,7.0,0.22,0.4,22000,52000,52,80,Hortaliza,Requiere temperaturas calidas; intolerante a heladas
+Zucchini,18,28,30,80,55,75,6.0,7.5,0.22,0.4,18000,48000,52,80,Hortaliza,Crecimiento rapido; buena rotacion con maiz
+Aguacate,15,25,60,130,60,80,5.5,7.0,0.22,0.42,20000,55000,55,82,Fruta,Sensible a encharcamiento; exportacion importante GT
+Mango,24,32,50,150,50,80,5.5,7.5,0.2,0.4,30000,70000,52,80,Fruta,Sequia previa a floracion mejora produccion
+Naranja,18,30,60,120,60,80,5.5,7.0,0.22,0.4,22000,55000,55,82,Fruta,Produccion citrica; sensible a heladas
+Limon,20,32,50,100,55,75,5.5,7.0,0.2,0.38,25000,60000,52,80,Fruta,Tolerante a sequia moderada; costa sur Guatemala
+Banano,22,32,100,200,70,90,5.5,7.0,0.3,0.5,28000,65000,58,85,Fruta,Region atlantica; altamente sensible a vientos
+Pina,20,32,80,160,60,80,4.5,6.5,0.22,0.42,25000,60000,50,78,Fruta,Suelos muy bien drenados; tolerante a pH bajo
+Papaya,22,32,80,150,60,80,5.5,7.0,0.25,0.42,28000,65000,55,82,Fruta,Sensible a virus del mosaico; requiere buena ventilacion
+Melon,20,32,30,80,40,70,6.0,7.5,0.2,0.38,25000,60000,50,78,Fruta,Clima calido seco; riego por goteo ideal
+Sandia,22,35,30,80,40,70,6.0,7.0,0.2,0.38,28000,65000,50,78,Fruta,Valles calidos; humedad alta favorece antracnosis
+Fresa,10,22,30,80,60,80,5.5,6.5,0.22,0.4,15000,42000,52,80,Fruta,Altiplano; alta demanda de mano de obra
+Cafe,18,25,80,180,65,85,5.5,6.5,0.25,0.45,5000,25000,58,85,Comercial,Principal cultivo exportacion GT; roya con >85% HR; crece en sombra
+Cacao,20,30,100,200,75,90,5.5,7.5,0.28,0.48,3000,20000,60,86,Comercial,Requiere sombra; regiones bajas humedas
+Cana de azucar,20,35,80,150,60,80,6.0,7.5,0.25,0.45,30000,70000,55,82,Comercial,Costa sur Guatemala; zafra nov-mayo
+Cardamomo,18,28,80,180,70,90,5.5,7.0,0.28,0.48,4000,18000,58,85,Comercial,Guatemala mayor exportador mundial; Alta Verapaz; sombra parcial
+Soya,20,30,50,120,55,80,6.0,7.0,0.22,0.42,22000,55000,52,80,Comercial,Fijacion de nitrogeno; rotacion con maiz
+Mani,22,35,40,100,50,75,5.5,7.0,0.2,0.38,25000,60000,50,78,Comercial,Suelos arenosos bien drenados; semi-arido
+Yuca,22,35,60,130,55,80,5.5,7.0,0.2,0.4,20000,55000,50,78,Raiz,Alta tolerancia a sequia; suelos pobres
+Camote,20,30,50,100,55,75,5.5,7.5,0.2,0.38,18000,50000,50,78,Raiz,Tolerante a suelos marginales; seguridad alimentaria
