@@ -1,0 +1,64 @@
+/* ============================================================
+   alerts.css — Página de Alertas
+   Alert list · Alert items · Rec items · Quick actions
+   ============================================================ */
+
+.alert-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.alert-item {
+  display: flex;
+  gap: 0.7rem;
+  align-items: flex-start;
+  padding: 0.75rem 0.95rem;
+  border-radius: var(--radius-md);
+  font-size: 0.8rem;
+  line-height: 1.55;
+  border: 1px solid transparent;
+}
+
+.alert-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.alert-item.critical { background: var(--red-soft);   border-color: rgba(185,28,28,0.15); color: #7f1d1d; }
+.alert-item.medium   { background: var(--earth-soft); border-color: rgba(139,94,25,0.16); color: #78350f; }
+.alert-item.low      { background: var(--green-soft); border-color: rgba(38,99,36,0.13);  color: #14532d; }
+
+.alert-item.critical .alert-dot { background: var(--red);   box-shadow: 0 0 6px rgba(185,28,28,0.55); }
+.alert-item.medium   .alert-dot { background: var(--earth); box-shadow: 0 0 6px rgba(139,94,25,0.45); }
+.alert-item.low      .alert-dot { background: var(--green); }
+
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.recommendation-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.rec-item {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  padding: 0.72rem 0.9rem;
+  border-radius: var(--radius-md);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.rec-icon { flex-shrink: 0; margin-top: 1px; }

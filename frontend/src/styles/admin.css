@@ -1,0 +1,248 @@
+/* ============================================================
+   admin.css — Estilos y overrides para el Panel de Administrador
+   Tema: "Soft Slate / Minimal Corporate"
+   ============================================================ */
+
+/* ── 1. Sobrescritura de Variables Globales (Scope) ───────── */
+.admin-theme {
+  /* Fondos Suaves (Grises/Plata) */
+  --bg:            #f4f6f8; /* slate-50/100 */
+  --bg-inner:      #eef1f4;
+  --surface:       #ffffff;
+  --surface-alt:   #f8fafc;
+  --surface-hover: #f1f5f9;
+
+  /* Texto (Gris Oscuro/Neutral) */
+  --text-primary:  #1e293b; /* slate-800 */
+  --text-secondary:#475569; /* slate-600 */
+  --text-muted:    #64748b; /* slate-500 */
+  --text-faint:    #94a3b8; /* slate-400 */
+
+  /* Bordes delicados */
+  --border:        rgba(100, 116, 139, 0.12);
+  --border-strong: rgba(100, 116, 139, 0.25);
+  --border-focus:  rgba(100, 116, 139, 0.45);
+
+  /* Acento (Gris Pizarra / Slate en vez del Verde Botánico) */
+  --green:         #475569; /* slate-600 */
+  --green-light:   #64748b;
+  --green-soft:    rgba(100, 116, 139, 0.08);
+  --green-mid:     rgba(100, 116, 139, 0.15);
+  --green-glow:    rgba(100, 116, 139, 0.2);
+
+  /* Sombras ligeras corporativas */
+  --shadow-xs: 0 1px 2px rgba(15,23,42,0.04);
+  --shadow-sm: 0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+  --shadow-md: 0 4px 12px rgba(15,23,42,0.05), 0 2px 4px rgba(15,23,42,0.03);
+  --shadow-lg: 0 10px 32px rgba(15,23,42,0.06), 0 4px 10px rgba(15,23,42,0.03);
+  --shadow-xl: 0 20px 48px rgba(15,23,42,0.08), 0 8px 16px rgba(15,23,42,0.04);
+
+  background-color: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+/* ── 2. Ajustes Generales de la Interfaz ──────────────────── */
+.admin-theme .page-content {
+  background: transparent;
+}
+
+/* Fondo decorativo exclusivo del admin (muy tenue) */
+.admin-theme::before {
+  content: "";
+  position: fixed;
+  top: -10%; right: -5%;
+  width: 50vw; height: 50vh;
+  background: radial-gradient(circle, rgba(100,116,139,0.04) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+.admin-theme::after {
+  content: "";
+  position: fixed;
+  bottom: -10%; left: -5%;
+  width: 60vw; height: 60vh;
+  background: radial-gradient(circle, rgba(100,116,139,0.03) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── 3. Tarjetas Oscuras con Glassmorphism ────────────────── */
+.admin-theme .card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-theme .card-header {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-alt);
+}
+
+.admin-theme .card-header h3 {
+  color: var(--text-primary);
+}
+
+/* ── 4. Chips (Etiquetas) ─────────────────────────────────── */
+.admin-theme .chip {
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+}
+.admin-theme .chip.green {
+  background: rgba(16,185,129,0.08);
+  border-color: rgba(16,185,129,0.2);
+  color: #059669; 
+}
+.admin-theme .chip.orange {
+  background: rgba(245,158,11,0.08);
+  border-color: rgba(245,158,11,0.2);
+  color: #d97706; 
+}
+.admin-theme .chip.blue {
+  background: rgba(56,189,248,0.08);
+  border-color: rgba(56,189,248,0.2);
+  color: #0284c7; 
+}
+.admin-theme .chip.gray {
+  background: var(--surface-hover);
+  border-color: var(--border);
+  color: var(--text-secondary); 
+}
+
+/* ── 5. Tablas Oscuras ────────────────────────────────────── */
+.admin-theme table th {
+  background: var(--surface-alt);
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+}
+.admin-theme table td {
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+}
+.admin-theme table tr:hover td {
+  background: var(--surface-hover);
+}
+
+/* ── 6. Inputs y Formularios (Filtros) ────────────────────── */
+.admin-theme .form-select,
+.admin-theme .form-input,
+.admin-theme select,
+.admin-theme input {
+  background: var(--surface) !important;
+  border: 1px solid var(--border-strong) !important;
+  color: var(--text-primary) !important;
+}
+.admin-theme .form-select:focus,
+.admin-theme .form-input:focus,
+.admin-theme select:focus,
+.admin-theme input:focus {
+  border-color: var(--green-light) !important;
+  box-shadow: 0 0 0 3px var(--green-soft) !important;
+}
+
+/* ── 7. Sidebar de Administrador Específico ───────────────── */
+.admin-sidebar {
+  background: #202b3c !important; /* Azul Pizarra Profundo, único elemento oscuro */
+  border-right: 1px solid rgba(255,255,255,0.05) !important;
+  z-index: 100;
+}
+.admin-sidebar .brand-text h1 {
+  color: #f8fafc !important;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.admin-sidebar .brand-icon {
+  background: linear-gradient(145deg, #475569, #334155) !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 2px 8px rgba(0,0,0,0.2) !important;
+  color: #ffffff !important;
+}
+.admin-sidebar .menu-item {
+  color: #94a3b8 !important;
+}
+.admin-sidebar .menu-item.active {
+  background: rgba(71,85,105,0.25) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(255,255,255,0.05) !important;
+}
+.admin-sidebar .user-pill {
+  background: rgba(255,255,255,0.03) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+}
+
+/* ── 8. Utilidades de Estado ──────────────────────────────── */
+.status-pill {
+  display: inline-flex;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.status-pill.success {
+  background: rgba(16,185,129,0.1);
+  color: #059669;
+}
+.admin-theme .status-pill.medium {
+  background: rgba(245,158,11,0.1);
+  color: #d97706;
+}
+.admin-theme .status-pill.high {
+  background: rgba(239,68,68,0.1);
+  color: #b91c1c;
+}
+
+.status-badge {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.8rem; font-weight: 600;
+}
+.status-badge.ok {
+  background: rgba(16,185,129,0.08);
+  border: 1px solid rgba(16,185,129,0.2);
+  color: #059669;
+}
+.status-badge.error {
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.2);
+  color: #b91c1c;
+}
+.status-badge.unknown {
+  background: rgba(148,163,184,0.1);
+  border: 1px solid rgba(148,163,184,0.2);
+  color: #e2e8f0;
+}
+.status-badge-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.status-badge.ok .status-badge-dot { background: #10b981; box-shadow: 0 0 6px rgba(16,185,129,0.6); }
+.status-badge.error .status-badge-dot { background: #ef4444; box-shadow: 0 0 6px rgba(239,68,68,0.6); }
+.status-badge.unknown .status-badge-dot { background: #94a3b8; }
+
+/* ── Paginación Admin ─────────────────────────────────────── */
+.admin-theme .btn-secondary {
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+.admin-theme .btn-secondary:hover:not(:disabled) {
+  background: var(--surface-alt);
+  border-color: var(--border-strong);
+}
+.admin-theme .btn-secondary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Botones Peligro ──────────────────────────────────────── */
+.btn-danger {
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.2);
+  color: #b91c1c;
+}
+.btn-danger:hover {
+  background: rgba(239,68,68,0.15);
+  color: #991b1b;
+}

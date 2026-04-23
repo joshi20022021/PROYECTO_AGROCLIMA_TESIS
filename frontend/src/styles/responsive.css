@@ -1,0 +1,90 @@
+/* ============================================================
+   responsive.css — Media Queries
+   Tablet · Mobile · Drawer · Breakpoints
+   ============================================================ */
+
+/* ── Tablet (≤ 1100px) ───────────────────────────── */
+@media (max-width: 1100px) {
+  .kpi-grid            { grid-template-columns: repeat(2, 1fr); }
+  .results-metrics     { grid-template-columns: repeat(2, 1fr); }
+  .results-grid        { grid-template-columns: 1fr 1fr; }
+  .models-layout       { grid-template-columns: 1fr; }
+  .models-pipeline     { grid-template-columns: 1fr 1fr; }
+  .models-summary-strip{ grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ── Tablet pequeño (≤ 960px) ────────────────────── */
+@media (max-width: 960px) {
+  :root { --sidebar-w: 230px; }
+
+  .chart-grid    { grid-template-columns: 1fr; }
+  .insight-grid  { grid-template-columns: 1fr 1fr; }
+  .ml-score-grid { grid-template-columns: 1fr 1fr; }
+  .model-hero    { grid-template-columns: 1fr; }
+}
+
+/* ── Mobile (≤ 768px): Sidebar como drawer ───────── */
+@media (max-width: 768px) {
+  /* El sidebar sale del flujo del grid */
+  .app-shell { grid-template-columns: 1fr; }
+
+  /* Sidebar como drawer deslizable */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    height: 100vh;
+    width: 280px;
+    z-index: 100;
+    transform: translateX(-100%);
+    box-shadow: none;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-xl);
+  }
+
+  .sidebar-close { display: flex; }
+
+  /* Overlay al abrir sidebar */
+  .sidebar-overlay {
+    display: block;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 300ms ease;
+  }
+  .sidebar-overlay.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* Hamburger visible */
+  .hamburger { display: flex; }
+
+  /* Ocultar etiqueta de botón */
+  .btn-label-hide { display: none; }
+
+  /* Padding reducido */
+  .topbar      { padding: 0 1rem; }
+  .page-content { padding: 0.75rem 1rem 2rem; }
+  .kpi-wrapper  { padding: 0.75rem 1rem 0; }
+
+  /* Grids a 2 o 1 columna */
+  .kpi-grid        { grid-template-columns: 1fr 1fr; }
+  .two-col         { grid-template-columns: 1fr; }
+  .metrics-form    { grid-template-columns: 1fr; }
+  .results-grid    { grid-template-columns: 1fr; }
+  .results-metrics { grid-template-columns: 1fr 1fr; }
+  .models-pipeline { grid-template-columns: 1fr 1fr; }
+  .models-summary-strip { grid-template-columns: repeat(2, 1fr); }
+  .insight-grid    { grid-template-columns: 1fr; }
+
+  .topbar-left h2 { font-size: 0.92rem; }
+}
+
+/* ── Mobile pequeño (≤ 480px) ────────────────────── */
+@media (max-width: 480px) {
+  .kpi-grid        { grid-template-columns: 1fr; }
+  .results-metrics { grid-template-columns: 1fr; }
+  .var-grid        { grid-template-columns: 1fr; }
+}

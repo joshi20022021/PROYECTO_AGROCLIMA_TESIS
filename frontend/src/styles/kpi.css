@@ -1,0 +1,82 @@
+/* ============================================================
+   kpi.css — Tarjetas de indicadores clave (KPI Grid)
+   ============================================================ */
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.8rem;
+}
+
+.kpi-card {
+  padding: 1rem 1.15rem 0.95rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow var(--t-slow), transform var(--t-slow);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Barra superior de color */
+.kpi-card::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3b9348, #266324 50%, #8b5e19);
+  opacity: 0.45;
+  transition: opacity var(--t-slow);
+}
+
+.kpi-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.kpi-card:hover::before { opacity: 1; }
+
+/* Card de alerta */
+.kpi-card.alert-card {
+  background: linear-gradient(145deg, rgba(185,28,28,0.04), var(--surface));
+  border-color: rgba(185,28,28,0.14);
+}
+.kpi-card.alert-card::before {
+  opacity: 1;
+  background: linear-gradient(90deg, #b91c1c, #ea580c);
+}
+
+/* Ícono temático */
+.kpi-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.65rem;
+  flex-shrink: 0;
+}
+
+.kpi-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  display: block;
+}
+
+.kpi-value {
+  font-size: 2.1rem;
+  font-weight: 850;
+  letter-spacing: -0.045em;
+  line-height: 1;
+  margin: 0.35rem 0 0.3rem;
+  color: var(--text-primary);
+}
+
+.kpi-sub {
+  font-size: 0.68rem;
+  color: var(--text-faint);
+  line-height: 1.45;
+}

@@ -1,0 +1,198 @@
+/* ============================================================
+   reports.css — Página de Resultados Ejecutivos
+   Results hero · Stats · Result cards · Variables · Timeline
+   ============================================================ */
+
+/* ── Hero de resultados ──────────────────────────── */
+.results-hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 1rem;
+  padding: 1.25rem 1.3rem;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(145deg, rgba(38,99,36,0.07) 0%, rgba(139,94,25,0.07) 100%);
+  border: 1px solid rgba(38,99,36,0.16);
+}
+
+.results-hero-eyebrow {
+  font-size: 0.6rem;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.28rem;
+}
+
+.results-hero h4 {
+  font-size: 1.3rem;
+  font-weight: 850;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.45rem;
+  color: var(--text-primary);
+}
+
+.results-hero p {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  max-width: 620px;
+}
+
+/* ── Métricas de resultado ───────────────────────── */
+.results-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+.result-stat {
+  padding: 0.95rem 1.05rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  transition: box-shadow var(--t-slow), transform var(--t-slow), border-color var(--t-slow);
+}
+.result-stat:hover {
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
+  border-color: rgba(38,99,36,0.2);
+}
+
+.stat-label {
+  font-size: 0.63rem;
+  font-weight: 720;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  display: block;
+}
+
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 850;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  display: block;
+  margin: 0.3rem 0 0.22rem;
+  color: var(--text-primary);
+}
+
+.stat-sub {
+  font-size: 0.7rem;
+  color: var(--text-faint);
+  line-height: 1.4;
+}
+
+/* ── Grid de tarjetas de resultado ───────────────── */
+.results-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.result-card {
+  padding: 1rem 1.05rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  min-width: 0;
+}
+
+.result-card.featured {
+  background: linear-gradient(160deg, rgba(255,255,255,0.98), rgba(238,241,235,0.9));
+  border-color: var(--border-strong);
+}
+
+.result-card.full-span { grid-column: 1 / -1; }
+
+.result-card h4 {
+  font-size: 0.82rem;
+  font-weight: 720;
+  margin-bottom: 0.72rem;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+/* ── Variables de entorno ────────────────────────── */
+.var-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.var-item {
+  padding: 0.62rem 0.72rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+}
+
+.var-label {
+  font-size: 0.62rem;
+  font-weight: 720;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  display: block;
+}
+
+.var-value {
+  font-size: 1.05rem;
+  font-weight: 800;
+  display: block;
+  margin-top: 0.22rem;
+  letter-spacing: -0.025em;
+  color: var(--text-primary);
+}
+
+/* ── Timeline ────────────────────────────────────── */
+.timeline-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.timeline-item {
+  padding: 0.62rem 0.75rem;
+  border-radius: var(--radius-sm);
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--green);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+}
+
+.timeline-item strong { color: var(--text-primary); font-weight: 720; }
+
+/* ── Criterios ───────────────────────────────────── */
+.criteria-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.criteria-list li {
+  display: flex;
+  gap: 0.55rem;
+  padding: 0.5rem 0;
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  border-bottom: 1px solid var(--border);
+}
+.criteria-list li:last-child { border-bottom: none; }
+
+.criteria-list li::before {
+  content: "→";
+  color: var(--green);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.conclusion-text {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}

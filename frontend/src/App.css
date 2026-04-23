@@ -1,0 +1,178 @@
+/* ============================================================
+   App.css — Punto de entrada de estilos globales
+   AgroClima GT · Design System v4 "Agro-Tech Premium"
+
+   Orden de importación (respeta la cascada CSS):
+   1. variables   → Tokens, reset y tipografía base
+   2. layout      → App shell, sidebar, topbar, page-content
+   3. components  → Buttons, chips, cards, forms, toast, tables
+   4. kpi         → KPI grid y tarjetas de indicadores
+   5. charts      → Gráficas Chart.js y legend pills
+   6. pages/      → Estilos específicos de cada página
+   7. responsive  → Breakpoints y media queries
+   ============================================================ */
+
+/* ── Base ───────────────────────────────────────── */
+@import "./styles/variables.css";
+@import "./styles/admin.css";
+
+/* ── Estructura ─────────────────────────────────── */
+@import "./styles/layout.css";
+
+/* ── Componentes reutilizables ───────────────────── */
+@import "./styles/components.css";
+
+/* ── KPIs ────────────────────────────────────────── */
+@import "./styles/kpi.css";
+
+/* ── Gráficas ────────────────────────────────────── */
+@import "./styles/charts.css";
+
+/* ── Páginas específicas ─────────────────────────── */
+@import "./styles/pages/dashboard.css";
+@import "./styles/pages/alerts.css";
+@import "./styles/pages/reports.css";
+@import "./styles/pages/models.css";
+
+/* ── Responsive ──────────────────────────────────── */
+@import "./styles/responsive.css";
+
+.welcome-popup-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  background:
+    radial-gradient(circle at top, rgba(76, 175, 114, 0.18), transparent 35%),
+    rgba(4, 12, 8, 0.72);
+  backdrop-filter: blur(10px);
+  animation: welcomeFadeIn 220ms ease-out;
+}
+
+.welcome-popup-card {
+  position: relative;
+  width: min(100%, 380px);
+  padding: 2rem 1.5rem;
+  border-radius: 24px;
+  overflow: hidden;
+  text-align: center;
+  color: #f3f8ef;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(160deg, rgba(11, 32, 18, 0.96), rgba(14, 42, 25, 0.88));
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.36);
+  animation: welcomeCardIn 420ms cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+.welcome-popup-card.admin {
+  background: linear-gradient(160deg, rgba(8, 31, 46, 0.98), rgba(8, 72, 94, 0.88));
+}
+
+.welcome-popup-orb {
+  position: absolute;
+  top: -70px;
+  left: 50%;
+  width: 180px;
+  height: 180px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(120, 237, 166, 0.34), transparent 65%);
+  filter: blur(4px);
+}
+
+.welcome-popup-card.admin .welcome-popup-orb {
+  background: radial-gradient(circle, rgba(72, 187, 255, 0.34), transparent 65%);
+}
+
+.welcome-popup-icon {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 1rem;
+  display: grid;
+  place-items: center;
+  border-radius: 22px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #f8fff8;
+  background: linear-gradient(145deg, #4caf72, #215b2d);
+  box-shadow: 0 14px 30px rgba(76, 175, 114, 0.25);
+}
+
+.welcome-popup-card.admin .welcome-popup-icon {
+  background: linear-gradient(145deg, #38bdf8, #0f5b85);
+  box-shadow: 0 14px 30px rgba(56, 189, 248, 0.24);
+}
+
+.welcome-popup-kicker {
+  position: relative;
+  margin: 0 0 0.45rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(232, 245, 226, 0.72);
+}
+
+.welcome-popup-card h2 {
+  position: relative;
+  margin: 0;
+  font-size: clamp(1.6rem, 4vw, 2rem);
+  font-weight: 900;
+}
+
+.welcome-popup-card p:last-of-type {
+  position: relative;
+  margin: 0.7rem 0 1.2rem;
+  color: rgba(232, 245, 226, 0.76);
+  font-size: 0.95rem;
+}
+
+.welcome-popup-loader {
+  display: inline-flex;
+  gap: 0.45rem;
+}
+
+.welcome-popup-loader span {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.88);
+  animation: welcomePulse 900ms ease-in-out infinite;
+}
+
+.welcome-popup-loader span:nth-child(2) {
+  animation-delay: 120ms;
+}
+
+.welcome-popup-loader span:nth-child(3) {
+  animation-delay: 240ms;
+}
+
+@keyframes welcomeFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes welcomeCardIn {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes welcomePulse {
+  0%, 80%, 100% {
+    transform: translateY(0) scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: translateY(-5px) scale(1);
+    opacity: 1;
+  }
+}
