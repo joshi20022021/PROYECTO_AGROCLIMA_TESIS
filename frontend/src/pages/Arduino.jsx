@@ -24,14 +24,39 @@ function formatValue(value, decimals = 1) {
   return Number(value).toFixed(decimals);
 }
 
-function SensorCard({ label, value, unit, color, note, decimals = 1 }) {
+function sensorStatus(value, { min, max, lowLabel = "Bajo", highLabel = "Alto" }) {
+  if (value === undefined || value === null || Number.isNaN(Number(value))) {
+    return { label: "Sin lectura", color: "#64748b", bg: "rgba(100,116,139,0.1)", note: "Esperando dato del sensor." };
+  }
+  const numeric = Number(value);
+  if (numeric < min) return { label: lowLabel, color: "#d97706", bg: "rgba(245,158,11,0.12)", note: "Conviene revisar esta condicion." };
+  if (numeric > max) return { label: highLabel, color: "#dc2626", bg: "rgba(220,38,38,0.1)", note: "Puede afectar el cultivo si se mantiene." };
+  return { label: "En rango", color: "#16a34a", bg: "rgba(22,163,74,0.12)", note: "Condicion estable para monitoreo." };
+}
+
+function SensorCard({ label, value, unit, color, note, decimals = 1, status }) {
   return (
-    <div className="card kpi-card" style={{ minWidth: 0 }}>
+    <div className="card kpi-card" style={{ minWidth: 0, borderLeft: status ? `4px solid ${status.color}` : undefined }}>
       <span className="kpi-label">{label}</span>
       <div className="kpi-value" style={{ color }}>
         {formatValue(value, decimals)}
         <span style={{ fontSize: "0.85rem", fontWeight: 500, marginLeft: "0.25rem" }}>{unit}</span>
       </div>
+      {status && (
+        <span style={{
+          display: "inline-flex",
+          alignSelf: "flex-start",
+          marginTop: "0.2rem",
+          padding: "0.22rem 0.5rem",
+          borderRadius: 999,
+          background: status.bg,
+          color: status.color,
+          fontSize: "0.68rem",
+          fontWeight: 800,
+        }}>
+          {status.label}
+        </span>
+      )}
       {note && <p className="kpi-sub" style={{ marginBottom: 0 }}>{note}</p>}
     </div>
   );
@@ -142,6 +167,37 @@ export default function Arduino() {
     }
   }
 
+  const sensorStates = {
+    temperature: sensorStatus(sensors?.temperature, { min: 18, max: 30, lowLabel: "Frio", highLabel: "Calor alto" }),
+    light: sensorStatus(sensors?.light_lux, { min: 12000, max: 65000, lowLabel: "Poca luz", highLabel: "Luz alta" }),
+    greenness: sensorStatus(sensors?.greenness_idx, { min: 45, max: 85, lowLabel: "Verdor bajo", highLabel: "Muy alto" }),
+    soil: sensorStatus(sensors?.soil_moisture, { min: 0.22, max: 0.45, lowLabel: "Suelo seco", highLabel: "Muy humedo" }),
+  };
+
+  const idealBandPlugin = {
+    id: "idealBand",
+    beforeDatasetsDraw(chart) {
+      const { ctx, chartArea, scales } = chart;
+      const y = scales.y;
+      if (!chartArea || !y) return;
+
+      const bands = [
+        { min: 18, max: 30, color: "rgba(184,124,32,0.08)", label: "Temp ideal" },
+        { min: 22, max: 45, color: "rgba(90,122,53,0.08)", label: "Suelo ideal" },
+        { min: 45, max: 85, color: "rgba(30,122,74,0.07)", label: "Verdor ideal" },
+      ];
+
+      ctx.save();
+      bands.forEach((band) => {
+        const yTop = y.getPixelForValue(band.max);
+        const yBottom = y.getPixelForValue(band.min);
+        ctx.fillStyle = band.color;
+        ctx.fillRect(chartArea.left, yTop, chartArea.right - chartArea.left, yBottom - yTop);
+      });
+      ctx.restore();
+    },
+  };
+
   const historyChart = useMemo(() => ({
     type: "line",
     data: {
@@ -161,6 +217,7 @@ export default function Arduino() {
         y: { grid: { color: "rgba(80,60,35,0.06)" } },
       },
     },
+    plugins: [idealBandPlugin],
   }), [history]);
 
   const yieldColors = prediction ? (YIELD_COLOR[prediction.yield_level] || YIELD_COLOR.medio) : null;
@@ -266,10 +323,10 @@ export default function Arduino() {
             )}
 
             <div className="kpi-grid">
-              <SensorCard label="Temperatura" value={sensors?.temperature} unit="C" color="#b87c20" note="Sensor DS18B20" />
-              <SensorCard label="Luz recibida" value={sensors?.light_lux} unit="lux" color="#c8a020" note="Sensor TSL2561" decimals={0} />
-              <SensorCard label="Verdor de hoja" value={sensors?.greenness_idx} unit="%" color="#1e7a4a" note="Sensor TCS3200" />
-              <SensorCard label="Humedad suelo" value={sensors?.soil_moisture} unit="vol" color="#5a7a35" note="Higrometro capacitivo" decimals={2} />
+              <SensorCard label="Temperatura" value={sensors?.temperature} unit="C" color="#b87c20" note={sensorStates.temperature.note} status={sensorStates.temperature} />
+              <SensorCard label="Luz recibida" value={sensors?.light_lux} unit="lux" color="#c8a020" note={sensorStates.light.note} status={sensorStates.light} decimals={0} />
+              <SensorCard label="Verdor de hoja" value={sensors?.greenness_idx} unit="%" color="#1e7a4a" note={sensorStates.greenness.note} status={sensorStates.greenness} />
+              <SensorCard label="Humedad suelo" value={sensors?.soil_moisture} unit="vol" color="#5a7a35" note={sensorStates.soil.note} status={sensorStates.soil} decimals={2} />
             </div>
 
             {sensors && (
@@ -292,7 +349,15 @@ export default function Arduino() {
           </div>
           <div className="card-body">
             {history.length > 1 ? (
-              <div style={{ height: 220 }}><ChartCanvas config={historyChart} /></div>
+              <>
+                <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "0.75rem", fontSize: "0.72rem", color: "var(--text-secondary)" }}>
+                  <span className="chip green">Bandas suaves = rango ideal</span>
+                  <span className="chip">Temperatura 18-30 C</span>
+                  <span className="chip">Suelo 22-45%</span>
+                  <span className="chip">Verdor 45-85%</span>
+                </div>
+                <div style={{ height: 220 }}><ChartCanvas config={historyChart} /></div>
+              </>
             ) : (
               <p style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>Esperando lecturas del Arduino...</p>
             )}

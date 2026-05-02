@@ -500,17 +500,17 @@ export default function Forecast({ form }) {
               </div>
               <div className="card-body">
                 <p style={{ margin: "0 0 0.85rem", fontSize: "0.82rem", color: "var(--text-secondary)" }}>
-                  Estos son los meses con mejor comportamiento historico estimado para {crop} en {municipio}.
+                  Usa esta guia para decidir si conviene sembrar ahora o esperar un mes con mejores condiciones para {crop}.
                 </p>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(12, 1fr)", gap: "0.3rem", marginBottom: "0.85rem" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(58px, 1fr))", gap: "0.3rem", marginBottom: "0.85rem" }}>
                   {Array.from({ length: 12 }, (_, index) => {
                     const monthNumber = index + 1;
                     const row = remoteSowingRows.find((item) => Number(item.month) === monthNumber);
-                    const rank = Number(row?.rank ?? 99);
                     const isTop3 = Boolean(row?.is_top3);
                     const isCurrent = index === MES_ACTUAL;
-                    const bg = isTop3 ? "#2563eb" : row ? "#1e7a4a" : "var(--bg)";
+                    const bg = isTop3 ? "#16a34a" : row ? "#d97706" : "var(--bg)";
                     const color = row ? "#fff" : "var(--text-muted)";
+                    const label = isTop3 ? "SI" : row ? "OK" : "NO";
                     return (
                       <div key={monthNumber} style={{
                         textAlign: "center",
@@ -523,7 +523,7 @@ export default function Forecast({ form }) {
                       }}>
                         <div style={{ fontSize: "0.68rem" }}>{MESES[index]}</div>
                         <div style={{ fontSize: "0.95rem", lineHeight: 1.2, marginTop: 2 }}>
-                          {isTop3 ? "TOP" : row ? `#${rank}` : "-"}
+                          {label}
                         </div>
                       </div>
                     );
@@ -533,20 +533,20 @@ export default function Forecast({ form }) {
                   {remoteSowingRows.slice(0, 3).map((row) => (
                     <div key={`${row.crop}-${row.month}`} style={{ border: "1px solid var(--border)", borderRadius: 10, padding: "0.8rem", background: "var(--surface)" }}>
                       <p style={{ margin: 0, fontSize: "0.72rem", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 700 }}>
-                        {MESES[Number(row.month) - 1]} · Opcion {row.rank}
+                        Mes recomendado
                       </p>
                       <strong style={{ display: "block", marginTop: "0.25rem", fontSize: "1rem", color: "#2563eb" }}>
-                        {Number(row.mean_yield).toFixed(1)}% favorable
+                        {MESES[Number(row.month) - 1]}
                       </strong>
                       <p style={{ margin: "0.2rem 0 0", fontSize: "0.75rem", color: "var(--text-secondary)" }}>
-                        Confianza historica: {Number(row.high_yield_rate).toFixed(1)}%
+                        Buen momento para planificar siembra.
                       </p>
                     </div>
                   ))}
                 </div>
                 <div style={{ display: "flex", gap: "1.25rem", flexWrap: "wrap", fontSize: "0.76rem", color: "var(--text-secondary)" }}>
-                  <span><span style={{ display:"inline-block", width:10, height:10, borderRadius:3, background:"#2563eb", marginRight:5, verticalAlign:"middle" }}/>Top 3 recomendados</span>
-                  <span><span style={{ display:"inline-block", width:10, height:10, borderRadius:3, background:"#1e7a4a", marginRight:5, verticalAlign:"middle" }}/>Meses viables</span>
+                  <span><span style={{ display:"inline-block", width:10, height:10, borderRadius:3, background:"#16a34a", marginRight:5, verticalAlign:"middle" }}/>Mejor momento</span>
+                  <span><span style={{ display:"inline-block", width:10, height:10, borderRadius:3, background:"#d97706", marginRight:5, verticalAlign:"middle" }}/>Bueno si hay manejo</span>
                   <span><span style={{ display:"inline-block", width:10, height:10, borderRadius:3, border:"2px solid #d97706", marginRight:5, verticalAlign:"middle" }}/>Mes actual</span>
                 </div>
               </div>
@@ -571,7 +571,7 @@ export default function Forecast({ form }) {
               <p style={{ margin: "0 0 0.85rem", fontSize: "0.82rem", color: "var(--text-secondary)" }}>
                 {data.nota}
               </p>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(12, 1fr)", gap: "0.3rem", marginBottom: "0.75rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(58px, 1fr))", gap: "0.3rem", marginBottom: "0.75rem" }}>
                 {MESES.map((m, i) => {
                   const esSiembra = data.siembra.includes(i);
                   const esCosecha = data.cosecha.includes(i);
