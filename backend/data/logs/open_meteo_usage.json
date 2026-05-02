@@ -1,0 +1,75 @@
+{
+  "totals": {
+    "external_requests": 20,
+    "cache_hits": 72
+  },
+  "by_day": {
+    "2026-04-01": {
+      "external_requests": 1,
+      "cache_hits": 1,
+      "by_municipio": {
+        "Solola": {
+          "external_requests": 1,
+          "cache_hits": 1
+        }
+      }
+    },
+    "2026-04-15": {
+      "external_requests": 12,
+      "cache_hits": 38,
+      "by_municipio": {
+        "Chimaltenango": {
+          "external_requests": 9,
+          "cache_hits": 27
+        },
+        "Guatemala": {
+          "external_requests": 2,
+          "cache_hits": 4
+        },
+        "Huehuetenango": {
+          "external_requests": 1,
+          "cache_hits": 7
+        }
+      }
+    },
+    "2026-04-19": {
+      "external_requests": 4,
+      "cache_hits": 23,
+      "by_municipio": {
+        "Chimaltenango": {
+          "external_requests": 2,
+          "cache_hits": 21
+        },
+        "Guatemala": {
+          "external_requests": 2,
+          "cache_hits": 2
+        }
+      }
+    },
+    "2026-04-26": {
+      "external_requests": 2,
+      "cache_hits": 5,
+      "by_municipio": {
+        "Chimaltenango": {
+          "external_requests": 1,
+          "cache_hits": 3
+        },
+        "Retalhuleu": {
+          "external_requests": 1,
+          "cache_hits": 2
+        }
+      }
+    },
+    "2026-04-27": {
+      "external_requests": 1,
+      "cache_hits": 5,
+      "by_municipio": {
+        "Chimaltenango": {
+          "external_requests": 1,
+          "cache_hits": 5
+        }
+      }
+    }
+  },
+  "last_request_at": "2026-04-27T02:35:30.659684"
+}

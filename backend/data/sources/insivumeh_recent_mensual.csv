@@ -1,0 +1,94 @@
+municipio,year,month,temperature,rainfall,humidity,temp_min,temp_max,wind_speed,station_count,sample_days,min_date,max_date,mean_distance_km,source,source_url
+Asuncion Mita,2025,6,27.424,444.0,77.529,21.694,33.259,10.306,2,17,2025-06-14,2025-06-30,1.19,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Asuncion Mita,2025,7,28.208,213.6,70.538,21.8,34.267,12.635,2,13,2025-07-01,2025-07-13,1.19,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Ayutla,2025,6,27.824,289.2,76.588,22.235,33.129,6.441,2,17,2025-06-14,2025-06-30,4.64,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Ayutla,2025,7,28.808,103.0,72.192,22.538,34.75,6.381,2,13,2025-07-01,2025-07-13,4.64,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Cahabon,2025,6,28.437,1068.2,88.02,22.239,35.337,5.388,3,17,2025-06-14,2025-06-30,19.79,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Cahabon,2025,7,28.459,330.6,88.051,21.8,35.7,6.356,3,13,2025-07-01,2025-07-13,19.79,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Champerico,2025,6,28.688,103.8,85.706,24.659,33.541,5.418,1,17,2025-06-14,2025-06-30,0.72,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Champerico,2025,7,29.592,44.3,78.615,24.446,34.483,4.869,1,13,2025-07-01,2025-07-13,0.72,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Chimaltenango,2025,6,18.774,198.8,86.706,14.012,23.953,1.982,2,17,2025-06-14,2025-06-30,8.17,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Chimaltenango,2025,7,19.804,39.9,85.077,13.785,25.358,2.073,2,13,2025-07-01,2025-07-13,8.17,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Coatepeque,2025,6,,444.2,,,,11.041,1,17,2025-06-14,2025-06-30,12.69,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Coatepeque,2025,7,,282.4,,,,11.308,1,13,2025-07-01,2025-07-13,12.69,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Coban,2025,6,23.576,507.1,83.353,18.229,29.241,3.806,2,17,2025-06-14,2025-06-30,18.53,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Coban,2025,7,24.235,106.7,79.769,17.546,30.717,4.7,2,13,2025-07-01,2025-07-13,18.53,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Cuilapa,2025,6,24.288,274.3,88.588,19.706,29.224,6.624,1,17,2025-06-14,2025-06-30,3.55,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Cuilapa,2025,7,25.223,82.3,85.231,19.092,30.417,7.231,1,13,2025-07-01,2025-07-13,3.55,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Escuintla,2025,1,27.591,0.0,,,,7.936,1,11,2025-01-21,2025-01-31,41.21,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Escuintla,2025,2,28.105,4.4,,,,7.337,1,19,2025-02-01,2025-02-19,41.21,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Escuintla,2025,6,26.503,394.0,88.529,19.129,29.776,4.82,3,17,2025-06-14,2025-06-30,17.493,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Escuintla,2025,7,27.212,138.2,84.923,19.369,30.733,4.667,3,13,2025-07-01,2025-07-13,17.493,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Esquipulas,2025,6,23.376,170.0,80.0,19.529,28.153,1.482,1,17,2025-06-14,2025-06-30,1.2,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Esquipulas,2025,7,24.592,20.6,72.308,19.646,29.417,3.454,1,13,2025-07-01,2025-07-13,1.2,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Flores,2025,6,27.371,107.4,80.941,22.941,32.671,9.182,1,17,2025-06-14,2025-06-30,2.59,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Flores,2025,7,28.146,57.5,78.615,22.169,34.383,7.123,1,13,2025-07-01,2025-07-13,2.59,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Gualan,2025,6,23.453,355.2,83.647,19.853,27.382,3.429,1,17,2025-06-14,2025-06-30,18.89,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Gualan,2025,7,23.908,38.7,81.769,20.0,28.167,4.462,1,13,2025-07-01,2025-07-13,18.89,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Guatemala,2025,6,20.568,489.0,79.059,17.012,25.126,7.798,3,17,2025-06-14,2025-06-30,9.817,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Guatemala,2025,7,21.577,72.8,72.038,17.219,26.463,10.177,3,13,2025-07-01,2025-07-13,9.817,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Huehuetenango,2025,6,18.697,370.4,81.382,13.571,24.918,4.682,2,17,2025-06-14,2025-06-30,19.87,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Huehuetenango,2025,7,19.438,79.7,73.577,12.223,26.383,8.692,2,13,2025-07-01,2025-07-13,19.87,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Ixcan,2025,6,,777.4,,,,,2,17,2025-06-14,2025-06-30,17.33,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Ixcan,2025,7,,164.4,,,,,2,13,2025-07-01,2025-07-13,17.33,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Jacaltenango,2025,6,16.809,359.2,92.353,7.606,21.459,7.224,2,17,2025-06-14,2025-06-30,19.04,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Jacaltenango,2025,7,17.581,69.0,91.0,7.438,23.004,7.438,2,13,2025-07-01,2025-07-13,19.04,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Jalapa,2025,6,18.494,283.4,85.412,13.576,24.153,5.394,1,17,2025-06-14,2025-06-30,14.03,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Jalapa,2025,7,18.854,46.6,83.462,13.031,24.55,6.138,1,13,2025-07-01,2025-07-13,14.03,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Jocotan,2025,6,27.2,234.6,71.353,22.165,32.859,8.9,1,17,2025-06-14,2025-06-30,2.79,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Jocotan,2025,7,27.777,51.4,69.462,20.815,34.133,8.077,1,13,2025-07-01,2025-07-13,2.79,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Jutiapa,2025,6,23.141,167.0,,18.824,28.271,2.488,1,17,2025-06-14,2025-06-30,16.45,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Jutiapa,2025,7,24.023,57.1,,18.262,29.317,2.838,1,13,2025-07-01,2025-07-13,16.45,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Malacatan,2025,6,27.229,171.4,80.824,,32.376,5.129,1,17,2025-06-14,2025-06-30,4.93,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Malacatan,2025,7,28.3,63.8,76.385,,33.667,5.354,1,13,2025-07-01,2025-07-13,4.93,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Mazatenango,2025,6,26.753,283.6,83.941,22.059,33.2,11.965,1,17,2025-06-14,2025-06-30,0.49,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Mazatenango,2025,7,27.254,62.0,82.385,21.808,33.433,11.408,1,13,2025-07-01,2025-07-13,0.49,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Mixco,2025,6,,107.0,,,,7.912,1,17,2025-06-14,2025-06-30,1.36,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Mixco,2025,7,,29.3,,,,8.262,1,13,2025-07-01,2025-07-13,1.36,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Morales,2025,6,27.794,759.2,84.765,21.176,33.353,3.753,3,17,2025-06-14,2025-06-30,16.27,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Morales,2025,7,28.123,97.9,84.538,21.077,33.75,3.564,3,13,2025-07-01,2025-07-13,16.27,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Nenton,2025,6,,239.2,,,,,1,17,2025-06-14,2025-06-30,1.48,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Nenton,2025,7,,19.3,,,,,1,12,2025-07-01,2025-07-12,1.48,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Patzun,2025,6,17.194,119.2,95.941,11.441,21.765,5.735,1,17,2025-06-14,2025-06-30,9.97,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Patzun,2025,7,18.277,12.2,94.692,11.385,23.367,6.646,1,13,2025-07-01,2025-07-13,9.97,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Poptun,2025,6,25.324,141.3,85.176,21.3,28.8,7.541,1,17,2025-06-14,2025-06-30,1.2,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Poptun,2025,7,26.285,13.8,84.077,21.062,30.567,7.285,1,13,2025-07-01,2025-07-13,1.2,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Puerto Barrios,2025,6,27.765,403.6,84.412,23.694,31.871,7.794,1,17,2025-06-14,2025-06-30,2.24,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Puerto Barrios,2025,7,28.438,139.3,80.308,24.015,32.283,8.454,1,13,2025-07-01,2025-07-13,2.24,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Quetzaltenango,2025,6,16.171,196.3,81.618,11.5,22.129,6.4,2,17,2025-06-14,2025-06-30,2.595,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Quetzaltenango,2025,7,16.881,27.1,75.808,9.762,23.608,6.204,2,13,2025-07-01,2025-07-13,2.595,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Rabinal,2025,6,23.506,141.4,,18.965,29.106,2.594,1,17,2025-06-14,2025-06-30,15.01,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Rabinal,2025,7,24.631,31.4,,18.015,32.05,2.262,1,13,2025-07-01,2025-07-13,15.01,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Retalhuleu,2025,6,26.988,290.6,78.059,22.494,32.271,8.271,1,17,2025-06-14,2025-06-30,1.77,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Retalhuleu,2025,7,27.908,64.9,73.769,22.492,33.767,6.838,1,13,2025-07-01,2025-07-13,1.77,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Sacatepequez,2025,6,,135.1,,,,10.688,1,17,2025-06-14,2025-06-30,2.3,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Sacatepequez,2025,7,,24.6,,,,11.0,1,13,2025-07-01,2025-07-13,2.3,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Salama,2025,6,23.753,175.4,90.235,18.265,29.482,8.453,1,17,2025-06-14,2025-06-30,8.18,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Salama,2025,7,23.477,41.7,90.462,16.992,29.633,10.454,1,13,2025-07-01,2025-07-13,8.18,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+San Agustin Acasaguastlan,2025,6,20.6,361.6,,16.0,25.441,1.526,2,17,2025-06-14,2025-06-30,6.845,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+San Agustin Acasaguastlan,2025,7,20.454,73.0,,15.692,25.417,1.685,2,13,2025-07-01,2025-07-13,6.845,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+San Jose Pinula,2025,6,,413.8,,,,16.582,2,17,2025-06-14,2025-06-30,7.345,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+San Jose Pinula,2025,7,,90.7,,,,19.9,2,13,2025-07-01,2025-07-13,7.209,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+San Juan Ostuncalco,2025,6,,182.2,,,,,2,17,2025-06-14,2025-06-30,10.455,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+San Juan Ostuncalco,2025,7,,28.3,,,,,2,12,2025-07-01,2025-07-12,10.455,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+San Lucas Sacatepequez,2025,6,17.724,82.6,84.588,10.812,22.718,1.512,1,17,2025-06-14,2025-06-30,1.14,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+San Lucas Sacatepequez,2025,7,17.792,30.5,80.615,10.038,23.15,1.462,1,13,2025-07-01,2025-07-13,1.14,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+San Marcos,2025,6,13.847,220.4,84.294,10.0,18.576,2.762,2,17,2025-06-14,2025-06-30,15.11,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+San Marcos,2025,7,14.485,28.4,80.385,9.015,20.133,2.496,2,13,2025-07-01,2025-07-13,15.11,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Santa Cruz del Quiche,2025,1,,0.0,,,,6.37,1,10,2025-01-22,2025-01-31,2.35,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Santa Cruz del Quiche,2025,2,,4.0,,,,6.165,1,20,2025-02-01,2025-02-20,2.35,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Santa Cruz del Quiche,2025,6,23.106,576.9,81.353,18.206,28.706,3.222,3,17,2025-06-14,2025-06-30,15.397,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Santa Cruz del Quiche,2025,7,24.062,147.5,76.231,17.308,30.5,3.123,3,13,2025-07-01,2025-07-13,15.397,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Santa Lucia Cotzumalguapa,2025,6,,244.3,,,,5.3,1,17,2025-06-14,2025-06-30,19.18,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Santa Lucia Cotzumalguapa,2025,7,,43.5,,,,5.231,1,13,2025-07-01,2025-07-13,19.18,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Santiago Atitlan,2025,6,19.844,388.6,84.765,13.259,24.55,7.015,2,17,2025-06-14,2025-06-30,5.36,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Santiago Atitlan,2025,7,20.646,18.3,81.654,13.231,26.092,7.25,2,13,2025-07-01,2025-07-13,5.36,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Solola,2025,6,15.865,144.4,91.588,10.159,20.035,2.412,1,17,2025-06-14,2025-06-30,1.62,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Solola,2025,7,17.046,7.3,90.923,9.715,21.867,3.154,1,13,2025-07-01,2025-07-13,1.62,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Taxisco,2025,6,28.924,115.9,82.765,21.882,33.188,1.688,1,17,2025-06-14,2025-06-30,44.27,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Taxisco,2025,7,29.231,111.3,81.615,21.708,33.85,1.8,1,13,2025-07-01,2025-07-13,44.27,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Totonicapan,2025,6,,78.5,,,,8.165,1,17,2025-06-14,2025-06-30,0.37,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Totonicapan,2025,7,,9.1,,,,7.892,1,13,2025-07-01,2025-07-13,0.37,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Villa Nueva,2025,4,,0.0,,,,8.0,1,1,2025-04-02,2025-04-02,8.13,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Zacapa,2025,6,28.097,407.5,74.0,21.103,33.194,4.788,2,17,2025-06-14,2025-06-30,11.76,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
+Zacapa,2025,7,28.485,52.4,73.115,20.969,33.375,5.227,2,13,2025-07-01,2025-07-13,11.76,INSIVUMEH,https://insivumeh.gob.gt/img/INSIVUMEH.html
