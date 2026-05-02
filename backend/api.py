@@ -1591,21 +1591,33 @@ def get_recommendations(cultivo: str,
     Las recomendaciones de variable='general'|'plaga'|'enfermedad' se incluyen siempre.
     Las demás se filtran según los umbrales y los valores enviados.
     """
-    if not (_DB_MODULE and db_available()):
-        raise HTTPException(503, "Base de datos no disponible")
+    seed_path = os.path.join(BASE_DIR, "data", "seeds", "recomendaciones_cultivo.csv")
 
-    with get_cursor() as cur:
-        cur.execute(
-            """SELECT id, cultivo, variable, condicion, umbral_min, umbral_max,
-                      nivel, icono, titulo, recomendacion, fuente
-               FROM recomendaciones_cultivo
-               WHERE LOWER(cultivo) = LOWER(%s) AND activo = TRUE
-               ORDER BY
-                 CASE nivel WHEN 'critica' THEN 1 WHEN 'advertencia' THEN 2 ELSE 3 END,
-                 id""",
-            (cultivo,),
-        )
-        all_rows = cur.fetchall()
+    all_rows = []
+    if _DB_MODULE and db_available():
+        with get_cursor() as cur:
+            cur.execute(
+                """SELECT id, cultivo, variable, condicion, umbral_min, umbral_max,
+                          nivel, icono, titulo, recomendacion, fuente
+                   FROM recomendaciones_cultivo
+                   WHERE LOWER(cultivo) = LOWER(%s) AND activo = TRUE
+                   ORDER BY
+                     CASE nivel WHEN 'critica' THEN 1 WHEN 'advertencia' THEN 2 ELSE 3 END,
+                     id""",
+                (cultivo,),
+            )
+            all_rows = cur.fetchall()
+
+    if not all_rows and os.path.exists(seed_path):
+        df = pd.read_csv(seed_path)
+        df = df[df["cultivo"].str.lower() == cultivo.lower()].copy()
+        level_order = {"critica": 1, "advertencia": 2, "info": 3}
+        df["_sort"] = df["nivel"].map(level_order).fillna(4)
+        df = df.sort_values(["_sort", "cultivo"]).drop(columns=["_sort"])
+        all_rows = df.where(pd.notnull(df), None).to_dict(orient="records")
+
+    if not all_rows and not (_DB_MODULE and db_available()):
+        raise HTTPException(503, "Base de datos no disponible")
 
     param_map = {
         "temperatura":   temperatura,
