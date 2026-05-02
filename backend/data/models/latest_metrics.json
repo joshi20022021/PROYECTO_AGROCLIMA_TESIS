@@ -1,0 +1,23 @@
+[
+  {
+    "municipio": "Chimaltenango",
+    "temperature": 16.6,
+    "rainfall": 1034.7,
+    "humidity": 74.8,
+    "soilMoisture": 0.352
+  },
+  {
+    "municipio": "Guatemala",
+    "temperature": 17.8,
+    "rainfall": 1008.1,
+    "humidity": 72.8,
+    "soilMoisture": 0.361
+  },
+  {
+    "municipio": "Sacatepequez",
+    "temperature": 17.5,
+    "rainfall": 1032.2,
+    "humidity": 72.6,
+    "soilMoisture": 0.361
+  }
+]

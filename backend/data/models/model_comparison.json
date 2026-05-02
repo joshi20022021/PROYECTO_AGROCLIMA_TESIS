@@ -1,0 +1,24 @@
+{
+  "compared_at": "2026-03-31T14:17:59.318447",
+  "n_train": 51948,
+  "n_test": 12987,
+  "n_features": 13,
+  "results": {
+    "XGBoost": {
+      "r2": 0.7157,
+      "mae": 4.86,
+      "rmse": 6.04,
+      "crossval_r2": 0.7092,
+      "crossval_std": 0.002,
+      "train_time_s": 3.4
+    },
+    "RandomForest": {
+      "r2": 0.4485,
+      "mae": 6.84,
+      "rmse": 8.42,
+      "crossval_r2": 0.4538,
+      "crossval_std": 0.0028,
+      "train_time_s": 5.4
+    }
+  }
+}
