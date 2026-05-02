@@ -1,248 +1,111 @@
-/* ============================================================
-   admin.css — Estilos y overrides para el Panel de Administrador
-   Tema: "Soft Slate / Minimal Corporate"
-   ============================================================ */
+/* admin.css — Panel Admin v5 · Soft Slate Corporate */
 
-/* ── 1. Sobrescritura de Variables Globales (Scope) ───────── */
 .admin-theme {
-  /* Fondos Suaves (Grises/Plata) */
-  --bg:            #f4f6f8; /* slate-50/100 */
-  --bg-inner:      #eef1f4;
+  --bg:            #f2f4f7;
+  --bg-inner:      #ebeef3;
   --surface:       #ffffff;
   --surface-alt:   #f8fafc;
   --surface-hover: #f1f5f9;
-
-  /* Texto (Gris Oscuro/Neutral) */
-  --text-primary:  #1e293b; /* slate-800 */
-  --text-secondary:#475569; /* slate-600 */
-  --text-muted:    #64748b; /* slate-500 */
-  --text-faint:    #94a3b8; /* slate-400 */
-
-  /* Bordes delicados */
-  --border:        rgba(100, 116, 139, 0.12);
-  --border-strong: rgba(100, 116, 139, 0.25);
-  --border-focus:  rgba(100, 116, 139, 0.45);
-
-  /* Acento (Gris Pizarra / Slate en vez del Verde Botánico) */
-  --green:         #475569; /* slate-600 */
+  --text-primary:  #1e293b;
+  --text-secondary:#475569;
+  --text-muted:    #64748b;
+  --text-faint:    #94a3b8;
+  --border:        rgba(100,116,139,0.12);
+  --border-strong: rgba(100,116,139,0.24);
+  --border-focus:  rgba(100,116,139,0.48);
+  --green:         #475569;
   --green-light:   #64748b;
-  --green-soft:    rgba(100, 116, 139, 0.08);
-  --green-mid:     rgba(100, 116, 139, 0.15);
-  --green-glow:    rgba(100, 116, 139, 0.2);
-
-  /* Sombras ligeras corporativas */
+  --green-vivid:   #7c8fa1;
+  --green-soft:    rgba(100,116,139,0.08);
+  --green-mid:     rgba(100,116,139,0.16);
+  --green-glow:    rgba(100,116,139,0.22);
   --shadow-xs: 0 1px 2px rgba(15,23,42,0.04);
-  --shadow-sm: 0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
-  --shadow-md: 0 4px 12px rgba(15,23,42,0.05), 0 2px 4px rgba(15,23,42,0.03);
-  --shadow-lg: 0 10px 32px rgba(15,23,42,0.06), 0 4px 10px rgba(15,23,42,0.03);
-  --shadow-xl: 0 20px 48px rgba(15,23,42,0.08), 0 8px 16px rgba(15,23,42,0.04);
-
+  --shadow-sm: 0 1px 4px rgba(15,23,42,0.07), 0 1px 2px rgba(15,23,42,0.04);
+  --shadow-md: 0 4px 14px rgba(15,23,42,0.07), 0 2px 5px rgba(15,23,42,0.04);
+  --shadow-lg: 0 10px 36px rgba(15,23,42,0.08), 0 4px 10px rgba(15,23,42,0.04);
+  --shadow-xl: 0 22px 50px rgba(15,23,42,0.10), 0 8px 18px rgba(15,23,42,0.05);
+  --radius-lg: 16px;
   background-color: var(--bg);
   color: var(--text-primary);
   min-height: 100vh;
 }
 
-/* ── 2. Ajustes Generales de la Interfaz ──────────────────── */
-.admin-theme .page-content {
-  background: transparent;
-}
-
-/* Fondo decorativo exclusivo del admin (muy tenue) */
 .admin-theme::before {
-  content: "";
-  position: fixed;
-  top: -10%; right: -5%;
-  width: 50vw; height: 50vh;
-  background: radial-gradient(circle, rgba(100,116,139,0.04) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: 0;
-}
-.admin-theme::after {
-  content: "";
-  position: fixed;
-  bottom: -10%; left: -5%;
-  width: 60vw; height: 60vh;
-  background: radial-gradient(circle, rgba(100,116,139,0.03) 0%, transparent 60%);
-  pointer-events: none;
-  z-index: 0;
+  content: ""; position: fixed; top: -15%; right: -8%; width: 55vw; height: 55vh;
+  background: radial-gradient(ellipse, rgba(100,116,139,0.05) 0%, transparent 65%);
+  pointer-events: none; z-index: 0;
 }
 
-/* ── 3. Tarjetas Oscuras con Glassmorphism ────────────────── */
-.admin-theme .card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
+.admin-theme .card { background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
+.admin-theme .card:hover { box-shadow: var(--shadow-md); border-color: rgba(100,116,139,0.22); }
+.admin-theme .card-header { border-bottom: 1px solid var(--border); background: linear-gradient(180deg, var(--surface-alt), var(--surface)); }
+.admin-theme .card-header h3 { color: var(--text-primary); }
+
+.admin-theme .chip              { background: var(--surface-hover); border: 1px solid var(--border); color: var(--text-secondary); }
+.admin-theme .chip.green  { background: rgba(16,185,129,0.08);  border-color: rgba(16,185,129,0.22);  color: #059669; }
+.admin-theme .chip.orange { background: rgba(245,158,11,0.08);  border-color: rgba(245,158,11,0.22);  color: #d97706; }
+.admin-theme .chip.blue   { background: rgba(56,189,248,0.08);  border-color: rgba(56,189,248,0.22);  color: #0284c7; }
+.admin-theme .chip.red    { background: rgba(239,68,68,0.08);   border-color: rgba(239,68,68,0.22);   color: #b91c1c; }
+.admin-theme .chip.gray   { background: var(--surface-hover); border-color: var(--border); color: var(--text-secondary); }
+
+.admin-theme table th { background: var(--surface-alt); color: var(--text-secondary); border-bottom: 1px solid var(--border); }
+.admin-theme table td { border-bottom: 1px solid var(--border); color: var(--text-primary); }
+.admin-theme table tr:hover td { background: var(--surface-hover); }
+
+.admin-theme .form-select, .admin-theme .form-input, .admin-theme select, .admin-theme input {
+  background: var(--surface) !important; border: 1px solid var(--border-strong) !important; color: var(--text-primary) !important;
+}
+.admin-theme .form-select:focus, .admin-theme .form-input:focus, .admin-theme select:focus, .admin-theme input:focus {
+  border-color: var(--green-light) !important; box-shadow: 0 0 0 3px var(--green-soft) !important;
 }
 
-.admin-theme .card-header {
-  border-bottom: 1px solid var(--border);
-  background: var(--surface-alt);
-}
-
-.admin-theme .card-header h3 {
-  color: var(--text-primary);
-}
-
-/* ── 4. Chips (Etiquetas) ─────────────────────────────────── */
-.admin-theme .chip {
-  background: var(--surface-hover);
-  border: 1px solid var(--border);
-  color: var(--text-secondary);
-}
-.admin-theme .chip.green {
-  background: rgba(16,185,129,0.08);
-  border-color: rgba(16,185,129,0.2);
-  color: #059669; 
-}
-.admin-theme .chip.orange {
-  background: rgba(245,158,11,0.08);
-  border-color: rgba(245,158,11,0.2);
-  color: #d97706; 
-}
-.admin-theme .chip.blue {
-  background: rgba(56,189,248,0.08);
-  border-color: rgba(56,189,248,0.2);
-  color: #0284c7; 
-}
-.admin-theme .chip.gray {
-  background: var(--surface-hover);
-  border-color: var(--border);
-  color: var(--text-secondary); 
-}
-
-/* ── 5. Tablas Oscuras ────────────────────────────────────── */
-.admin-theme table th {
-  background: var(--surface-alt);
-  color: var(--text-secondary);
-  border-bottom: 1px solid var(--border);
-}
-.admin-theme table td {
-  border-bottom: 1px solid var(--border);
-  color: var(--text-primary);
-}
-.admin-theme table tr:hover td {
-  background: var(--surface-hover);
-}
-
-/* ── 6. Inputs y Formularios (Filtros) ────────────────────── */
-.admin-theme .form-select,
-.admin-theme .form-input,
-.admin-theme select,
-.admin-theme input {
-  background: var(--surface) !important;
-  border: 1px solid var(--border-strong) !important;
-  color: var(--text-primary) !important;
-}
-.admin-theme .form-select:focus,
-.admin-theme .form-input:focus,
-.admin-theme select:focus,
-.admin-theme input:focus {
-  border-color: var(--green-light) !important;
-  box-shadow: 0 0 0 3px var(--green-soft) !important;
-}
-
-/* ── 7. Sidebar de Administrador Específico ───────────────── */
+/* Admin sidebar */
 .admin-sidebar {
-  background: #202b3c !important; /* Azul Pizarra Profundo, único elemento oscuro */
-  border-right: 1px solid rgba(255,255,255,0.05) !important;
-  z-index: 100;
+  background: linear-gradient(180deg, #1a2535 0%, #1e2d40 100%) !important;
+  border-right: 1px solid rgba(255,255,255,0.06) !important;
+  z-index: 100; box-shadow: 4px 0 20px rgba(0,0,0,0.14) !important;
 }
-.admin-sidebar .brand-text h1 {
-  color: #f8fafc !important;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-.admin-sidebar .brand-icon {
-  background: linear-gradient(145deg, #475569, #334155) !important;
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 2px 8px rgba(0,0,0,0.2) !important;
-  color: #ffffff !important;
-}
-.admin-sidebar .menu-item {
-  color: #94a3b8 !important;
-}
+.admin-sidebar .brand { border-bottom: 1px solid rgba(255,255,255,0.06) !important; }
+.admin-sidebar .brand-text h1 { color: #f1f5f9 !important; font-weight: 800; }
+.admin-sidebar .brand-text p  { color: rgba(148,163,184,0.5) !important; }
+.admin-sidebar .brand-icon { background: linear-gradient(145deg, #64748b, #334155) !important; box-shadow: 0 0 0 1px rgba(255,255,255,0.12), 0 4px 12px rgba(0,0,0,0.25) !important; color: #ffffff !important; }
+.admin-sidebar .menu-item       { color: #7c8fa1 !important; }
+.admin-sidebar .menu-item:hover { background: rgba(100,116,139,0.14) !important; color: #e2e8f0 !important; border-color: rgba(100,116,139,0.18) !important; }
 .admin-sidebar .menu-item.active {
-  background: rgba(71,85,105,0.25) !important;
-  color: #ffffff !important;
-  border: 1px solid rgba(255,255,255,0.05) !important;
+  background: rgba(56,189,248,0.12) !important; color: #bae6fd !important; border-color: rgba(56,189,248,0.20) !important;
 }
-.admin-sidebar .user-pill {
-  background: rgba(255,255,255,0.03) !important;
-  border: 1px solid rgba(255,255,255,0.08) !important;
+.admin-sidebar .menu-item.active::before {
+  background: linear-gradient(180deg, #38bdf8, #0284c7) !important;
+  box-shadow: 0 0 10px rgba(56,189,248,0.6) !important;
 }
+.admin-sidebar .menu-item.active .menu-icon { filter: drop-shadow(0 0 4px rgba(56,189,248,0.5)) !important; }
+.admin-sidebar .nav-label { color: rgba(148,163,184,0.35) !important; }
+.admin-sidebar .sidebar-footer { background: rgba(56,189,248,0.05) !important; border-color: rgba(56,189,248,0.12) !important; }
+.admin-sidebar .sidebar-logout-btn { color: #fca5a5 !important; border-color: rgba(239,68,68,0.22) !important; }
 
-/* ── 8. Utilidades de Estado ──────────────────────────────── */
+/* Status */
 .status-pill {
-  display: inline-flex;
-  padding: 0.15rem 0.5rem;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  display: inline-flex; align-items: center; gap: 0.3rem;
+  padding: 0.18rem 0.52rem; border-radius: 999px;
+  font-size: 0.68rem; font-weight: 730; text-transform: uppercase; letter-spacing: 0.05em;
 }
-.status-pill.success {
-  background: rgba(16,185,129,0.1);
-  color: #059669;
-}
-.admin-theme .status-pill.medium {
-  background: rgba(245,158,11,0.1);
-  color: #d97706;
-}
-.admin-theme .status-pill.high {
-  background: rgba(239,68,68,0.1);
-  color: #b91c1c;
-}
+.status-pill::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.status-pill.success { background: rgba(16,185,129,0.10); color: #059669; border: 1px solid rgba(16,185,129,0.20); }
+.admin-theme .status-pill.medium { background: rgba(245,158,11,0.10); color: #d97706; border: 1px solid rgba(245,158,11,0.20); }
+.admin-theme .status-pill.high   { background: rgba(239,68,68,0.10); color: #b91c1c; border: 1px solid rgba(239,68,68,0.20); }
 
-.status-badge {
-  display: flex; align-items: center; gap: 0.5rem;
-  padding: 0.5rem 0.8rem;
-  border-radius: 8px;
-  font-size: 0.8rem; font-weight: 600;
-}
-.status-badge.ok {
-  background: rgba(16,185,129,0.08);
-  border: 1px solid rgba(16,185,129,0.2);
-  color: #059669;
-}
-.status-badge.error {
-  background: rgba(239,68,68,0.08);
-  border: 1px solid rgba(239,68,68,0.2);
-  color: #b91c1c;
-}
-.status-badge.unknown {
-  background: rgba(148,163,184,0.1);
-  border: 1px solid rgba(148,163,184,0.2);
-  color: #e2e8f0;
-}
-.status-badge-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-}
-.status-badge.ok .status-badge-dot { background: #10b981; box-shadow: 0 0 6px rgba(16,185,129,0.6); }
-.status-badge.error .status-badge-dot { background: #ef4444; box-shadow: 0 0 6px rgba(239,68,68,0.6); }
+.status-badge { display: flex; align-items: center; gap: 0.5rem; padding: 0.52rem 0.85rem; border-radius: 9px; font-size: 0.8rem; font-weight: 620; }
+.status-badge.ok      { background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.22); color: #059669; }
+.status-badge.error   { background: rgba(239,68,68,0.08);  border: 1px solid rgba(239,68,68,0.22);  color: #b91c1c; }
+.status-badge.unknown { background: rgba(148,163,184,0.10); border: 1px solid rgba(148,163,184,0.22); color: #64748b; }
+.status-badge-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.status-badge.ok    .status-badge-dot { background: #10b981; box-shadow: 0 0 8px rgba(16,185,129,0.6); }
+.status-badge.error .status-badge-dot { background: #ef4444; box-shadow: 0 0 8px rgba(239,68,68,0.6); }
 .status-badge.unknown .status-badge-dot { background: #94a3b8; }
 
-/* ── Paginación Admin ─────────────────────────────────────── */
-.admin-theme .btn-secondary {
-  background: var(--surface-hover);
-  border: 1px solid var(--border);
-  color: var(--text-primary);
-}
-.admin-theme .btn-secondary:hover:not(:disabled) {
-  background: var(--surface-alt);
-  border-color: var(--border-strong);
-}
-.admin-theme .btn-secondary:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
+.admin-theme .btn-secondary { background: var(--surface-hover); border: 1px solid var(--border); color: var(--text-primary); }
+.admin-theme .btn-secondary:hover:not(:disabled) { background: var(--surface-alt); border-color: var(--border-strong); }
+.admin-theme .btn-secondary:disabled { opacity: 0.4; cursor: not-allowed; }
 
-/* ── Botones Peligro ──────────────────────────────────────── */
-.btn-danger {
-  background: rgba(239,68,68,0.08);
-  border: 1px solid rgba(239,68,68,0.2);
-  color: #b91c1c;
-}
-.btn-danger:hover {
-  background: rgba(239,68,68,0.15);
-  color: #991b1b;
-}
+.btn-danger { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.22); color: #b91c1c; padding: 0.45rem 0.85rem; border-radius: var(--radius-sm); font-family: inherit; font-size: 0.8rem; font-weight: 640; cursor: pointer; transition: all var(--t-base); }
+.btn-danger:hover { background: rgba(239,68,68,0.15); color: #991b1b; border-color: rgba(239,68,68,0.35); transform: translateY(-1px); }

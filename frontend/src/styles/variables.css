@@ -1,11 +1,10 @@
 /* ============================================================
    variables.css — Tokens de diseño globales
-   AgroClima GT · Design System v4 "Agro-Tech Premium"
+   AgroClima GT · Design System v5 "Agro-Tech Premium Plus"
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=DM+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
 
-/* ── Custom Properties ──────────────────────────── */
 :root {
   /* Fondos */
   --bg:            #eef1eb;
@@ -13,73 +12,80 @@
   --surface:       #ffffff;
   --surface-alt:   #f5f8f3;
   --surface-hover: #ecf0e9;
+  --surface-glass: rgba(255,255,255,0.72);
 
   /* Texto */
-  --text-primary:  #1a2418;
-  --text-secondary:#374832;
-  --text-muted:    #5f7255;
+  --text-primary:  #141d12;
+  --text-secondary:#354530;
+  --text-muted:    #5c6f54;
   --text-faint:    #8fa885;
 
   /* Bordes */
   --border:        rgba(45,84,36,0.09);
-  --border-strong: rgba(45,84,36,0.18);
-  --border-focus:  rgba(38,99,36,0.5);
+  --border-strong: rgba(45,84,36,0.20);
+  --border-focus:  rgba(38,99,36,0.55);
 
-  /* Verde — acción principal · bosque */
-  --green:         #266324;
+  /* Verde */
+  --green:         #246222;
   --green-light:   #3b9348;
+  --green-vivid:   #4caf72;
   --green-soft:    rgba(38,99,36,0.08);
-  --green-mid:     rgba(38,99,36,0.15);
-  --green-glow:    rgba(38,99,36,0.28);
+  --green-mid:     rgba(38,99,36,0.16);
+  --green-glow:    rgba(38,99,36,0.30);
+  --green-gradient: linear-gradient(135deg, #4caf72 0%, #246222 60%, #163915 100%);
 
-  /* Tierra — suelo · pH · cálido */
+  /* Tierra */
   --earth:         #8b5e19;
   --earth-soft:    rgba(139,94,25,0.09);
   --earth-mid:     rgba(139,94,25,0.18);
 
-  /* Cielo — lluvia · agua */
+  /* Cielo */
   --sky:           #0369a1;
   --sky-soft:      rgba(3,105,161,0.08);
   --sky-mid:       rgba(3,105,161,0.16);
 
-  /* Riesgo · Alerta */
+  /* Riesgo */
   --red:           #b91c1c;
   --red-soft:      rgba(185,28,28,0.07);
   --red-mid:       rgba(185,28,28,0.14);
 
-  /* Compatibilidad legacy */
+  /* Compatibilidad */
   --gold:       var(--earth);
   --gold-soft:  var(--earth-soft);
   --gold-mid:   var(--earth-mid);
   --blue:       var(--sky);
   --blue-soft:  var(--sky-soft);
 
-  /* Sombras con tinte vegetal */
+  /* Sombras */
   --shadow-xs: 0 1px 2px rgba(22,50,18,0.06);
-  --shadow-sm: 0 1px 4px rgba(22,50,18,0.08), 0 1px 2px rgba(22,50,18,0.05);
-  --shadow-md: 0 4px 14px rgba(22,50,18,0.10), 0 2px 5px rgba(22,50,18,0.06);
-  --shadow-lg: 0 10px 36px rgba(22,50,18,0.12), 0 4px 10px rgba(22,50,18,0.07);
-  --shadow-xl: 0 20px 54px rgba(22,50,18,0.18), 0 8px 18px rgba(22,50,18,0.09);
+  --shadow-sm: 0 2px 6px rgba(22,50,18,0.09), 0 1px 2px rgba(22,50,18,0.05);
+  --shadow-md: 0 4px 18px rgba(22,50,18,0.12), 0 2px 6px rgba(22,50,18,0.06);
+  --shadow-lg: 0 12px 40px rgba(22,50,18,0.14), 0 4px 12px rgba(22,50,18,0.07);
+  --shadow-xl: 0 24px 60px rgba(22,50,18,0.18), 0 8px 20px rgba(22,50,18,0.09);
+  --shadow-green-sm: 0 4px 16px rgba(38,99,36,0.25);
+  --shadow-green-md: 0 8px 28px rgba(38,99,36,0.32);
 
   /* Radios */
   --radius-xs:  4px;
   --radius-sm:  8px;
   --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 22px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-2xl: 32px;
 
   /* Layout */
-  --sidebar-w: 256px;
-  --topbar-h:  60px;
+  --sidebar-w: 260px;
+  --topbar-h:  62px;
 
   /* Transiciones */
   --t-fast:   90ms ease;
-  --t-base:   160ms ease;
-  --t-slow:   280ms ease;
-  --t-spring: 380ms cubic-bezier(0.34,1.56,0.64,1);
+  --t-base:   180ms ease;
+  --t-slow:   300ms ease;
+  --t-spring: 420ms cubic-bezier(0.34,1.56,0.64,1);
+  --t-bounce: 500ms cubic-bezier(0.22,1.2,0.36,1);
 }
 
-/* ── Reset ──────────────────────────────────────── */
+/* Reset */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
@@ -93,8 +99,22 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scrollbar personalizado */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(38,99,36,0.18); border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(38,99,36,0.32); }
+::-webkit-scrollbar-thumb { background: rgba(38,99,36,0.22); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(38,99,36,0.40); }
+
+/* Animaciones globales */
+@keyframes pulseRing {
+  0%   { transform: scale(1); opacity: 0.7; }
+  70%  { transform: scale(2.2); opacity: 0; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+@keyframes floatUp {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-4px); }
+}
+@keyframes kpiReveal {
+  from { opacity: 0; transform: translateY(12px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}

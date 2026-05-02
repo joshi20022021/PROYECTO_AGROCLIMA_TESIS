@@ -1,64 +1,60 @@
-/* ============================================================
-   alerts.css — Página de Alertas
-   Alert list · Alert items · Rec items · Quick actions
-   ============================================================ */
+/* alerts.css — Alertas v5 */
 
-.alert-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-}
+.alert-list { display: flex; flex-direction: column; gap: 0.45rem; }
 
 .alert-item {
-  display: flex;
-  gap: 0.7rem;
-  align-items: flex-start;
-  padding: 0.75rem 0.95rem;
-  border-radius: var(--radius-md);
-  font-size: 0.8rem;
-  line-height: 1.55;
+  display: flex; gap: 0.75rem; align-items: flex-start;
+  padding: 0.82rem 1rem; border-radius: var(--radius-md);
+  font-size: 0.8rem; line-height: 1.58;
   border: 1px solid transparent;
+  transition: transform var(--t-base), box-shadow var(--t-base);
+  position: relative; overflow: hidden;
 }
+.alert-item::before {
+  content: ""; position: absolute; left: 0; top: 0; bottom: 0;
+  width: 3px; border-radius: 0 2px 2px 0;
+}
+.alert-item:hover { transform: translateX(3px); box-shadow: var(--shadow-sm); }
 
 .alert-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  margin-top: 5px;
+  width: 8px; height: 8px; border-radius: 50%;
+  flex-shrink: 0; margin-top: 5px; position: relative;
+}
+.alert-item.critical .alert-dot::after {
+  content: ""; position: absolute; inset: -3px; border-radius: 50%;
+  border: 1.5px solid currentColor;
+  animation: pulseRing 2s ease-out infinite; opacity: 0;
 }
 
-.alert-item.critical { background: var(--red-soft);   border-color: rgba(185,28,28,0.15); color: #7f1d1d; }
-.alert-item.medium   { background: var(--earth-soft); border-color: rgba(139,94,25,0.16); color: #78350f; }
-.alert-item.low      { background: var(--green-soft); border-color: rgba(38,99,36,0.13);  color: #14532d; }
-
-.alert-item.critical .alert-dot { background: var(--red);   box-shadow: 0 0 6px rgba(185,28,28,0.55); }
-.alert-item.medium   .alert-dot { background: var(--earth); box-shadow: 0 0 6px rgba(139,94,25,0.45); }
-.alert-item.low      .alert-dot { background: var(--green); }
-
-.quick-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+.alert-item.critical {
+  background: linear-gradient(135deg, rgba(185,28,28,0.06), rgba(185,28,28,0.03));
+  border-color: rgba(185,28,28,0.18); color: #7f1d1d;
 }
-
-.recommendation-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
+.alert-item.critical::before { background: linear-gradient(180deg, #ef4444, #b91c1c); }
+.alert-item.medium {
+  background: linear-gradient(135deg, rgba(139,94,25,0.07), rgba(139,94,25,0.03));
+  border-color: rgba(139,94,25,0.18); color: #78350f;
 }
+.alert-item.medium::before { background: linear-gradient(180deg, #f59e0b, #8b5e19); }
+.alert-item.low {
+  background: linear-gradient(135deg, rgba(38,99,36,0.07), rgba(38,99,36,0.03));
+  border-color: rgba(38,99,36,0.15); color: #14532d;
+}
+.alert-item.low::before { background: linear-gradient(180deg, #4caf72, #246222); }
+
+.alert-item.critical .alert-dot { background: var(--red);   box-shadow: 0 0 8px rgba(185,28,28,0.65); }
+.alert-item.medium   .alert-dot { background: var(--earth); box-shadow: 0 0 8px rgba(139,94,25,0.50); }
+.alert-item.low      .alert-dot { background: var(--green); box-shadow: 0 0 6px rgba(38,99,36,0.40); }
+
+.quick-actions { display: flex; flex-direction: column; gap: 0.38rem; }
+.recommendation-list { display: flex; flex-direction: column; gap: 0.45rem; }
 
 .rec-item {
-  display: flex;
-  gap: 0.65rem;
-  align-items: flex-start;
-  padding: 0.72rem 0.9rem;
-  border-radius: var(--radius-md);
-  background: var(--surface-alt);
-  border: 1px solid var(--border);
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  line-height: 1.55;
+  display: flex; gap: 0.68rem; align-items: flex-start;
+  padding: 0.78rem 0.95rem; border-radius: var(--radius-md);
+  background: var(--surface); border: 1px solid var(--border);
+  font-size: 0.8rem; color: var(--text-secondary); line-height: 1.58;
+  transition: box-shadow var(--t-base), transform var(--t-base), border-color var(--t-base);
 }
-
+.rec-item:hover { box-shadow: var(--shadow-sm); transform: translateX(2px); border-color: rgba(38,99,36,0.18); }
 .rec-icon { flex-shrink: 0; margin-top: 1px; }
