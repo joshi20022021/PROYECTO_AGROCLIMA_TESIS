@@ -1,0 +1,371 @@
+@startuml AgroClimaGT_AltoNivel
+title AgroClima GT - Diagrama CORE
+top to bottom direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam actorStyle stickman
+skinparam defaultTextAlignment center
+skinparam usecase {
+  BackgroundColor white
+  BorderColor #666666
+}
+
+actor "Servicio\nOpen-Meteo" as OpenMeteo
+actor "Usuario\nAgricola" as Usuario
+actor "Administrador" as Admin
+actor "Arduino /\nSensores" as Arduino
+actor "Servidor\nSMTP" as SMTP
+actor "PostgreSQL /\nDatasets /\nModelo ML" as DataActor
+
+usecase "AgroClima GT" as CORE
+
+OpenMeteo --> CORE
+Usuario --> CORE
+Admin --> CORE
+Arduino --> CORE
+SMTP --> CORE
+DataActor --> CORE
+@enduml
+
+
+@startuml AgroClimaGT_CDU_PrimeraDescomposicion
+title AgroClima GT - Diagrama de Primera Descomposicion
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam actorStyle stickman
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor white
+  BorderColor #666666
+}
+
+actor "Usuario Agricola" as Usuario
+actor "Administrador" as Admin
+actor "Dispositivo Arduino" as Arduino
+actor "Open-Meteo" as Meteo
+actor "Servidor SMTP" as SMTP
+actor "PostgreSQL / Modelo ML" as DataLayer
+
+rectangle "Sistema AgroClima GT" {
+  usecase "CDU 100: Acceso\ny gestion de sesion" as CDU100
+  usecase "CDU 200: Analisis de\nrendimiento agroclimatico" as CDU200
+  usecase "CDU 300: Pronostico y\napoyo agronomico" as CDU300
+  usecase "CDU 400: Monitoreo de\nsensores y alertas" as CDU400
+  usecase "CDU 500: Gestion de datos\ny retroalimentacion" as CDU500
+  usecase "CDU 600: Administracion de\nplataforma y modelo ML" as CDU600
+}
+
+Usuario --> CDU100
+Usuario --> CDU200
+Usuario --> CDU300
+Usuario --> CDU400
+Usuario --> CDU500
+
+Admin --> CDU100
+Admin --> CDU400
+Admin --> CDU500
+Admin --> CDU600
+
+Arduino --> CDU400
+Meteo --> CDU300
+SMTP --> CDU400
+SMTP --> CDU600
+DataLayer --> CDU200
+DataLayer --> CDU500
+DataLayer --> CDU600
+@enduml
+
+
+@startuml AgroClimaGT_CDU_Expandido_01
+title AgroClima GT - CDU 100 Acceso y gestion de sesion
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam actorStyle stickman
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor white
+  BorderColor #666666
+}
+
+actor "Usuario Agricola" as Usuario
+actor "Administrador" as Admin
+
+rectangle "CDU 100 - Acceso y gestion de sesion" {
+  usecase "CDU 101: Ingresar\ncomo usuario" as U1
+  usecase "CDU 102: Ingresar\ncomo administrador" as U2
+  usecase "CDU 103: Validar\ncredenciales admin" as U3
+  usecase "CDU 104: Cargar panel\nsegun rol" as U4
+  usecase "CDU 105: Cerrar\nsesion" as U5
+}
+
+Usuario --> U1
+Admin --> U2
+Usuario --> U5
+Admin --> U5
+
+U2 .> U3 : <<include>>
+U1 .> U4 : <<include>>
+U2 .> U4 : <<include>>
+@enduml
+
+
+@startuml AgroClimaGT_CDU_Expandido_02
+title AgroClima GT - CDU 200 Analisis de rendimiento agroclimatico
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam actorStyle stickman
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor white
+  BorderColor #666666
+}
+
+actor "Usuario Agricola" as Usuario
+actor "PostgreSQL / Modelo ML" as DataLayer
+
+rectangle "CDU 200 - Analisis de rendimiento agroclimatico" {
+  usecase "CDU 201: Consultar\nmetricas climaticas" as U1
+  usecase "CDU 202: Ingresar variables\ndel cultivo y ambiente" as U2
+  usecase "CDU 203: Predecir\nrendimiento" as U3
+  usecase "CDU 204: Explicar prediccion\n(SHAP e intervalo)" as U4
+  usecase "CDU 205: Clasificar nivel\nde riesgo" as U5
+  usecase "CDU 206: Evaluar anomalia\nde sensores" as U6
+  usecase "CDU 207: Evaluar drift\nde datos" as U7
+  usecase "CDU 208: Visualizar\nresultados ejecutivos" as U8
+  usecase "CDU 209: Consultar\nrecomendaciones" as U9
+}
+
+Usuario --> U1
+Usuario --> U2
+Usuario --> U3
+Usuario --> U8
+DataLayer --> U3
+
+U3 .> U4 : <<include>>
+U3 .> U5 : <<include>>
+U3 .> U6 : <<include>>
+U3 .> U7 : <<include>>
+U8 .> U9 : <<extend>>
+@enduml
+
+
+@startuml AgroClimaGT_CDU_Expandido_03
+title AgroClima GT - CDU 300 Pronostico y apoyo agronomico
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam actorStyle stickman
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor white
+  BorderColor #666666
+}
+
+actor "Usuario Agricola" as Usuario
+actor "Servicio Meteorologico\nOpen-Meteo" as Meteo
+
+rectangle "CDU 300 - Pronostico y apoyo agronomico" {
+  usecase "CDU 301: Seleccionar\nmunicipio o departamento" as U1
+  usecase "CDU 302: Consultar pronostico\nde 7 dias" as U2
+  usecase "CDU 303: Mostrar alertas\nmeteorologicas semanales" as U3
+  usecase "CDU 304: Calcular deficit\nhidrico y riego" as U4
+  usecase "CDU 305: Consultar calendario\nde siembra" as U5
+}
+
+Usuario --> U1
+Usuario --> U2
+Usuario --> U4
+Usuario --> U5
+Meteo --> U2
+
+U2 .> U3 : <<include>>
+U2 .> U4 : <<extend>>
+U2 .> U5 : <<extend>>
+@enduml
+
+
+@startuml AgroClimaGT_CDU_Expandido_04
+title AgroClima GT - CDU 400 Monitoreo de sensores y alertas
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam actorStyle stickman
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor white
+  BorderColor #666666
+}
+
+actor "Usuario Agricola" as Usuario
+actor "Administrador" as Admin
+actor "Dispositivo Arduino" as Arduino
+actor "Servidor SMTP" as SMTP
+
+rectangle "CDU 400 - Monitoreo de sensores y alertas" {
+  usecase "CDU 401: Conectar o\ndesconectar Arduino" as U1
+  usecase "CDU 402: Configurar cultivo\ny municipio del lote" as U2
+  usecase "CDU 403: Transmitir lecturas\nde sensores" as U3
+  usecase "CDU 404: Simular\nlecturas" as U4
+  usecase "CDU 405: Procesar lectura\nen backend" as U5
+  usecase "CDU 406: Generar prediccion\nautomatica" as U6
+  usecase "CDU 407: Evaluar alertas\npor umbrales" as U7
+  usecase "CDU 408: Notificar alertas\ncriticas por correo" as U8
+  usecase "CDU 409: Publicar datos\npor WebSocket" as U9
+  usecase "CDU 410: Visualizar panel\nen tiempo real" as U10
+}
+
+Usuario --> U1
+Usuario --> U2
+Usuario --> U4
+Usuario --> U10
+Admin --> U1
+Admin --> U2
+Admin --> U8
+Admin --> U10
+Arduino --> U3
+SMTP --> U8
+
+U3 .> U5 : <<include>>
+U4 .> U5 : <<include>>
+U5 .> U6 : <<include>>
+U5 .> U7 : <<include>>
+U7 .> U8 : <<extend>>
+U5 .> U9 : <<include>>
+U9 .> U10 : <<include>>
+@enduml
+
+
+@startuml AgroClimaGT_CDU_Expandido_05
+title AgroClima GT - CDU 500 Gestion de datos y retroalimentacion
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam actorStyle stickman
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor white
+  BorderColor #666666
+}
+
+actor "Usuario Agricola" as Usuario
+actor "Administrador" as Admin
+
+rectangle "CDU 500 - Gestion de datos y retroalimentacion" {
+  usecase "CDU 501: Consultar\ndataset operativo" as U1
+  usecase "CDU 502: Descargar\nplantilla CSV" as U2
+  usecase "CDU 503: Cargar\ndataset CSV" as U3
+  usecase "CDU 504: Registrar inventario\nde datasets" as U4
+  usecase "CDU 505: Consultar predicciones\nhistoricas" as U5
+  usecase "CDU 506: Consultar lecturas\nhistoricas" as U6
+  usecase "CDU 507: Registrar feedback real\ndel rendimiento" as U7
+  usecase "CDU 508: Evaluar umbral de\nreentrenamiento" as U8
+}
+
+Usuario --> U1
+Usuario --> U2
+Usuario --> U7
+Admin --> U1
+Admin --> U2
+Admin --> U3
+Admin --> U5
+Admin --> U6
+
+U3 .> U4 : <<include>>
+U7 .> U8 : <<include>>
+@enduml
+
+
+@startuml AgroClimaGT_CDU_Expandido_06
+title AgroClima GT - CDU 600 Administracion de plataforma y modelo ML
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam actorStyle stickman
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor white
+  BorderColor #666666
+}
+
+actor "Administrador" as Admin
+actor "Servidor SMTP" as SMTP
+
+rectangle "CDU 600 - Administracion de plataforma y modelo ML" {
+  usecase "CDU 601: Consultar dashboard\nadministrativo" as U1
+  usecase "CDU 602: Consultar informacion\ndel modelo activo" as U2
+  usecase "CDU 603: Comparar\nmodelos ML" as U3
+  usecase "CDU 604: Reentrenar\nmodelo" as U4
+  usecase "CDU 605: Consultar uso\nde Open-Meteo" as U5
+  usecase "CDU 606: Configurar destinatarios\nde alertas" as U6
+  usecase "CDU 607: Enviar correo\nde prueba" as U7
+}
+
+Admin --> U1
+Admin --> U2
+Admin --> U3
+Admin --> U4
+Admin --> U5
+Admin --> U6
+Admin --> U7
+SMTP --> U7
+
+U4 .> U2 : <<extend>>
+U6 .> U7 : <<extend>>
+@enduml
+
+
+@startuml AgroClimaGT_Despliegue
+title AgroClima GT - Diagrama de Despliegue
+left to right direction
+skinparam componentStyle rectangle
+
+cloud "GitHub Pages" as GitHubPages {
+  artifact "Frontend publicado\nbuild / dist" as FrontendDeploy
+}
+
+node "PC / Laptop del usuario" as ClientNode {
+  artifact "Navegador Web" as Browser
+}
+
+node "Host local Windows\nC:\\Users\\edgar\\Downloads\\TESISXD\\conferencia" as Host {
+  node "Proceso Uvicorn" as Uvicorn {
+    artifact "FastAPI API\nbackend/api.py\n:8000" as API
+    artifact "Modulo ML\nbackend/ml_insights.py" as ML
+    artifact "Lector Arduino\nbackend/arduino_reader.py" as Reader
+    artifact "Motor de alertas\nbackend/alert_engine.py" as AlertEngine
+    artifact "Notificador\nbackend/email_notifier.py" as Mailer
+  }
+
+  folder "Archivos locales" as Storage {
+    artifact "Modelo joblib\nxgboost_yield.joblib" as ModelFile
+    artifact "Encoders / metricas /\nCSV / logs JSON" as DataFiles
+  }
+
+  node "Docker Engine" as Docker {
+    node "Contenedor PostgreSQL 16" as PgContainer {
+      database "agroclima_db\n:5435" as PostgreSQL
+    }
+  }
+}
+
+node "Dispositivo fisico" as Edge {
+  device "Arduino + sensores\n(temperatura, luz,\nhumedad suelo, color/pH)" as Arduino
+}
+
+cloud "API Open-Meteo" as OpenMeteo
+cloud "Servidor SMTP" as SMTP
+
+Browser --> GitHubPages : abre pagina web
+GitHubPages --> Browser : entrega interfaz React
+Browser --> API : envia datos / consulta resultados
+Browser --> API : recibe lecturas en tiempo real
+API --> PostgreSQL : guarda predicciones y lecturas
+API --> ModelFile : carga modelo XGBoost
+API --> DataFiles : lee datasets y metricas
+Reader --> Arduino : recibe lecturas por USB
+API --> OpenMeteo : consulta pronostico
+Mailer --> SMTP : envia alertas por correo
+@enduml
