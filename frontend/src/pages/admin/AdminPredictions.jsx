@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { municipioOptions, cropOptions } from "../../data/constants";
 import ChartCanvas from "../../components/ChartCanvas";
 
-const API = "http://localhost:8000";
+const API = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 const PAGE_SIZE = 20;
 
 function buildParams({ limit, offset, filter }) {

@@ -533,13 +533,13 @@ export default function Forecast({ form }) {
                   {remoteSowingRows.slice(0, 3).map((row) => (
                     <div key={`${row.crop}-${row.month}`} style={{ border: "1px solid var(--border)", borderRadius: 10, padding: "0.8rem", background: "var(--surface)" }}>
                       <p style={{ margin: 0, fontSize: "0.72rem", color: "var(--text-muted)", textTransform: "uppercase", fontWeight: 700 }}>
-                        {MESES[Number(row.month) - 1]} · Lugar {row.rank}
+                        {MESES[Number(row.month) - 1]} · Opcion {row.rank}
                       </p>
                       <strong style={{ display: "block", marginTop: "0.25rem", fontSize: "1rem", color: "#2563eb" }}>
-                        {Number(row.mean_yield).toFixed(1)}% rendimiento
+                        {Number(row.mean_yield).toFixed(1)}% favorable
                       </strong>
                       <p style={{ margin: "0.2rem 0 0", fontSize: "0.75rem", color: "var(--text-secondary)" }}>
-                        Exito alto: {Number(row.high_yield_rate).toFixed(1)}% · Muestras: {row.n_samples}
+                        Confianza historica: {Number(row.high_yield_rate).toFixed(1)}%
                       </p>
                     </div>
                   ))}

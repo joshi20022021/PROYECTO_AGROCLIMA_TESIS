@@ -289,84 +289,8 @@ export default function Alerts({ dataset = [], showToast, setActiveSection }) {
               </select>
             </label>
             <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", lineHeight: 1.5 }}>
-              Esta vista separa lo que reporta el sensor ahora mismo de los riesgos detectados en datos analizados.
+              Elige el cultivo y departamento para ver solo avisos que requieren atencion.
             </div>
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="card-header">
-            <h3>Resumen de alertas</h3>
-            <span className="chip">{liveAlerts.length + historicalAlerts.length} visibles</span>
-          </div>
-          <div className="card-body" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.55rem" }}>
-            {[
-              { label: "Tiempo real urgentes", value: liveSummary.severe, color: "#b41e1e" },
-              { label: "Tiempo real revisar", value: liveSummary.moderate, color: "#b87c20" },
-              { label: "Tiempo real estables", value: liveSummary.stable, color: "#1e7a4a" },
-              { label: "Analisis del cultivo", value: historicalAlerts.length, color: "var(--text-primary)" },
-            ].map((item) => (
-              <div
-                key={item.label}
-                style={{
-                  padding: "0.7rem 0.8rem",
-                  borderRadius: 8,
-                  background: "rgba(255,252,247,0.8)",
-                  border: "1px solid var(--border)",
-                }}
-              >
-                <span style={{ fontSize: "0.68rem", fontWeight: 700, textTransform: "uppercase", color: "var(--text-muted)", display: "block" }}>
-                  {item.label}
-                </span>
-                <span style={{ fontSize: "1.35rem", fontWeight: 800, color: item.color, lineHeight: 1 }}>
-                  {item.value}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="card-header">
-            <h3>Acciones rapidas</h3>
-            <span className="chip">Campo</span>
-          </div>
-          <div className="card-body">
-            <div className="quick-actions">
-              <button
-                className="btn secondary"
-                onClick={() => {
-                  setActiveSection("arduino");
-                  showToast("Redirigiendo a panel Arduino...");
-                }}
-              >
-                Panel Arduino
-              </button>
-              <button
-                className="btn secondary"
-                onClick={() => {
-                  setActiveSection("dashboard");
-                  showToast("Ir a Dashboard para revisar el riesgo.");
-                }}
-              >
-                Ver riesgo
-              </button>
-              <button className="btn secondary" onClick={() => setLiveAlerts([])}>
-                Limpiar alertas en pantalla
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div className="card">
-          <div className="card-header">
-            <h3>Como leer esta pantalla</h3>
-          </div>
-          <div className="card-body" style={{ display: "flex", flexDirection: "column", gap: "0.55rem", fontSize: "0.82rem", color: "var(--text-secondary)" }}>
-            <div><strong>Tiempo real:</strong> lo que el sensor detecta ahora mismo.</div>
-            <div><strong>Analisis del cultivo:</strong> riesgos vistos en datos del cultivo y municipio seleccionados.</div>
-            <div><strong>Urgente:</strong> conviene actuar hoy.</div>
-            <div><strong>Revisar:</strong> conviene corregir esta semana.</div>
           </div>
         </div>
 
@@ -404,7 +328,7 @@ export default function Alerts({ dataset = [], showToast, setActiveSection }) {
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "0.7rem" }}>
                 {historicalAlerts.map((alert, index) => (
-                  <AlertCard key={`historical-${index}`} alert={alert} sourceLabel="Analisis del cultivo" />
+                  <AlertCard key={`historical-${index}`} alert={alert} sourceLabel="Cultivo" />
                 ))}
               </div>
             )}

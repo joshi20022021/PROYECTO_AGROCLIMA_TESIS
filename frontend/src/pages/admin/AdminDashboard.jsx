@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const API = "http://localhost:8000";
+const API = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 const STAT_ICONS = {
   predicciones: (
@@ -53,6 +53,12 @@ export default function AdminDashboard() {
     { key: "modelo",       label: "Version modelo activo",  value: stats.modelo_activo ?? "v2.0", color: "#7c3aed" },
   ] : [];
 
+  const modelCoverage = [
+    { label: "Municipios en el modelo", value: 61, detail: "8 zonas agroclimaticas de Guatemala" },
+    { label: "Registros de entrenamiento", value: "812,520", detail: "Open-Meteo, 2010-2024" },
+    { label: "Cultivos modelados", value: 37, detail: "Granos, hortalizas, frutas y comerciales" },
+  ];
+
   return (
     <div className="page-content">
       {/* Estado del sistema */}
@@ -104,6 +110,22 @@ export default function AdminDashboard() {
           ))}
         </div>
       )}
+
+      <div className="card">
+        <div className="card-header">
+          <h3>Cobertura del modelo</h3>
+          <span className="chip">Datos tecnicos</span>
+        </div>
+        <div className="card-body" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.75rem" }}>
+          {modelCoverage.map((item) => (
+            <div key={item.label} style={{ padding: "0.9rem 1rem", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface-alt)" }}>
+              <span className="kpi-label">{item.label}</span>
+              <div className="kpi-value" style={{ color: "var(--text-primary)" }}>{item.value}</div>
+              <p className="kpi-sub" style={{ marginBottom: 0 }}>{item.detail}</p>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {/* Ultimas predicciones */}
       {stats?.ultimas_predicciones?.length > 0 && (

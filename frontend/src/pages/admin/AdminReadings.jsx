@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const API = "http://localhost:8000";
+const API = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 const PAGE_SIZE = 20;
 
 export default function AdminReadings() {

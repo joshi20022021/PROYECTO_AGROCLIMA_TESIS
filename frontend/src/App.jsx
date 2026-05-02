@@ -479,24 +479,6 @@ function UserApp({ onLogout, userEmail }) {
             </div>
           </header>
 
-          <div className="kpi-wrapper" style={{ padding: "1rem 1.5rem 0" }}>
-            <div className="kpi-grid">
-              {kpis.map((kpi) => (
-                <div key={kpi.label} className={`card kpi-card ${kpi.alert ? "alert-card" : ""}`}>
-                  <div
-                    className="kpi-icon"
-                    style={{ background: kpi.iconBg, color: kpi.iconColor }}
-                  >
-                    {kpi.icon}
-                  </div>
-                  <span className="kpi-label">{kpi.label}</span>
-                  <div className="kpi-value" style={{ color: kpi.valueColor }}>{kpi.value}</div>
-                  <p className="kpi-sub">{kpi.sub}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
           {pages[activeSection]}
         </div>
       </div>

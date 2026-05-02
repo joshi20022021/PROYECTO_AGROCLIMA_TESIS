@@ -464,9 +464,6 @@ export default function Reports({
           <div style={{ fontSize: "0.72rem", color: "var(--text-secondary)", fontWeight: 700, marginTop: 4 }}>
             variables fuera de rango
           </div>
-          <div style={{ fontSize: "0.68rem", color: "var(--text-muted)", marginTop: 8 }}>
-            Puntaje del sistema: {risk.score}/100
-          </div>
         </div>
       </div>
 
@@ -700,16 +697,20 @@ export default function Reports({
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.85rem" }}>
         <div className="card">
           <div className="card-header" style={{ borderBottom: "1px solid var(--border)" }}>
-            <h3>Resumen practico</h3>
+            <h3>Decision de campo</h3>
           </div>
           <div className="card-body" style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
             {[
-              { label: "Estado actual", value: farmerRisk.title },
-              { label: "Problema principal", value: prioritySummary.main.name },
-              { label: "Variables fuera de rango", value: prioritySummary.outOfRangeCount },
-              { label: "Alertas urgentes", value: safeRiskCounts.highCount },
-              { label: "Alertas preventivas", value: safeRiskCounts.mediumCount },
-              { label: "pH promedio del suelo", value: averageSoilPh },
+              { label: "Que hacer", value: farmerRisk.title },
+              { label: "Revisar primero", value: prioritySummary.main.name },
+              {
+                label: "Prioridad",
+                value: safeRiskCounts.highCount > 0
+                  ? "Atender hoy"
+                  : safeRiskCounts.mediumCount > 0
+                    ? "Revisar esta semana"
+                    : "Seguir observando",
+              },
             ].map((row) => (
               <div
                 key={row.label}
@@ -728,23 +729,21 @@ export default function Reports({
                 </span>
               </div>
             ))}
-            <div style={{ fontSize: "0.74rem", color: "var(--text-muted)", lineHeight: 1.5, marginTop: "0.25rem" }}>
-              Cultivos monitoreados en tu panel: {cropCoverage}. Puntaje del sistema: {risk.score}/100.
+            <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", lineHeight: 1.5, marginTop: "0.25rem" }}>
+              {farmerRisk.subtitle}
             </div>
           </div>
         </div>
 
         <div className="card">
           <div className="card-header" style={{ borderBottom: "1px solid var(--border)" }}>
-            <h3>Cuando pedir ayuda</h3>
+            <h3>Cuando llamar a un tecnico</h3>
           </div>
           <div className="card-body" style={{ display: "flex", flexDirection: "column", gap: "0.65rem" }}>
             {[
-              { texto: "Ves manchas en hojas que no reconoces", urgencia: "Urgente" },
-              { texto: "Las plantas se marchitan aunque esten regadas", urgencia: "Urgente" },
-              { texto: "El cultivo no crece al ritmo esperado", urgencia: "Esta semana" },
-              { texto: "El suelo se ve muy seco aunque hayas regado", urgencia: "Esta semana" },
-              { texto: "Quieres saber cuando es mejor sembrar", urgencia: "Cuando puedas" },
+              { texto: "Manchas nuevas en hojas o tallos", urgencia: "Hoy" },
+              { texto: "Plantas marchitas aunque el suelo este humedo", urgencia: "Hoy" },
+              { texto: "El cultivo no mejora despues de corregir riego o drenaje", urgencia: "Esta semana" },
             ].map((item, i) => (
               <div
                 key={i}
@@ -767,13 +766,13 @@ export default function Reports({
                     padding: "0.15rem 0.45rem",
                     borderRadius: 20,
                     background:
-                      item.urgencia === "Urgente"
+                      item.urgencia === "Hoy"
                         ? "rgba(239,68,68,0.1)"
                         : item.urgencia === "Esta semana"
                           ? "rgba(245,158,11,0.1)"
                           : "rgba(22,163,74,0.1)",
                     color:
-                      item.urgencia === "Urgente"
+                      item.urgencia === "Hoy"
                         ? "#ef4444"
                         : item.urgencia === "Esta semana"
                           ? "#f59e0b"
@@ -796,7 +795,7 @@ export default function Reports({
                 fontWeight: 600,
               }}
             >
-              Extensionistas MAGA: 1548 (llamada gratis)
+              MAGA 1548 - llamada gratis
             </div>
           </div>
         </div>

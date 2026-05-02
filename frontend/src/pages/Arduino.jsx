@@ -8,6 +8,7 @@ import {
 } from "../services/api";
 
 const MAX_HISTORY = 20;
+const API = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 const YIELD_COLOR = {
   alto:    { bg: "rgba(30,122,74,0.12)",  border: "#1e7a4a", text: "#1e7a4a" },
@@ -145,7 +146,7 @@ export default function Arduino() {
     setEmailSaving(true);
     setEmailMsg({ text: "", ok: true });
     try {
-      const res = await fetch("http://localhost:8000/admin/email-config", {
+      const res = await fetch(`${API}/admin/email-config`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-admin-token": ADMIN_TOKEN },
         body: JSON.stringify({ email_to: emailTo.trim(), severidad_min: "severo" }),
@@ -163,7 +164,7 @@ export default function Arduino() {
     setEmailTesting(true);
     setEmailMsg({ text: "", ok: true });
     try {
-      const res = await fetch("http://localhost:8000/admin/email-test", {
+      const res = await fetch(`${API}/admin/email-test`, {
         method: "POST",
         headers: { "x-admin-token": ADMIN_TOKEN },
       });
