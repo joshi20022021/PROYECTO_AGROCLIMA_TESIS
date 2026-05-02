@@ -1,4 +1,5 @@
-const BASE_URL = "http://localhost:8000";
+const BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+const WS_URL = BASE_URL.replace(/^http/, "ws");
 
 async function request(path, options = {}) {
   const res = await fetch(`${BASE_URL}${path}`, options);
@@ -210,7 +211,7 @@ export async function simulateArduino(data) {
 }
 
 export function createArduinoSocket(onMessage, onClose) {
-  const ws = new WebSocket("ws://localhost:8000/ws/arduino");
+  const ws = new WebSocket(`${WS_URL}/ws/arduino`);
   ws.onmessage = (e) => onMessage(JSON.parse(e.data));
   ws.onclose   = onClose || (() => {});
   return ws;
