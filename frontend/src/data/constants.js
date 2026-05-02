@@ -51,7 +51,7 @@ export const sections = {
   arduino: {
     label: "Arduino",
     title: "Monitoreo en Tiempo Real",
-    subtitle: "Lectura de sensores via Arduino y analisis automatico con XGBoost.",
+    subtitle: "Lecturas vivas de temperatura, luz, verdor y humedad del suelo.",
   },
 };
 
