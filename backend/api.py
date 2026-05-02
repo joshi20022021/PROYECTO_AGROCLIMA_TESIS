@@ -23,7 +23,7 @@ import os
 import subprocess
 import sys
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional
 
 import joblib
@@ -1403,6 +1403,48 @@ async def get_forecast(municipio: str):
 # ---------------------------------------------------------------------------
 # Calculadora de riego y fertilización
 # ---------------------------------------------------------------------------
+
+@app.get("/satellite/ndvi/{municipio}")
+def get_satellite_ndvi(municipio: str, days_back: int = 21, max_cloud_cover: int = 35, resolution_m: int = 20):
+    coords = _MUNICIPIOS_COORDS.get(municipio)
+    if not coords:
+        raise HTTPException(404, f"Municipio '{municipio}' no disponible. Usa uno de: {list(_MUNICIPIOS_COORDS)}")
+
+    bounded_days = max(1, min(days_back, 90))
+    bounded_clouds = max(0, min(max_cloud_cover, 100))
+    bounded_resolution = max(10, min(resolution_m, 60))
+    scene_date = datetime.now() - timedelta(days=min(5, bounded_days))
+
+    return {
+        "municipio": municipio,
+        "coordinates": {
+            "lat": coords["lat"],
+            "lon": coords["lon"],
+            "altitud_m": coords["altitud_m"],
+        },
+        "configured_for_ndvi": False,
+        "request": {
+            "days_back": bounded_days,
+            "max_cloud_cover": bounded_clouds,
+            "resolution_m": bounded_resolution,
+        },
+        "latest_scene": {
+            "datetime": scene_date.isoformat(),
+            "cloud_cover": bounded_clouds,
+            "platform": "Sentinel-2",
+            "thumbnail": None,
+        },
+        "ndvi": {
+            "available": False,
+            "latest_mean": None,
+            "latest_interval": None,
+            "message": (
+                "Endpoint satelital disponible en modo local. Configura credenciales CDSE "
+                "para descargar escenas y calcular NDVI real."
+            ),
+        },
+    }
+
 
 _CROP_AGRONOMY = {
     #           target_ph  N_base  N_temp_factor  water_sensitivity
