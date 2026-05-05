@@ -1648,7 +1648,24 @@ def get_recommendations(cultivo: str,
         if matches:
             result.append(dict(r))
 
-    return result
+    deduped = []
+    seen_recommendations = set()
+    seen_condition_variables = set()
+    for item in result:
+        var = item.get("variable")
+        if var in param_map:
+            if var in seen_condition_variables:
+                continue
+            seen_condition_variables.add(var)
+
+        key = " ".join((item.get("recomendacion") or "").casefold().split())
+        if key and key in seen_recommendations:
+            continue
+        if key:
+            seen_recommendations.add(key)
+        deduped.append(item)
+
+    return deduped
 
 
 @app.get("/dataset")
