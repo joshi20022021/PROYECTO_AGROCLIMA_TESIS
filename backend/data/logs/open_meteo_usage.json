@@ -1,7 +1,7 @@
 {
   "totals": {
-    "external_requests": 20,
-    "cache_hits": 84
+    "external_requests": 22,
+    "cache_hits": 86
   },
   "by_day": {
     "2026-04-01": {
@@ -79,7 +79,17 @@
           "cache_hits": 12
         }
       }
+    },
+    "2026-05-05": {
+      "external_requests": 2,
+      "cache_hits": 2,
+      "by_municipio": {
+        "Chimaltenango": {
+          "external_requests": 2,
+          "cache_hits": 2
+        }
+      }
     }
   },
-  "last_request_at": "2026-05-01T21:14:37.447438"
+  "last_request_at": "2026-05-05T01:29:03.759240"
 }

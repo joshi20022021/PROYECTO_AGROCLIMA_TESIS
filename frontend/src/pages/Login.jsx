@@ -46,20 +46,20 @@ export default function Login({ onLogin }) {
   return (
     <div style={{
       minHeight: "100vh",
-      background: "linear-gradient(135deg, #060d0a 0%, #0c1f10 30%, #081525 70%, #040d06 100%)",
+      background: "radial-gradient(900px 320px at 50% 12%, rgba(255,255,255,0.12), rgba(255,255,255,0) 62%), linear-gradient(135deg, #020814 0%, #061734 36%, #04241f 72%, #01040a 100%)",
       display: "flex", alignItems: "center", justifyContent: "center",
       fontFamily: '"Inter","DM Sans",system-ui,sans-serif',
       padding: "1.5rem", position: "relative", overflow: "hidden",
     }}>
       {/* Orbes de fondo */}
-      {orb("-15%", "-10%", undefined, undefined, "55vw", "55vw", "rgba(76,175,114,0.12)", 1)}
-      {orb(undefined, undefined, "-10%", "-20%", "60vw", "60vw", "rgba(3,105,161,0.10)", 2)}
-      {orb("40%", undefined, "15%", undefined, "25vw", "25vw", "rgba(139,94,25,0.08)", 3)}
+      {orb("-18%", "-12%", undefined, undefined, "58vw", "58vw", "rgba(34,197,94,0.12)", 1)}
+      {orb(undefined, undefined, "-12%", "-22%", "62vw", "62vw", "rgba(59,130,246,0.10)", 2)}
+      {orb("42%", undefined, "12%", undefined, "26vw", "26vw", "rgba(16,185,129,0.08)", 3)}
 
       {/* Cuadrícula decorativa */}
       <div style={{
         position: "absolute", inset: 0,
-        backgroundImage: "linear-gradient(rgba(76,175,114,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(76,175,114,0.04) 1px, transparent 1px)",
+        backgroundImage: "linear-gradient(rgba(34,197,94,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(59,130,246,0.035) 1px, transparent 1px)",
         backgroundSize: "48px 48px", pointerEvents: "none",
       }} />
 
@@ -82,38 +82,36 @@ export default function Login({ onLogin }) {
 
         {/* Logo */}
         <div style={{ textAlign:"center", marginBottom:"2rem" }}>
-          <div style={{
-            display:"inline-flex", alignItems:"center", justifyContent:"center",
-            width:68, height:68, borderRadius:22,
-            background:"linear-gradient(145deg,#4caf72 0%,#246222 55%,#163915 100%)",
-            marginBottom:"1.1rem",
-            boxShadow:"0 0 0 1px rgba(76,175,114,0.38),0 8px 32px rgba(38,99,36,0.55),0 0 48px rgba(76,175,114,0.20)",
-            color:"#e8f5e2", position:"relative",
-          }}>
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/>
-              <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
-            </svg>
-            <div style={{ position:"absolute", inset:0, borderRadius:"inherit", background:"linear-gradient(145deg,rgba(255,255,255,0.16),transparent 60%)", pointerEvents:"none" }} />
+          <div style={{ position: "relative", display: "inline-block" }}>
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                left: "50%",
+                top: "50%",
+                transform: "translate(-50%, -54%)",
+                width: "min(92vw, 520px)",
+                height: 210,
+                background: "radial-gradient(closest-side, rgba(255,255,255,0.22), rgba(187,247,208,0.10), rgba(59,130,246,0.06), transparent 72%)",
+                filter: "blur(12px)",
+                pointerEvents: "none",
+              }}
+            />
+            <img
+              src="/logo.png"
+              alt="AgroClima GT"
+              style={{
+                width: "92vw",
+                maxWidth: 480,
+                height: "auto",
+                objectFit: "contain",
+                display: "block",
+                margin: "0 auto 1.1rem",
+                filter: "brightness(1.08) contrast(1.12) saturate(1.18) drop-shadow(0 18px 42px rgba(0,0,0,0.55))",
+              }}
+            />
           </div>
 
-          <div style={{ display:"flex", justifyContent:"center", gap:"0.45rem", marginBottom:"1.1rem", flexWrap:"wrap" }}>
-            {["XGBoost ML","Open-Meteo","37 cultivos"].map((t,i)=>(
-              <span key={t} style={{
-                fontSize:"0.6rem", fontWeight:700, letterSpacing:"0.07em", textTransform:"uppercase",
-                padding:"0.22rem 0.65rem", borderRadius:999,
-                background:"rgba(76,175,114,0.12)", border:"1px solid rgba(76,175,114,0.22)",
-                color:"rgba(140,232,164,0.85)", animation:`tagIn 360ms ${i*80}ms ease both`,
-              }}>{t}</span>
-            ))}
-          </div>
-
-          <h1 style={{ color:"#f0f8ec", fontSize:"1.95rem", fontWeight:900, margin:0, letterSpacing:"-0.045em", lineHeight:1.15 }}>
-            AgroClima <span style={{ color:"#4caf72" }}>GT</span>
-          </h1>
-          <p style={{ color:"rgba(255,255,255,0.42)", fontSize:"0.84rem", margin:"0.38rem 0 0" }}>
-            Sistema de monitoreo agroclimatico · USAC 2025
-          </p>
         </div>
 
         {/* Card usuario */}
