@@ -23,6 +23,7 @@ import os
 import subprocess
 import sys
 import threading
+import unicodedata
 from datetime import datetime, timedelta
 from typing import Optional
 
@@ -544,9 +545,16 @@ def _maybe_trigger_retraining() -> dict:
     }
 
 
+def _normalize_location_key(value: str) -> str:
+    text = unicodedata.normalize("NFKD", str(value or ""))
+    text = "".join(ch for ch in text if not unicodedata.combining(ch))
+    return " ".join(text.casefold().split())
+
+
 def _resolve_coords(municipio: str) -> tuple[float | None, float | None, str | None, str | None]:
+    requested = _normalize_location_key(municipio)
     for known, meta in MUNICIPIO_CATALOG.items():
-        if known.lower() == str(municipio).lower():
+        if _normalize_location_key(known) == requested:
             return meta.get("lat"), meta.get("lon"), meta.get("depto"), meta.get("zona")
     return None, None, None, None
 
@@ -1232,6 +1240,21 @@ _MUNICIPIOS_COORDS = {
     "El Progreso":    {"lat": 14.8500, "lon": -90.0667, "altitud_m":  428},
 }
 
+
+def _resolve_weather_coords(municipio: str) -> tuple[str | None, dict | None]:
+    requested = _normalize_location_key(municipio)
+    for known, coords in _MUNICIPIOS_COORDS.items():
+        if _normalize_location_key(known) == requested:
+            return known, coords
+    for known, meta in MUNICIPIO_CATALOG.items():
+        if _normalize_location_key(known) == requested:
+            return known, {
+                "lat": meta.get("lat"),
+                "lon": meta.get("lon"),
+                "altitud_m": meta.get("altitud_m"),
+            }
+    return None, None
+
 _WEATHER_OPEN_METEO = (
     "https://api.open-meteo.com/v1/forecast"
     "?latitude={lat}&longitude={lon}"
@@ -1321,9 +1344,10 @@ async def get_forecast(municipio: str):
     import urllib.error
     from datetime import timedelta
 
-    coords = _MUNICIPIOS_COORDS.get(municipio)
+    canonical_municipio, coords = _resolve_weather_coords(municipio)
     if not coords:
-        raise HTTPException(404, f"Municipio '{municipio}' no disponible. Usa uno de: {list(_MUNICIPIOS_COORDS)}")
+        raise HTTPException(404, f"Municipio '{municipio}' no disponible")
+    municipio = canonical_municipio
 
     # Cache simple: evita llamar Open-Meteo en cada render
     cached = _FORECAST_CACHE.get(municipio)
@@ -1406,9 +1430,10 @@ async def get_forecast(municipio: str):
 
 @app.get("/satellite/ndvi/{municipio}")
 def get_satellite_ndvi(municipio: str, days_back: int = 21, max_cloud_cover: int = 35, resolution_m: int = 20):
-    coords = _MUNICIPIOS_COORDS.get(municipio)
+    canonical_municipio, coords = _resolve_weather_coords(municipio)
     if not coords:
-        raise HTTPException(404, f"Municipio '{municipio}' no disponible. Usa uno de: {list(_MUNICIPIOS_COORDS)}")
+        raise HTTPException(404, f"Municipio '{municipio}' no disponible")
+    municipio = canonical_municipio
 
     bounded_days = max(1, min(days_back, 90))
     bounded_clouds = max(0, min(max_cloud_cover, 100))
