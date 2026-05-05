@@ -1,7 +1,7 @@
 {
   "totals": {
-    "external_requests": 22,
-    "cache_hits": 86
+    "external_requests": 26,
+    "cache_hits": 95
   },
   "by_day": {
     "2026-04-01": {
@@ -81,15 +81,19 @@
       }
     },
     "2026-05-05": {
-      "external_requests": 2,
-      "cache_hits": 2,
+      "external_requests": 6,
+      "cache_hits": 11,
       "by_municipio": {
         "Chimaltenango": {
-          "external_requests": 2,
+          "external_requests": 5,
+          "cache_hits": 9
+        },
+        "Baja Verapaz": {
+          "external_requests": 1,
           "cache_hits": 2
         }
       }
     }
   },
-  "last_request_at": "2026-05-05T01:29:03.759240"
+  "last_request_at": "2026-05-05T02:02:07.351285"
 }

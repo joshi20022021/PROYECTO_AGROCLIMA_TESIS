@@ -54,8 +54,9 @@ FEATURES = [
     "swvl3",          # ERA5-Land humedad suelo profunda (28-100 cm)
     "soil_temp",      # ERA5-Land temperatura suelo 0-7 cm (°C)
 ]
-# Features extra (dataset_v2 — NASA POWER)
+# Features extra (presentes en dataset_openmeteo/v2 pero no en el preliminar)
 FEATURES_EXTRA = [
+    "altitud_m",      # Elevación del municipio (m) — diferencia zonas agroclimaticas
     "temp_max",       # NASA POWER temperatura máxima mensual (°C)
     "temp_min",       # NASA POWER temperatura mínima mensual (°C)
     "wind_speed",     # NASA POWER viento 2m (m/s)
@@ -154,8 +155,8 @@ def cmd_train():
     if db_available():
         sync_model_metadata({
             "nombre": "XGBoost",
-            "version": "v2.1-db",
-            "dataset_usado": "dataset_v2.csv",
+            "version": "v2.1",
+            "dataset_usado": "dataset_openmeteo.csv",
             "n_filas": len(df),
             "n_features": len(active_features),
             "r2_test": round(r2, 4),

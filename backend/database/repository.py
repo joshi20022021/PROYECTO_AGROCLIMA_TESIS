@@ -170,6 +170,16 @@ def load_training_dataframe(dataset_name: str | None = None) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+_VALID_DEPTOS = [
+    "Chimaltenango", "Sacatepequez", "Guatemala", "Escuintla",
+    "Santa Rosa", "Solola", "Totonicapan", "Quetzaltenango",
+    "Suchitepequez", "Retalhuleu", "San Marcos", "Huehuetenango",
+    "Quiche", "Baja Verapaz", "Coban", "Peten",
+    "Izabal", "Zacapa", "Chiquimula", "Jalapa",
+    "Jutiapa", "El Progreso",
+]
+
+
 def get_latest_metrics():
     with get_cursor() as cur:
         cur.execute(
@@ -177,8 +187,10 @@ def get_latest_metrics():
             SELECT municipio, temperatura AS temperature, precipitacion AS rainfall,
                    humedad AS humidity, soil_moisture
             FROM metricas_climaticas
+            WHERE municipio = ANY(%s)
             ORDER BY municipio
-            """
+            """,
+            (_VALID_DEPTOS,),
         )
         rows = cur.fetchall()
     return rows

@@ -221,6 +221,45 @@ CREATE TABLE IF NOT EXISTS recomendaciones_cultivo (
 CREATE INDEX IF NOT EXISTS idx_recom_cultivo ON recomendaciones_cultivo(cultivo);
 CREATE INDEX IF NOT EXISTS idx_recom_variable ON recomendaciones_cultivo(variable);
 
+-- Calendario de siembra óptimo por municipio/cultivo/mes (desde sowing_calendar.csv)
+CREATE TABLE IF NOT EXISTS calendario_siembra (
+    id              SERIAL PRIMARY KEY,
+    municipio       VARCHAR(100) NOT NULL,
+    cultivo         VARCHAR(100) NOT NULL,
+    mes             SMALLINT    NOT NULL,
+    rank            SMALLINT,
+    is_top3         BOOLEAN,
+    mean_yield      FLOAT,
+    std_yield       FLOAT,
+    high_yield_rate FLOAT,
+    n_samples       INTEGER,
+    score           FLOAT,
+    recommendation  VARCHAR(50),
+    UNIQUE (municipio, cultivo, mes)
+);
+
+CREATE INDEX IF NOT EXISTS idx_cal_siembra_municipio ON calendario_siembra(municipio);
+CREATE INDEX IF NOT EXISTS idx_cal_siembra_cultivo   ON calendario_siembra(cultivo);
+
+-- Índice de estrés hídrico mensual por municipio/año (desde water_stress_index.csv)
+CREATE TABLE IF NOT EXISTS indice_estres_hidrico (
+    id                 SERIAL PRIMARY KEY,
+    municipio          VARCHAR(100) NOT NULL,
+    zona               VARCHAR(50),
+    altitud_m          FLOAT,
+    anio               SMALLINT    NOT NULL,
+    mes                SMALLINT    NOT NULL,
+    precipitacion      FLOAT,
+    eto_mm_day         FLOAT,
+    rain_mm_day        FLOAT,
+    water_stress_index FLOAT,
+    stress_level       VARCHAR(20),
+    UNIQUE (municipio, anio, mes)
+);
+
+CREATE INDEX IF NOT EXISTS idx_estres_hidrico_municipio ON indice_estres_hidrico(municipio);
+CREATE INDEX IF NOT EXISTS idx_estres_hidrico_anio      ON indice_estres_hidrico(anio);
+
 -- Feedback real de campo para ciclo de aprendizaje y reentrenamiento automatico
 CREATE TABLE IF NOT EXISTS model_feedback (
     id                SERIAL PRIMARY KEY,
@@ -241,9 +280,28 @@ CREATE INDEX IF NOT EXISTS idx_model_feedback_crop_loc ON model_feedback(cultivo
 -- ── Datos iniciales ──────────────────────────────────────────
 
 INSERT INTO municipios (nombre, lat, lon) VALUES
-    ('Chimaltenango', 14.6614, -90.8197),
-    ('Sacatepequez',  14.5586, -90.7295),
-    ('Guatemala',     14.6349, -90.5069)
+    ('Chimaltenango',  14.6614, -90.8197),
+    ('Sacatepequez',   14.5586, -90.7295),
+    ('Guatemala',      14.6349, -90.5069),
+    ('Escuintla',      14.3019, -90.7857),
+    ('Santa Rosa',     14.2136, -90.2975),
+    ('Solola',         14.7752, -91.1820),
+    ('Totonicapan',    14.9133, -91.3598),
+    ('Quetzaltenango', 14.8445, -91.5187),
+    ('Suchitepequez',  14.5319, -91.5099),
+    ('Retalhuleu',     14.5286, -91.6863),
+    ('San Marcos',     14.9599, -91.7952),
+    ('Huehuetenango',  15.3189, -91.4706),
+    ('Quiche',         15.0301, -91.1500),
+    ('Baja Verapaz',   15.1264, -90.3631),
+    ('Coban',          15.4686, -90.3769),
+    ('Peten',          16.9302, -89.8883),
+    ('Izabal',         15.4667, -89.1333),
+    ('Zacapa',         14.9726, -89.5267),
+    ('Chiquimula',     14.7993, -89.5454),
+    ('Jalapa',         14.6333, -89.9833),
+    ('Jutiapa',        14.2936, -89.8963),
+    ('El Progreso',    14.8500, -90.0667)
 ON CONFLICT DO NOTHING;
 
 -- Modelo actual (entrenado con dataset_v2.csv)

@@ -39,12 +39,13 @@ FEATURES = [
     "soil_ph", "soil_moisture", "light_lux", "greenness_idx",
     "swvl2", "swvl3", "soil_temp",
     "temp_max", "temp_min", "wind_speed",
+    "altitud_m",
 ]
 
 SENSOR_FEATURES = [
     "temperature", "rainfall", "humidity", "soil_ph", "soil_moisture",
     "light_lux", "greenness_idx", "swvl2", "swvl3", "soil_temp",
-    "temp_max", "temp_min", "wind_speed",
+    "temp_max", "temp_min", "wind_speed", "altitud_m",
 ]
 
 FEATURE_LABELS = {
@@ -61,10 +62,62 @@ FEATURE_LABELS = {
     "temp_max": "temperatura maxima",
     "temp_min": "temperatura minima",
     "wind_speed": "viento",
+    "altitud_m": "altitud",
     "month": "mes",
     "municipio_enc": "municipio",
     "crop_enc": "cultivo",
 }
+
+# Altitudes (m) por municipio — cubre los 22 departamentos del frontend
+# y los 61 municipios del dataset de entrenamiento (era5_mensual / openmeteo).
+_ALTITUDES: dict[str, float] = {
+    # 22 departamentos del frontend
+    "Chimaltenango": 1800, "Sacatepequez": 1530, "Guatemala": 1502,
+    "Escuintla": 346,  "Santa Rosa": 896,   "Solola": 2113,
+    "Totonicapan": 2500, "Quetzaltenango": 2333, "Suchitepequez": 372,
+    "Retalhuleu": 239, "San Marcos": 2400,  "Huehuetenango": 1901,
+    "Quiche": 2021,   "Baja Verapaz": 940,  "Coban": 1317,
+    "Peten": 127,     "Izabal": 2,          "Zacapa": 230,
+    "Chiquimula": 424, "Jalapa": 1360,      "Jutiapa": 905,
+    "El Progreso": 428,
+    # Municipios adicionales del dataset de entrenamiento (era5 / openmeteo)
+    "Asuncion Mita": 500, "Ayutla": 50, "Barillas": 1350, "Cahabon": 180,
+    "Champerico": 5, "Chicacao": 370, "Chichicastenango": 2070,
+    "Chiquimulilla": 152, "Cuilapa": 896, "Flores": 110, "Guanagazapa": 520,
+    "Huehuetenango_muni": 1901, "Ixcan": 180, "Jalapa_muni": 1360,
+    "La Democracia": 55, "Livingston": 5, "Malacatan": 380,
+    "Mazatenango": 372, "Morazan": 780, "Morales": 18, "Nebaj": 1906,
+    "Nueva Concepcion": 20, "Palin": 1100, "Panzos": 90, "Patulul": 450,
+    "Puerto Barrios": 2, "Puerto San Jose": 2, "Quetzaltenango_muni": 2333,
+    "Salamá": 940, "San Cristobal Verapaz": 1430, "San Marcos_muni": 2400,
+    "San Pedro Carchá": 1320, "Santa Cruz del Quiche": 2021,
+    "Santa Lucia Cotzumalguapa": 356, "Santiago Atitlan": 1592,
+    "Sayaxche": 120, "Solola_muni": 2113, "Tecun Uman": 40,
+    "Tikal": 250, "Todos Santos Cuchumatan": 2480, "Totonicapan_muni": 2500,
+    "Zacapa_muni": 230, "Zunilito": 500,
+}
+
+
+def _get_altitude(municipio: str) -> float:
+    """Devuelve la altitud en metros para un municipio. Carga era5_mensual.csv si es necesario."""
+    if municipio in _ALTITUDES:
+        return _ALTITUDES[municipio]
+    # Intento case-insensitive
+    lower = municipio.lower()
+    for k, v in _ALTITUDES.items():
+        if k.lower() == lower:
+            return v
+    # Fallback: cargar desde era5_mensual.csv una sola vez
+    era5_path = os.path.join(BASE_DIR, "data", "sources", "era5_mensual.csv")
+    if os.path.exists(era5_path):
+        try:
+            df_alt = pd.read_csv(era5_path, usecols=["municipio", "altitud_m"])
+            row = df_alt[df_alt["municipio"].str.lower() == lower]
+            if not row.empty:
+                return float(row.iloc[0]["altitud_m"])
+        except Exception:
+            pass
+    return 800.0  # promedio Guatemala si no se encuentra
 
 
 @dataclass
@@ -131,6 +184,7 @@ def _fill_optional_values(payload: dict[str, Any]) -> dict[str, Any]:
     data.setdefault("temp_max", t + 8.0)
     data.setdefault("temp_min", t - 6.0)
     data.setdefault("wind_speed", 2.5)
+    data.setdefault("altitud_m", _get_altitude(str(data.get("municipio", ""))))
     return data
 
 
@@ -158,6 +212,7 @@ def prepare_input_row(payload: dict[str, Any], encoders: dict[str, Any]) -> Prep
         "temp_max": float(data["temp_max"]),
         "temp_min": float(data["temp_min"]),
         "wind_speed": float(data["wind_speed"]),
+        "altitud_m": float(data["altitud_m"]),
     }
     return PreparedInput(row_df=pd.DataFrame([row]), row_raw=data)
 

@@ -19,7 +19,7 @@ import AdminPredictions from "./pages/admin/AdminPredictions";
 import AdminReadings    from "./pages/admin/AdminReadings";
 import AdminDatasets    from "./pages/admin/AdminDatasets";
 
-import { sections, initialDataset, initialTrendSeries, defaultForm } from "./data/constants";
+import { sections, initialDataset, initialTrendSeries, defaultForm, municipioOptions } from "./data/constants";
 import { calculateRisk, buildAlerts, clamp, getRecommendation, getAverageRiskByCrop } from "./utils/riskUtils";
 import { predictYield, getForecast, getMetrics } from "./services/api";
 
@@ -100,14 +100,16 @@ function UserApp({ onLogout, userEmail }) {
     getMetrics()
       .then((metrics) => {
         setApiOnline(true);
-        const first = metrics[0];
+        const first = metrics.find((m) => municipioOptions.includes(m.municipio)) ?? metrics[0];
         if (first) {
           setForm((prev) => ({
             ...prev,
-            municipality: first.municipio,
-            temperature:  first.temperature,
-            rainfall:     first.rainfall,
-            humidity:     first.humidity,
+            municipality: municipioOptions.includes(first.municipio)
+              ? first.municipio
+              : municipioOptions[0],
+            temperature:  Math.round(first.temperature * 10) / 10,
+            rainfall:     Math.round(first.rainfall * 10) / 10,
+            humidity:     Math.round(first.humidity * 10) / 10,
           }));
         }
         showToast("Datos ERA5-Land cargados desde el servidor.");
@@ -132,11 +134,11 @@ function UserApp({ onLogout, userEmail }) {
         const forecast = await getForecast(form.municipality);
         if (cancelled) return;
 
-        const totalRain = normalizeField(forecast?.summary?.total_rain_mm ?? 0, 0, 600, 0);
-        const avgTmax = Number(forecast?.summary?.avg_tmax ?? 0);
-        const avgTmin = Number(forecast?.summary?.avg_tmin ?? 0);
-        const avgTemp = normalizeField(((avgTmax + avgTmin) / 2).toFixed(1), 5, 45, 22);
-        const firstHumidity = normalizeField(forecast?.days?.[0]?.humidity ?? form.humidity, 5, 100, 70);
+        const totalRain    = Math.round(normalizeField(forecast?.summary?.total_rain_mm ?? 0, 0, 600, 0) * 10) / 10;
+        const avgTmax      = Number(forecast?.summary?.avg_tmax ?? 0);
+        const avgTmin      = Number(forecast?.summary?.avg_tmin ?? 0);
+        const avgTemp      = Math.round(normalizeField((avgTmax + avgTmin) / 2, 5, 45, 22) * 10) / 10;
+        const firstHumidity = Math.round(normalizeField(forecast?.days?.[0]?.humidity ?? form.humidity, 5, 100, 70) * 10) / 10;
 
         setForm((prev) => {
           if (prev.municipality !== form.municipality) return prev;
