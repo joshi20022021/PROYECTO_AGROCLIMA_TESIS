@@ -33,8 +33,10 @@ sys.path.insert(0, BASE_DIR := os.path.dirname(os.path.dirname(os.path.dirname(o
 from database.connection import db_available
 from database.repository import load_training_dataframe, sync_model_metadata
 
-DATASET_PATH    = os.path.join(BASE_DIR, "data", "datasets", "dataset_preliminar.csv")
-DATASET_OM_PATH = os.path.join(BASE_DIR, "data", "datasets", "dataset_openmeteo.csv")
+DATASET_PATH       = os.path.join(BASE_DIR, "data", "datasets", "dataset_preliminar.csv")
+DATASET_OM_PATH    = os.path.join(BASE_DIR, "data", "datasets", "dataset_openmeteo.csv")
+DATASET_COMB_PATH  = os.path.join(BASE_DIR, "data", "datasets", "dataset_combinado.csv")
+DATASET_FAO_PATH   = os.path.join(BASE_DIR, "data", "datasets", "dataset_faostat.csv")
 MODEL_DIR       = os.path.join(BASE_DIR, "data", "models")
 MODEL_PATH      = os.path.join(MODEL_DIR, "xgboost_yield.joblib")
 ENCODER_PATH    = os.path.join(MODEL_DIR, "label_encoders.joblib")
@@ -66,13 +68,25 @@ CAT_COLS = ["municipio", "crop"]
 
 
 def load_data() -> pd.DataFrame:
-    # 1) Preferir dataset Open-Meteo (mayor cobertura: 61 municipios)
+    # 1) Dataset calibrado FAOSTAT — yield_pct anclado a rendimientos reales
+    if os.path.exists(DATASET_FAO_PATH):
+        df = pd.read_csv(DATASET_FAO_PATH)
+        print(f"Dataset cargado: dataset_faostat.csv ({len(df):,} filas, "
+              f"{df['municipio'].nunique()} municipios) [calibrado FAOSTAT]")
+        return df
+    # 2) Dataset combinado (openmeteo + v2 ERA5/NASA)
+    if os.path.exists(DATASET_COMB_PATH):
+        df = pd.read_csv(DATASET_COMB_PATH)
+        print(f"Dataset cargado: dataset_combinado.csv ({len(df):,} filas, "
+              f"{df['municipio'].nunique()} municipios)")
+        return df
+    # 3) Fallback: solo Open-Meteo
     if os.path.exists(DATASET_OM_PATH):
         df = pd.read_csv(DATASET_OM_PATH)
         print(f"Dataset cargado: dataset_openmeteo.csv ({len(df):,} filas, "
               f"{df['municipio'].nunique()} municipios)")
         return df
-    # 2) Fallback: base de datos
+    # 3) Fallback: base de datos
     if db_available():
         df = load_training_dataframe("dataset_v2.csv")
         if not df.empty:
@@ -80,11 +94,11 @@ def load_data() -> pd.DataFrame:
         df = load_training_dataframe()
         if not df.empty:
             return df
-    # 3) Fallback final: CSV local
+    # 4) Fallback final: CSV local
     if not os.path.exists(DATASET_PATH):
         raise FileNotFoundError(
-            "No hay dataset disponible. Ejecuta primero:\n"
-            "  python scripts/datasets/generate_dataset_openmeteo.py nofit"
+            "No hay dataset disponible. Ejecuta:\n"
+            "  python scripts/datasets/merge_datasets.py"
         )
     return pd.read_csv(DATASET_PATH)
 
@@ -152,11 +166,16 @@ def cmd_train():
     joblib.dump(encoders, ENCODER_PATH)
     print(f"\nModelo guardado: {MODEL_PATH}")
 
+    dataset_name = (
+        "dataset_faostat.csv"   if os.path.exists(DATASET_FAO_PATH)
+        else "dataset_combinado.csv" if os.path.exists(DATASET_COMB_PATH)
+        else "dataset_openmeteo.csv"
+    )
     if db_available():
         sync_model_metadata({
             "nombre": "XGBoost",
-            "version": "v2.1",
-            "dataset_usado": "dataset_openmeteo.csv",
+            "version": "v3.0",
+            "dataset_usado": dataset_name,
             "n_filas": len(df),
             "n_features": len(active_features),
             "r2_test": round(r2, 4),

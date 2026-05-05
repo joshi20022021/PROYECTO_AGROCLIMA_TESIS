@@ -28,20 +28,23 @@ const STAT_ICONS = {
 };
 
 export default function AdminDashboard() {
-  const [stats, setStats]   = useState(null);
-  const [dbOk, setDbOk]     = useState(null);
-  const [apiOk, setApiOk]   = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats]       = useState(null);
+  const [modelInfo, setModelInfo] = useState(null);
+  const [dbOk, setDbOk]         = useState(null);
+  const [apiOk, setApiOk]       = useState(null);
+  const [loading, setLoading]   = useState(true);
 
   useEffect(() => {
+    const ADMIN = { "X-Admin-Token": "agroclima-admin-2024" };
     Promise.all([
       fetch(`${API}/health`).then((r) => r.json()).catch(() => null),
-      fetch(`${API}/admin/stats`, { headers: { "X-Admin-Token": "agroclima-admin-2024" } })
-        .then((r) => r.json()).catch(() => null),
-    ]).then(([health, adminStats]) => {
+      fetch(`${API}/admin/stats`,      { headers: ADMIN }).then((r) => r.json()).catch(() => null),
+      fetch(`${API}/admin/model-info`, { headers: ADMIN }).then((r) => r.json()).catch(() => null),
+    ]).then(([health, adminStats, info]) => {
       setApiOk(!!health);
       setDbOk(health?.db_online ?? false);
       setStats(adminStats);
+      setModelInfo(info?.model ?? null);
       setLoading(false);
     });
   }, []);
@@ -53,10 +56,23 @@ export default function AdminDashboard() {
     { key: "modelo",       label: "Version modelo activo",  value: stats.modelo_activo ?? "v2.0", color: "#7c3aed" },
   ] : [];
 
+  const fmtNum = (n) => n != null ? Number(n).toLocaleString("es-GT") : "—";
   const modelCoverage = [
-    { label: "Municipios en el modelo", value: 61, detail: "8 zonas agroclimaticas de Guatemala" },
-    { label: "Registros de entrenamiento", value: "812,520", detail: "Open-Meteo, 2010-2024" },
-    { label: "Cultivos modelados", value: 37, detail: "Granos, hortalizas, frutas y comerciales" },
+    {
+      label: "Municipios en el modelo",
+      value: fmtNum(modelInfo?.coveredMunicipalities ?? 61),
+      detail: "8 zonas agroclimaticas de Guatemala",
+    },
+    {
+      label: "Registros de entrenamiento",
+      value: fmtNum(modelInfo?.totalRows),
+      detail: modelInfo?.dataset ?? "dataset_combinado.csv",
+    },
+    {
+      label: "Cultivos modelados",
+      value: fmtNum(modelInfo?.nCrops ?? 37),
+      detail: "Granos, hortalizas, frutas y comerciales",
+    },
   ];
 
   return (

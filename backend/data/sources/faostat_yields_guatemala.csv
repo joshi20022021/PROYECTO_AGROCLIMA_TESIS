@@ -1,0 +1,113 @@
+crop,year,yield_hgha,unit,item_fao
+Aguacate,2010,9994.8,kg/ha,Avocados
+Aguacate,2011,10114.0,kg/ha,Avocados
+Aguacate,2012,10041.8,kg/ha,Avocados
+Aguacate,2013,10471.0,kg/ha,Avocados
+Aguacate,2014,10827.6,kg/ha,Avocados
+Aguacate,2015,10041.9,kg/ha,Avocados
+Aguacate,2016,10531.6,kg/ha,Avocados
+Aguacate,2017,10462.1,kg/ha,Avocados
+Aguacate,2018,10366.9,kg/ha,Avocados
+Aguacate,2019,10394.4,kg/ha,Avocados
+Aguacate,2020,14270.0,kg/ha,Avocados
+Aguacate,2021,17894.6,kg/ha,Avocados
+Aguacate,2022,23179.0,kg/ha,Avocados
+Aguacate,2023,23141.4,kg/ha,Avocados
+Frijol,2010,888.5,kg/ha,"Beans, dry"
+Frijol,2011,900.1,kg/ha,"Beans, dry"
+Frijol,2012,910.5,kg/ha,"Beans, dry"
+Frijol,2013,925.4,kg/ha,"Beans, dry"
+Frijol,2014,938.1,kg/ha,"Beans, dry"
+Frijol,2015,954.0,kg/ha,"Beans, dry"
+Frijol,2016,979.0,kg/ha,"Beans, dry"
+Frijol,2017,980.3,kg/ha,"Beans, dry"
+Frijol,2018,999.9,kg/ha,"Beans, dry"
+Frijol,2019,951.2,kg/ha,"Beans, dry"
+Frijol,2020,859.4,kg/ha,"Beans, dry"
+Frijol,2021,772.1,kg/ha,"Beans, dry"
+Frijol,2022,632.3,kg/ha,"Beans, dry"
+Frijol,2023,674.6,kg/ha,"Beans, dry"
+Cacao,2010,2689.2,kg/ha,Cocoa beans
+Cacao,2011,2811.7,kg/ha,Cocoa beans
+Cacao,2012,2829.5,kg/ha,Cocoa beans
+Cacao,2013,2900.8,kg/ha,Cocoa beans
+Cacao,2014,2628.0,kg/ha,Cocoa beans
+Cacao,2015,2614.9,kg/ha,Cocoa beans
+Cacao,2016,2669.3,kg/ha,Cocoa beans
+Cacao,2017,2710.8,kg/ha,Cocoa beans
+Cacao,2018,2584.6,kg/ha,Cocoa beans
+Cacao,2019,2570.4,kg/ha,Cocoa beans
+Cacao,2020,2588.5,kg/ha,Cocoa beans
+Cacao,2021,2581.1,kg/ha,Cocoa beans
+Cacao,2022,2580.0,kg/ha,Cocoa beans
+Cacao,2023,2583.2,kg/ha,Cocoa beans
+Cafe,2010,993.7,kg/ha,"Coffee, green"
+Cafe,2011,1041.5,kg/ha,"Coffee, green"
+Cafe,2012,1071.2,kg/ha,"Coffee, green"
+Cafe,2013,992.2,kg/ha,"Coffee, green"
+Cafe,2014,867.5,kg/ha,"Coffee, green"
+Cafe,2015,837.5,kg/ha,"Coffee, green"
+Cafe,2016,861.3,kg/ha,"Coffee, green"
+Cafe,2017,869.5,kg/ha,"Coffee, green"
+Cafe,2018,860.3,kg/ha,"Coffee, green"
+Cafe,2019,830.2,kg/ha,"Coffee, green"
+Cafe,2020,767.0,kg/ha,"Coffee, green"
+Cafe,2021,708.7,kg/ha,"Coffee, green"
+Cafe,2022,633.9,kg/ha,"Coffee, green"
+Cafe,2023,566.1,kg/ha,"Coffee, green"
+Maiz,2010,1994.4,kg/ha,Maize (corn)
+Maiz,2011,1997.6,kg/ha,Maize (corn)
+Maiz,2012,2034.8,kg/ha,Maize (corn)
+Maiz,2013,2082.7,kg/ha,Maize (corn)
+Maiz,2014,2089.8,kg/ha,Maize (corn)
+Maiz,2015,2114.8,kg/ha,Maize (corn)
+Maiz,2016,2152.2,kg/ha,Maize (corn)
+Maiz,2017,2154.0,kg/ha,Maize (corn)
+Maiz,2018,2154.1,kg/ha,Maize (corn)
+Maiz,2019,2112.8,kg/ha,Maize (corn)
+Maiz,2020,2026.5,kg/ha,Maize (corn)
+Maiz,2021,1954.3,kg/ha,Maize (corn)
+Maiz,2022,1803.6,kg/ha,Maize (corn)
+Maiz,2023,1799.9,kg/ha,Maize (corn)
+Papa,2010,25254.7,kg/ha,Potatoes
+Papa,2011,25506.4,kg/ha,Potatoes
+Papa,2012,24953.6,kg/ha,Potatoes
+Papa,2013,24755.4,kg/ha,Potatoes
+Papa,2014,24956.1,kg/ha,Potatoes
+Papa,2015,25253.7,kg/ha,Potatoes
+Papa,2016,25684.9,kg/ha,Potatoes
+Papa,2017,25633.6,kg/ha,Potatoes
+Papa,2018,25718.1,kg/ha,Potatoes
+Papa,2019,25815.9,kg/ha,Potatoes
+Papa,2020,25973.5,kg/ha,Potatoes
+Papa,2021,25849.4,kg/ha,Potatoes
+Papa,2022,25540.5,kg/ha,Potatoes
+Papa,2023,25550.5,kg/ha,Potatoes
+Arroz,2010,2825.8,kg/ha,Rice
+Arroz,2011,2862.1,kg/ha,Rice
+Arroz,2012,2892.8,kg/ha,Rice
+Arroz,2013,2938.7,kg/ha,Rice
+Arroz,2014,3006.1,kg/ha,Rice
+Arroz,2015,2935.6,kg/ha,Rice
+Arroz,2016,2980.7,kg/ha,Rice
+Arroz,2017,2974.9,kg/ha,Rice
+Arroz,2018,2973.9,kg/ha,Rice
+Arroz,2019,3026.4,kg/ha,Rice
+Arroz,2020,3068.3,kg/ha,Rice
+Arroz,2021,2949.6,kg/ha,Rice
+Arroz,2022,2946.0,kg/ha,Rice
+Arroz,2023,2977.6,kg/ha,Rice
+Tomate,2010,34408.7,kg/ha,Tomatoes
+Tomate,2011,34855.5,kg/ha,Tomatoes
+Tomate,2012,34820.8,kg/ha,Tomatoes
+Tomate,2013,35053.0,kg/ha,Tomatoes
+Tomate,2014,35841.5,kg/ha,Tomatoes
+Tomate,2015,37380.0,kg/ha,Tomatoes
+Tomate,2016,38473.1,kg/ha,Tomatoes
+Tomate,2017,38489.2,kg/ha,Tomatoes
+Tomate,2018,38512.3,kg/ha,Tomatoes
+Tomate,2019,39145.6,kg/ha,Tomatoes
+Tomate,2020,45146.4,kg/ha,Tomatoes
+Tomate,2021,48511.7,kg/ha,Tomatoes
+Tomate,2022,68026.9,kg/ha,Tomatoes
+Tomate,2023,50527.1,kg/ha,Tomatoes

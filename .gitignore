@@ -1,3 +1,15 @@
 .local-logs/
 __pycache__/
 *.py[cod]
+
+# Datasets grandes (>100 MB — limite GitHub)
+backend/data/datasets/dataset_combinado.csv
+backend/data/datasets/dataset_faostat.csv
+backend/data/datasets/dataset_openmeteo.csv
+backend/data/datasets/dataset_v2.csv
+
+# Modelo entrenado (puede ser grande)
+backend/data/models/*.joblib
+
+# Logs generados automaticamente
+backend/data/logs/

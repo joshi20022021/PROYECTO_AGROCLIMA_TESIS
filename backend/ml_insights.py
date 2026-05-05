@@ -474,7 +474,13 @@ def detect_sensor_anomaly(encoders: dict[str, Any], payload: dict[str, Any]) -> 
     model, meta, _ = _load_or_train_monitoring(encoders)
     data = _fill_optional_values(payload)
 
-    row = pd.DataFrame([{k: float(data[k]) for k in SENSOR_FEATURES}])
+    # Use only features the saved Isolation Forest was trained on
+    try:
+        trained_feats = list(model.feature_names_in_)
+    except AttributeError:
+        trained_feats = SENSOR_FEATURES
+
+    row = pd.DataFrame([{k: float(data.get(k, 0.0)) for k in trained_feats}])
     decision = float(model.decision_function(row)[0])
     pred = int(model.predict(row)[0])
 
@@ -505,8 +511,10 @@ def compute_data_drift(encoders: dict[str, Any], payload: dict[str, Any]) -> dic
     similarities = []
 
     for feat in SENSOR_FEATURES:
+        if feat not in profile["features"]:
+            continue
         stats = profile["features"][feat]
-        val = float(data[feat])
+        val = float(data.get(feat, stats["mean"]))
         mean = float(stats["mean"])
         std = float(stats["std"])
 
