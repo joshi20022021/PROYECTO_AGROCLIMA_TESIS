@@ -81,4 +81,8 @@ export const defaultForm = {
   temperature: "",
   humidity: "",
   soilPh: "",
+  leafCondition: 65,
 };
+
+// Cultivos con los que fue entrenado el modelo XGBoost
+export const TRAINED_CROPS = ["Aguacate", "Arroz", "Cacao", "Cafe", "Frijol", "Maiz", "Papa", "Tomate"];

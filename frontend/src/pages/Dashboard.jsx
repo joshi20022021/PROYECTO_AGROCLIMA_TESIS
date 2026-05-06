@@ -1,8 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import ChartCanvas from "../components/ChartCanvas";
-import { cropOptions, municipioOptions } from "../data/constants";
+import { cropOptions, municipioOptions, TRAINED_CROPS } from "../data/constants";
 import { getCropOptimalConditions, getSatelliteNdvi } from "../services/api";
 import { getRiskLabel, getRecommendation } from "../utils/riskUtils";
+
+const MONTHS_ES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
+const LEAF_OPTIONS = [
+  { value: 80, label: "Hojas verdes", emoji: "🟢", desc: "Sanas y vigorosas" },
+  { value: 55, label: "Algo amarillas", emoji: "🟡", desc: "Señales leves de estres" },
+  { value: 30, label: "Amarillas/cafes", emoji: "🔴", desc: "Estres visible o enfermedad" },
+];
 
 function hasInvalidValues(form) {
   return (
@@ -469,7 +477,13 @@ export default function Dashboard({ form, selectedEntry, predictionRisk, trendSe
   );
   const primaryAlert = farmerAlerts[0] || null;
   const quickActions = farmerAlerts.slice(0, 3);
-  const productionBand = yieldResult ? yieldBand(yieldResult.yield_pct) : null;
+  const productionBand = yieldResult
+    ? predictionRisk.level === "high"
+      ? { label: "Produccion en riesgo", color: "#dc2626", text: "Las condiciones actuales amenazan el rendimiento. Corrige los factores criticos antes de continuar." }
+      : predictionRisk.level === "medium"
+        ? { label: yieldResult.yield_pct >= 80 ? "Produccion esperada aceptable" : yieldBand(yieldResult.yield_pct).label, color: "#d97706", text: "Corrige los factores en alerta para mantener un rendimiento estable." }
+        : yieldBand(yieldResult.yield_pct)
+    : null;
   const ndviValue = satellite?.ndvi?.available ? satellite.ndvi.latest_mean : null;
   const ndviStatus = ndviStatusCopy(ndviValue);
 
@@ -496,6 +510,11 @@ export default function Dashboard({ form, selectedEntry, predictionRisk, trendSe
                   {cropOptions.map((c) => <option key={c}>{c}</option>)}
                 </select>
               </label>
+              {!TRAINED_CROPS.includes(form.crop) && (
+                <div className="form-full" style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 8, padding: "0.55rem 0.8rem", fontSize: "0.75rem", color: "#b45309" }}>
+                  <strong>{form.crop}</strong> no esta en los 8 cultivos con los que fue entrenado el modelo. La prediccion usara el cultivo mas similar disponible. Cultivos con datos reales: {TRAINED_CROPS.join(", ")}.
+                </div>
+              )}
               <label className="form-label">
                 Precipitacion (mm)
                 <input className="form-input" name="rainfall" type="number" min="0" max="600" step="0.1" value={form.rainfall} onChange={updateForm} placeholder="0 – 600 mm" />
@@ -538,6 +557,39 @@ export default function Dashboard({ form, selectedEntry, predictionRisk, trendSe
                   )}
                 </div>
               </div>
+              {/* Selector estado de hojas */}
+              <div className="form-full">
+                <p style={{ margin: "0 0 0.4rem", fontSize: "0.78rem", fontWeight: 700, color: "var(--text-secondary)" }}>
+                  Estado de las hojas del cultivo
+                </p>
+                <div style={{ display: "flex", gap: "0.5rem" }}>
+                  {LEAF_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => updateForm({ target: { name: "leafCondition", value: opt.value } })}
+                      style={{
+                        flex: 1, padding: "0.5rem 0.4rem", borderRadius: 8, cursor: "pointer",
+                        border: `2px solid ${form.leafCondition === opt.value ? "var(--accent)" : "var(--border)"}`,
+                        background: form.leafCondition === opt.value ? "rgba(22,163,74,0.07)" : "var(--surface-alt)",
+                        fontSize: "0.72rem", fontWeight: 600, color: "var(--text-primary)",
+                        textAlign: "center", lineHeight: 1.4,
+                      }}
+                    >
+                      <div style={{ fontSize: "1.1rem", marginBottom: "0.2rem" }}>{opt.emoji}</div>
+                      <div>{opt.label}</div>
+                      <div style={{ fontSize: "0.65rem", color: "var(--text-muted)", fontWeight: 400 }}>{opt.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Mes del analisis */}
+              <div className="form-full" style={{ fontSize: "0.73rem", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                Analizando para: <strong style={{ color: "var(--text-secondary)" }}>{MONTHS_ES[new Date().getMonth()]} {new Date().getFullYear()}</strong>
+              </div>
+
               {hasInvalidValues(form) && (
                 <div className="form-full" style={{ background: "rgba(220,38,38,0.08)", border: "1px solid rgba(220,38,38,0.3)", borderRadius: 8, padding: "0.6rem 0.8rem", fontSize: "0.75rem", color: "#dc2626" }}>
                   Algunos valores estan fuera del rango agricola valido. Verifica temperatura (5–45 °C), humedad (5–100%) y pH (3.5–9.5).
@@ -611,12 +663,56 @@ export default function Dashboard({ form, selectedEntry, predictionRisk, trendSe
                       style={{ width: `${yieldResult.yield_pct}%` }}
                     />
                   </div>
+                  {yieldResult.confidence && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", marginTop: "0.35rem" }}>
+                      <span style={{ fontSize: "0.7rem", color: "var(--text-muted)" }}>Rango del modelo:</span>
+                      <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--text-secondary)" }}>
+                        {yieldResult.confidence.low.toFixed(1)}% – {yieldResult.confidence.high.toFixed(1)}%
+                      </span>
+                      <span style={{ fontSize: "0.67rem", color: "var(--text-muted)" }}>
+                        (±{yieldResult.confidence.margin.toFixed(1)}%)
+                      </span>
+                    </div>
+                  )}
                   <p style={{ fontSize: "0.8rem", color: productionBand?.color || "var(--text-secondary)", margin: "0.42rem 0 0", fontWeight: 700 }}>
                     {productionBand?.label}
                   </p>
                   <p style={{ fontSize: "0.75rem", color: "var(--text-secondary)", margin: "0.18rem 0 0", lineHeight: 1.5 }}>
                     {productionBand?.text}
                   </p>
+
+                  {/* SHAP: factores que influyeron */}
+                  {yieldResult?.explanation?.top_contributions?.length > 0 && (
+                    <div style={{ marginTop: "0.75rem", padding: "0.75rem 0.85rem", borderRadius: 9, background: "var(--surface-alt)", border: "1px solid var(--border)" }}>
+                      <p style={{ margin: "0 0 0.5rem", fontSize: "0.68rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.07em", color: "var(--text-muted)" }}>
+                        Factores que influyeron
+                      </p>
+                      <div style={{ display: "flex", flexDirection: "column", gap: "0.4rem" }}>
+                        {yieldResult.explanation.top_contributions.map((c) => {
+                          const isPos = c.impact >= 0;
+                          const maxImpact = Math.max(...yieldResult.explanation.top_contributions.map(x => Math.abs(x.impact)));
+                          const barWidth = Math.round((Math.abs(c.impact) / Math.max(maxImpact, 1)) * 100);
+                          return (
+                            <div key={c.feature} style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                              <span style={{ fontSize: "0.7rem", color: "var(--text-secondary)", width: 80, flexShrink: 0, textAlign: "right" }}>
+                                {c.label}
+                              </span>
+                              <div style={{ flex: 1, height: 8, borderRadius: 4, background: "rgba(0,0,0,0.07)", overflow: "hidden" }}>
+                                <div style={{
+                                  height: "100%", width: `${barWidth}%`, borderRadius: 4,
+                                  background: isPos ? "#16a34a" : "#dc2626",
+                                  transition: "width 0.4s ease",
+                                }} />
+                              </div>
+                              <span style={{ fontSize: "0.7rem", fontWeight: 700, color: isPos ? "#16a34a" : "#dc2626", width: 42, flexShrink: 0 }}>
+                                {isPos ? "+" : ""}{c.impact.toFixed(1)}%
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
 
                   <div style={{
                     marginTop: "0.7rem",

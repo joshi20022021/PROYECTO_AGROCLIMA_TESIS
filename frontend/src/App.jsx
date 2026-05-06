@@ -19,7 +19,7 @@ import AdminPredictions from "./pages/admin/AdminPredictions";
 import AdminReadings    from "./pages/admin/AdminReadings";
 import AdminDatasets    from "./pages/admin/AdminDatasets";
 
-import { sections, initialDataset, initialTrendSeries, defaultForm, municipioOptions } from "./data/constants";
+import { sections, initialDataset, initialTrendSeries, defaultForm, municipioOptions, TRAINED_CROPS } from "./data/constants";
 import { calculateRisk, buildAlerts, clamp, getRecommendation, getAverageRiskByCrop } from "./utils/riskUtils";
 import { predictYield, getForecast, getMetrics } from "./services/api";
 
@@ -175,6 +175,7 @@ function UserApp({ onLogout, userEmail }) {
       temperature:  normalizeField(form.temperature, 5, 45, 22),
       humidity:     normalizeField(form.humidity, 5, 100, 70),
       soilPh:       normalizeField(form.soilPh, 3.5, 9.5, 6),
+      timestamp:    new Date().toISOString(),
     };
     setSelectedEntry(entry);
     setSubmitting(true);
@@ -268,6 +269,7 @@ function UserApp({ onLogout, userEmail }) {
       temperature:  normalizeField(form.temperature, 5, 45, 22),
       humidity:     normalizeField(form.humidity, 5, 100, 70),
       soilPh:       normalizeField(form.soilPh, 3.5, 9.5, 6),
+      timestamp:    new Date().toISOString(),
     };
     setDataset((prev) => [entry, ...prev].slice(0, 8));
     setTrendSeries((prev) => ({
@@ -281,13 +283,15 @@ function UserApp({ onLogout, userEmail }) {
     if (apiOnline) {
       try {
         const result = await predictYield({
-          municipio:   entry.municipality,
-          crop:        entry.crop,
-          month:       new Date().getMonth() + 1,
-          temperature: entry.temperature,
-          rainfall:    entry.rainfall,
-          humidity:    entry.humidity,
-          soilPh:      entry.soilPh,
+          municipio:    entry.municipality,
+          crop:         entry.crop,
+          month:        new Date().getMonth() + 1,
+          temperature:  entry.temperature,
+          rainfall:     entry.rainfall,
+          humidity:     entry.humidity,
+          soilPh:       entry.soilPh,
+          greennessIdx: form.leafCondition ?? 65,
+          cropKnown:    TRAINED_CROPS.includes(entry.crop),
         });
         setYieldResult(result);
         showToast(`Rendimiento estimado: ${result.yield_pct}% — ${entry.crop} en ${entry.municipality}.`);

@@ -276,8 +276,37 @@ export default function Forecast({ form }) {
       )}
 
       {loading && (
-        <div style={{ textAlign: "center", padding: "3rem", color: "var(--text-muted)", fontSize: "0.85rem" }}>
-          Consultando Open-Meteo para {municipio}...
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+          {/* Skeleton banner */}
+          <div style={{ borderRadius: 14, padding: "1.4rem 1.5rem", background: "var(--surface-alt)", border: "1px solid var(--border)", display: "flex", justifyContent: "space-between", gap: "1rem" }}>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+              <div style={{ height: 12, width: 120, borderRadius: 6, background: "var(--border)", animation: "pulse 1.4s ease-in-out infinite" }} />
+              <div style={{ height: 28, width: 220, borderRadius: 6, background: "var(--border)", animation: "pulse 1.4s ease-in-out infinite" }} />
+              <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.3rem" }}>
+                {[80, 100, 70].map((w, i) => <div key={i} style={{ height: 24, width: w, borderRadius: 999, background: "var(--border)", animation: "pulse 1.4s ease-in-out infinite" }} />)}
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: "0.75rem" }}>
+              {[0,1,2].map(i => <div key={i} style={{ width: 80, height: 80, borderRadius: 10, background: "var(--border)", animation: "pulse 1.4s ease-in-out infinite" }} />)}
+            </div>
+          </div>
+          {/* Skeleton 7-day cards */}
+          <div className="card">
+            <div style={{ padding: "1rem 1.15rem", borderBottom: "1px solid var(--border)", height: 24, width: 140, borderRadius: 6, background: "var(--border)", animation: "pulse 1.4s ease-in-out infinite" }} />
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: "0.5rem", padding: "1rem" }}>
+              {Array.from({ length: 7 }).map((_, i) => (
+                <div key={i} style={{ display: "flex", flexDirection: "column", gap: "0.4rem", alignItems: "center" }}>
+                  <div style={{ height: 12, width: 30, borderRadius: 4, background: "var(--border)", animation: "pulse 1.4s ease-in-out infinite" }} />
+                  <div style={{ height: 32, width: 32, borderRadius: "50%", background: "var(--border)", animation: "pulse 1.4s ease-in-out infinite" }} />
+                  <div style={{ height: 10, width: 40, borderRadius: 4, background: "var(--border)", animation: "pulse 1.4s ease-in-out infinite" }} />
+                  <div style={{ height: 10, width: 36, borderRadius: 4, background: "var(--border)", animation: "pulse 1.4s ease-in-out infinite" }} />
+                </div>
+              ))}
+            </div>
+          </div>
+          <p style={{ textAlign: "center", fontSize: "0.78rem", color: "var(--text-muted)", margin: 0 }}>
+            Consultando Open-Meteo para {municipio}...
+          </p>
         </div>
       )}
 

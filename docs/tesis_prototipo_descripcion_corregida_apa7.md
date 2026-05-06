@@ -879,6 +879,60 @@ Las métricas de clasificación se asocian con la validación de alertas y anoma
 
 La validación funcional verifica que el sistema genere alertas ante entradas fuera de rango, lecturas simuladas anómalas o predicciones de bajo rendimiento. Este enfoque comprueba la lógica operativa del prototipo antes de avanzar hacia una evaluación estadística de clasificación.
 
+### 3.7. Requerimientos del prototipo
+
+Los requerimientos del prototipo se dividen en funcionales y no funcionales. Los primeros describen las acciones que el sistema debe permitir al usuario o administrador; los segundos definen condiciones de calidad, operación, seguridad y desempeño que delimitan la forma en que el sistema debe funcionar.
+
+**Tabla 3.9. Requerimientos funcionales del sistema.**
+
+| Código | Requerimiento funcional |
+|---|---|
+| RF-01 | El sistema debe permitir ingresar al panel de usuario para consultar el dashboard agrícola. |
+| RF-02 | El sistema debe permitir seleccionar municipio, cultivo y variables agroclimáticas para ejecutar una predicción. |
+| RF-03 | El sistema debe estimar el rendimiento agrícola esperado mediante el modelo XGBoost. |
+| RF-04 | El sistema debe clasificar el resultado en un nivel de riesgo o rendimiento interpretable para el usuario. |
+| RF-05 | El sistema debe mostrar recomendaciones agronómicas asociadas al cultivo y a las variables fuera de rango. |
+| RF-06 | El sistema debe consultar pronóstico meteorológico por municipio mediante Open-Meteo. |
+| RF-07 | El sistema debe calcular apoyo agronómico relacionado con riego, pH y calendario de siembra. |
+| RF-08 | El sistema debe permitir la conexión o simulación de lecturas Arduino. |
+| RF-09 | El sistema debe recibir lecturas de temperatura, luz, humedad de suelo e índice de verdor desde sensores o simulación. |
+| RF-10 | El sistema debe transmitir lecturas en tiempo real hacia la interfaz mediante WebSocket. |
+| RF-11 | El sistema debe generar alertas cuando las variables se alejen de los rangos óptimos del cultivo. |
+| RF-12 | El sistema debe registrar predicciones, lecturas y alertas en PostgreSQL cuando la base de datos esté disponible. |
+| RF-13 | El sistema debe permitir cargar datasets CSV y descargar una plantilla de carga. |
+| RF-14 | El sistema debe permitir al administrador consultar estadísticas, predicciones, lecturas, datasets y estado del modelo. |
+| RF-15 | El sistema debe permitir reentrenar o comparar modelos desde el panel administrativo. |
+| RF-16 | El sistema debe permitir configurar destinatarios y enviar correos de prueba para alertas críticas. |
+| RF-17 | El sistema debe exportar resultados o reportes desde la interfaz cuando la vista lo permita. |
+
+Nota. Elaboración propia a partir de funcionalidades implementadas en el prototipo.
+
+Referencia APA de la tabla: Elaboración propia. (2026). *Requerimientos funcionales de AgroClima GT* [Tabla]. Tesis de prototipo AgroClima GT.
+
+**Tabla 3.10. Requerimientos no funcionales del sistema.**
+
+| Código | Requerimiento no funcional |
+|---|---|
+| RNF-01 | El sistema debe ejecutarse en ambiente local usando backend FastAPI, frontend React/Vite y PostgreSQL en Docker. |
+| RNF-02 | La API debe responder mediante HTTP y WebSocket para soportar consultas y monitoreo en tiempo real. |
+| RNF-03 | El sistema debe validar rangos de entrada antes de enviar datos al modelo predictivo. |
+| RNF-04 | La interfaz debe ser comprensible para usuarios no especializados, usando semáforos, tablas, gráficas y recomendaciones. |
+| RNF-05 | El sistema debe mantener separación entre frontend, backend, base de datos, modelo ML y módulo de sensores. |
+| RNF-06 | El modelo debe conservarse como artefacto local reproducible mediante archivos Joblib. |
+| RNF-07 | La base de datos debe conservar historiales operativos de predicciones, alertas y lecturas. |
+| RNF-08 | El sistema debe operar aunque el correo no esté configurado; en ese caso solo se desactiva el envío SMTP. |
+| RNF-09 | El sistema debe evitar llamadas innecesarias a Open-Meteo mediante caché temporal. |
+| RNF-10 | El prototipo debe permitir simulación de sensores para validar el flujo sin depender del montaje físico. |
+| RNF-11 | La comunicación del Arduino con la computadora debe realizarse por USB tipo B en la versión actual del prototipo. |
+| RNF-12 | La conexión de la computadora al sistema web puede realizarse dentro de una red local o WiFi, siempre que el backend sea accesible. |
+| RNF-13 | Los sensores físicos deben calibrarse antes de usarse como evidencia de campo. |
+| RNF-14 | Las alertas del prototipo deben presentarse como apoyo a la decisión, no como alerta oficial agrícola. |
+| RNF-15 | El sistema debe documentar claramente las limitaciones de validación física y de datos reales de campo. |
+
+Nota. Elaboración propia a partir del alcance técnico y operativo del prototipo.
+
+Referencia APA de la tabla: Elaboración propia. (2026). *Requerimientos no funcionales de AgroClima GT* [Tabla]. Tesis de prototipo AgroClima GT.
+
 ## 4. DISEÑO E IMPLEMENTACIÓN DEL PROTOTIPO
 
 ### 4.1. Arquitectura general del sistema predictivo
@@ -959,6 +1013,8 @@ Las alertas se presentan como apoyo a la decisión. El sistema muestra advertenc
 
 La integración de sensores se implementa en software mediante Arduino por puerto serial, simulación de lecturas y comunicación con el backend. Esta capa permite probar el flujo de adquisición de datos sin depender todavía de una instalación física en parcelas. Las variables consideradas en el diseño del módulo son temperatura, luz, humedad de suelo y color/pH.
 
+El componente físico contempla un Arduino conectado a sensores mediante protoboard, jumpers y resistencias. En la versión actual, el enlace directo Arduino-computadora se realiza por cable USB tipo B; la computadora que ejecuta o consume el sistema puede conectarse a la red local mediante WiFi para acceder al frontend o backend. Para que el Arduino se comunique por WiFi de forma autónoma sería necesario agregar un módulo WiFi o usar una placa con conectividad integrada, componente que no forma parte del listado utilizado.
+
 El componente físico se mantiene como etapa de validación posterior. La instalación en campo requiere montaje, calibración, pruebas de estabilidad y comparación con instrumentos de referencia.
 
 **Tabla 4.1. Alcance del componente de sensores.**
@@ -975,13 +1031,81 @@ Nota. Elaboración propia a partir del módulo Arduino del prototipo.
 
 Referencia APA de la tabla: Elaboración propia. (2026). *Alcance del componente de sensores en AgroClima GT* [Tabla]. Tesis de prototipo AgroClima GT.
 
+**Tabla 4.2. Componentes físicos utilizados para el módulo de sensores.**
+
+| Componente | Cantidad | Uso dentro del prototipo |
+|---|---:|---|
+| Arduino UNO/MEGA compatible | 1 | Microcontrolador central para lectura de sensores. |
+| Cable USB tipo B para Arduino | 1 | Comunicación y alimentación desde la computadora. |
+| Protoboard 830 puntos | 1 | Montaje temporal del circuito sin soldadura permanente. |
+| Jumper macho-hembra 20 cm | 1 tira de 40 | Conexiones entre Arduino y módulos con pines. |
+| Jumper macho-macho 20 cm | 1 tira de 40 | Conexiones sobre protoboard. |
+| Jumper hembra-hembra 20 cm | 1 tira de 40 | Conexiones entre módulos. |
+| Higrómetro capacitivo de larga duración | 1 | Medición de humedad del suelo. |
+| Sensor de intensidad de luz TSL2561 | 1 | Medición de luminosidad ambiental. |
+| Sensor de color TCS3200 | 1 | Lectura RGB para calcular índice de verdor. |
+| Sensor de temperatura tipo sonda DS18B20 | 1 | Medición de temperatura. |
+| Kit de resistencias | 1 | Resistencias de apoyo, como pull-up para DS18B20. |
+| Batería PKcell 9V | 1 | Fuente de alimentación auxiliar para pruebas. |
+| Conector clip para batería 9V | 1 | Conexión de la batería al circuito. |
+| Alambre para protoboard 24 AWG blanco, azul, negro y rojo | 4 rollos | Organización de señales, tierra y alimentación. |
+| Estaño 60/40 | 3 metros | Soldadura de conexiones necesarias. |
+| Cinta de aislar negra | 1 rollo | Aislamiento y protección de conexiones. |
+
+Nota. Elaboración propia a partir del listado de componentes adquiridos para el prototipo.
+
+Referencia APA de la tabla: Elaboración propia. (2026). *Componentes físicos del módulo de sensores de AgroClima GT* [Tabla]. Tesis de prototipo AgroClima GT.
+
+**Figura 4.3. Diagrama de conexión del módulo Arduino y sensores.**
+
+```plantuml
+@startuml AgroClimaGT_Diagrama_Sensores
+left to right direction
+skinparam shadowing false
+skinparam componentStyle rectangle
+
+node "Modulo fisico de sensores" {
+  component "Arduino UNO/MEGA" as Arduino
+  component "Protoboard 830" as Proto
+  component "DS18B20\nTemperatura" as DS18B20
+  component "Higrometro capacitivo\nHumedad del suelo" as Soil
+  component "TSL2561\nIntensidad de luz" as Light
+  component "TCS3200\nColor RGB / verdor" as Color
+  component "Bateria 9V + clip\nAlimentacion auxiliar" as Battery
+  component "Resistencias, jumpers,\nalambres y aislante" as Wiring
+}
+
+node "Computadora local" {
+  component "Backend FastAPI\nPySerial + WebSocket" as Backend
+  component "Frontend React/Vite\nDashboard Arduino" as Frontend
+}
+
+cloud "Red local / WiFi" as Wifi
+
+DS18B20 --> Proto : senal 1-Wire
+Soil --> Proto : salida analogica
+Light --> Proto : I2C
+Color --> Proto : senales digitales RGB
+Battery --> Proto : alimentacion auxiliar
+Wiring --> Proto : conexion fisica
+Proto --> Arduino : pines de entrada/salida
+Arduino --> Backend : USB tipo B / serial
+Backend --> Frontend : WebSocket
+Frontend --> Wifi : acceso desde navegador en red local
+@enduml
+```
+
+Nota. Elaboración propia a partir del diseño físico del módulo de sensores. El Arduino se comunica con la computadora por USB; la red WiFi corresponde al acceso de la computadora o navegador al sistema web.
+
+Referencia APA de la figura: Elaboración propia. (2026). *Diagrama de conexión del módulo Arduino y sensores de AgroClima GT* [Diagrama PlantUML]. Tesis de prototipo AgroClima GT.
+
 ### 4.6. Diseño de la interfaz de visualización y apoyo a la toma de decisiones
 
 La interfaz web traduce datos técnicos en información comprensible para el usuario. En sistemas de soporte a decisiones agrícolas, las visualizaciones ayudan a conectar datos complejos con recomendaciones concretas (Gutiérrez et al., 2022). AgroClima GT aplica este principio mediante dashboard, pronóstico, alertas, reportes, modelos, mapa de riesgo, módulo Arduino y panel administrativo.
 
 El dashboard permite ingresar variables y obtener una predicción. Forecast muestra pronóstico meteorológico. Alerts presenta advertencias y recomendaciones. RiskMap permite interpretación espacial. Arduino muestra lecturas locales o simuladas. Admin concentra seguimiento de datasets, predicciones, lecturas y estado del modelo.
 
-**Tabla 4.2. Módulos de interfaz y aporte al usuario.**
+**Tabla 4.3. Módulos de interfaz y aporte al usuario.**
 
 | Módulo | Aporte |
 |---|---|
@@ -1178,7 +1302,7 @@ Nota. Elaboración propia a partir del módulo Arduino del prototipo.
 
 Referencia APA de la tabla: Elaboración propia. (2026). *Alcance del componente de sensores en AgroClima GT* [Tabla]. Tesis de prototipo AgroClima GT.
 
-## Tabla 4.2. Módulos de interfaz y aporte al usuario
+## Tabla 4.3. Módulos de interfaz y aporte al usuario
 
 **Inciso donde va:** `4.6. Diseño de la interfaz de visualización y apoyo a la toma de decisiones`.
 

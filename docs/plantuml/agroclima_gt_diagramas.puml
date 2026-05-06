@@ -317,6 +317,44 @@ U6 .> U7 : <<extend>>
 @enduml
 
 
+@startuml AgroClimaGT_Diagrama_Sensores
+title AgroClima GT - Diagrama de sensores y conexion Arduino
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam componentStyle rectangle
+
+node "Modulo fisico de sensores" {
+  component "Arduino UNO/MEGA" as Arduino
+  component "Protoboard 830" as Proto
+  component "DS18B20\nTemperatura" as DS18B20
+  component "Higrometro capacitivo\nHumedad del suelo" as Soil
+  component "TSL2561\nIntensidad de luz" as Light
+  component "TCS3200\nColor RGB / verdor" as Color
+  component "Bateria 9V + clip\nAlimentacion auxiliar" as Battery
+  component "Resistencias, jumpers,\nalambres y aislante" as Wiring
+}
+
+node "Computadora local" {
+  component "Backend FastAPI\nPySerial + WebSocket" as Backend
+  component "Frontend React/Vite\nDashboard Arduino" as Frontend
+}
+
+cloud "Red local / WiFi" as Wifi
+
+DS18B20 --> Proto : senal 1-Wire
+Soil --> Proto : salida analogica
+Light --> Proto : I2C
+Color --> Proto : senales digitales RGB
+Battery --> Proto : alimentacion auxiliar
+Wiring --> Proto : conexion fisica
+Proto --> Arduino : pines de entrada/salida
+Arduino --> Backend : USB tipo B / serial
+Backend --> Frontend : WebSocket
+Frontend --> Wifi : acceso desde navegador
+@enduml
+
+
 @startuml AgroClimaGT_Despliegue
 title AgroClima GT - Diagrama de Despliegue
 left to right direction

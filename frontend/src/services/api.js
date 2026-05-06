@@ -18,7 +18,7 @@ export async function getMetrics() {
   return request("/metrics");
 }
 
-export async function predictYield({ municipio, crop, month, temperature, rainfall, humidity, soilPh, soilMoisture = 0.28 }) {
+export async function predictYield({ municipio, crop, month, temperature, rainfall, humidity, soilPh, soilMoisture = 0.28, greennessIdx = 65 }) {
   return request("/predict", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -31,6 +31,7 @@ export async function predictYield({ municipio, crop, month, temperature, rainfa
       humidity,
       soil_ph:       soilPh,
       soil_moisture: soilMoisture,
+      greenness_idx: greennessIdx,
     }),
   });
 }
