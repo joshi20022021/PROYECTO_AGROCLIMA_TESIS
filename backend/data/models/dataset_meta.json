@@ -1,0 +1,6 @@
+{
+  "total_rows": 2111220,
+  "n_municipalities": 61,
+  "n_crops": 37,
+  "dataset": "dataset_faostat.csv"
+}

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import ChartCanvas from "../components/ChartCanvas";
 import { cropOptions, municipioOptions } from "../data/constants";
 import { createArduinoSocket, setArduinoConfig } from "../services/api";
 import { calculateRisk, getRecommendation } from "../utils/riskUtils";
@@ -211,6 +212,7 @@ export default function Alerts({ dataset = [], showToast, setActiveSection }) {
   const [municipio, setMunicipio] = useState("Chimaltenango");
   const [crop, setCrop] = useState("Maiz");
   const [liveAlerts, setLiveAlerts] = useState([]);
+  const [sensorHistory, setSensorHistory] = useState([]);
   const [wsReady, setWsReady] = useState(false);
   const wsRef = useRef(null);
 
@@ -227,12 +229,67 @@ export default function Alerts({ dataset = [], showToast, setActiveSection }) {
     };
   }, [liveAlerts]);
 
+  const sensorChart = useMemo(() => ({
+    type: "line",
+    data: {
+      labels: sensorHistory.map((reading) => reading.label),
+      datasets: [
+        {
+          label: "Temperatura C",
+          data: sensorHistory.map((reading) => reading.temperature),
+          borderColor: "#dc2626",
+          backgroundColor: "rgba(220,38,38,0.08)",
+          tension: 0.35,
+          pointRadius: 2,
+        },
+        {
+          label: "Humedad suelo %",
+          data: sensorHistory.map((reading) => reading.soil_moisture),
+          borderColor: "#16a34a",
+          backgroundColor: "rgba(22,163,74,0.08)",
+          tension: 0.35,
+          pointRadius: 2,
+        },
+        {
+          label: "Verdor",
+          data: sensorHistory.map((reading) => reading.greenness_idx),
+          borderColor: "#2563eb",
+          backgroundColor: "rgba(37,99,235,0.08)",
+          tension: 0.35,
+          pointRadius: 2,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: { legend: { position: "bottom", labels: { boxWidth: 10, usePointStyle: true } } },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: "#64748b", maxTicksLimit: 6 } },
+        y: { grid: { color: "rgba(148,163,184,0.18)" }, ticks: { color: "#64748b" } },
+      },
+    },
+  }), [sensorHistory]);
+
   function openSocket() {
     if (wsRef.current) wsRef.current.close();
     const ws = createArduinoSocket(
       (msg) => {
         if (Array.isArray(msg.alerts)) {
           setLiveAlerts(msg.alerts);
+        }
+        if (msg.sensors) {
+          const sensors = msg.sensors;
+          setSensorHistory((prev) => [
+            ...prev,
+            {
+              label: new Date().toLocaleTimeString("es-GT", { hour: "2-digit", minute: "2-digit", second: "2-digit" }),
+              temperature: Number(sensors.temperature ?? sensors.temperatura ?? 0),
+              soil_moisture: Number(sensors.soil_moisture ?? sensors.humedad_suelo ?? sensors.humidity ?? 0),
+              greenness_idx: Number(sensors.greenness_idx ?? sensors.verdor ?? 0),
+            },
+          ].slice(-30));
         }
       },
       () => setWsReady(false)
@@ -290,6 +347,24 @@ export default function Alerts({ dataset = [], showToast, setActiveSection }) {
             </label>
             <div style={{ fontSize: "0.8rem", color: "var(--text-secondary)", lineHeight: 1.5 }}>
               Elige el cultivo y departamento para ver solo avisos que requieren atencion.
+            </div>
+          </div>
+        </div>
+
+        <div className="card full-span">
+          <div className="card-header">
+            <h3>Lecturas historicas del Arduino</h3>
+            <span className="chip">{sensorHistory.length} muestras</span>
+          </div>
+          <div className="card-body">
+            <div className="arduino-history-chart">
+              {sensorHistory.length === 0 ? (
+                <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", margin: 0 }}>
+                  Esperando lecturas del WebSocket para construir el historial.
+                </p>
+              ) : (
+                <ChartCanvas config={sensorChart} />
+              )}
             </div>
           </div>
         </div>

@@ -225,9 +225,10 @@ def sync_model_metadata(payload: dict):
         cur.execute(
             """
             INSERT INTO modelos_ml
-            (nombre, version, dataset_usado, n_filas, n_features, r2_test, mae, rmse,
+            (nombre, version, dataset_usado, n_filas, n_features,
+             r2_test, mae, rmse, precision, recall, f1, low_yield_threshold,
              crossval_r2, crossval_std, hiperparametros, activo)
-            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,TRUE)
+            VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,TRUE)
             """,
             (
                 payload.get("nombre", "XGBoost"),
@@ -238,6 +239,10 @@ def sync_model_metadata(payload: dict):
                 payload.get("r2_test"),
                 payload.get("mae"),
                 payload.get("rmse"),
+                payload.get("precision"),
+                payload.get("recall"),
+                payload.get("f1"),
+                payload.get("low_yield_threshold", 50),
                 payload.get("crossval_r2"),
                 payload.get("crossval_std"),
                 Json(payload.get("hiperparametros", {})),

@@ -9,6 +9,7 @@ import Alerts from "./pages/Alerts";
 import Reports from "./pages/Reports";
 import Arduino from "./pages/Arduino";
 import Forecast from "./pages/Forecast";
+import RiskMap from "./pages/RiskMap";
 
 // ── Panel de administrador ─────────────────────────────────────────────────
 import Login from "./pages/Login";
@@ -81,7 +82,15 @@ function SessionPopup({ mode, role, user }) {
 
 // ── Panel de usuario ───────────────────────────────────────────────────────
 
-function UserApp({ onLogout, userEmail }) {
+function ThemeToggle({ theme, onToggle }) {
+  return (
+    <button className="btn ghost icon-only" onClick={onToggle} aria-label="Cambiar modo claro u oscuro" title="Modo claro/oscuro">
+      {theme === "dark" ? "☀" : "☾"}
+    </button>
+  );
+}
+
+function UserApp({ onLogout, userEmail, theme, onToggleTheme }) {
   const [activeSection, setActiveSection] = useState("dashboard");
   const [dataset, setDataset]             = useState(initialDataset);
   const [trendSeries, setTrendSeries]     = useState(initialTrendSeries);
@@ -180,15 +189,20 @@ function UserApp({ onLogout, userEmail }) {
     setSelectedEntry(entry);
     setSubmitting(true);
     predictYield({
-      municipio:   entry.municipality,
-      crop:        entry.crop,
-      month:       new Date().getMonth() + 1,
-      temperature: entry.temperature,
-      rainfall:    entry.rainfall,
-      humidity:    entry.humidity,
-      soilPh:      entry.soilPh,
+      municipio:    entry.municipality,
+      crop:         entry.crop,
+      month:        new Date().getMonth() + 1,
+      temperature:  entry.temperature,
+      rainfall:     entry.rainfall,
+      humidity:     entry.humidity,
+      soilPh:       entry.soilPh,
+      greennessIdx: form.leafCondition ?? 65,
+      cropKnown:    TRAINED_CROPS.includes(entry.crop),
     })
-      .then((result) => setYieldResult(result))
+      .then((result) => {
+        setYieldResult(result);
+        setSelectedEntry((prev) => ({ ...prev, yieldPct: result.yield_pct, yieldLevel: result.yield_level }));
+      })
       .catch(() => {})
       .finally(() => setSubmitting(false));
   }, [activeSection]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -294,6 +308,11 @@ function UserApp({ onLogout, userEmail }) {
           cropKnown:    TRAINED_CROPS.includes(entry.crop),
         });
         setYieldResult(result);
+        setDataset((prev) => prev.map((item, index) => (
+          index === 0 && item.timestamp === entry.timestamp
+            ? { ...item, yieldPct: result.yield_pct, yieldLevel: result.yield_level }
+            : item
+        )));
         showToast(`Rendimiento estimado: ${result.yield_pct}% — ${entry.crop} en ${entry.municipality}.`);
       } catch {
         setYieldResult(null);
@@ -356,72 +375,6 @@ function UserApp({ onLogout, userEmail }) {
     showToast(`Dataset exportado: ${dataset.length} registros.`);
   }
 
-  const kpis = [
-    {
-      label: "Municipios en el modelo",
-      value: 61,
-      sub: "Cobertura nacional · 8 zonas agroclimáticas de Guatemala",
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-          <circle cx="12" cy="9" r="2.5"/>
-        </svg>
-      ),
-      iconBg: "rgba(38,99,36,0.1)",
-      iconColor: "var(--green)",
-      valueColor: "var(--green)",
-    },
-    {
-      label: "Registros de entrenamiento",
-      value: "812,520",
-      sub: "Open-Meteo · 61 municipios · 37 cultivos · 2010-2024",
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20 17.58A5 5 0 0 0 18 8h-1.26A8 8 0 1 0 4 16.25"/>
-          <line x1="8" y1="16" x2="8.01" y2="16"/>
-          <line x1="8" y1="20" x2="8.01" y2="20"/>
-          <line x1="12" y1="18" x2="12.01" y2="18"/>
-          <line x1="12" y1="22" x2="12.01" y2="22"/>
-          <line x1="16" y1="16" x2="16.01" y2="16"/>
-          <line x1="16" y1="20" x2="16.01" y2="20"/>
-        </svg>
-      ),
-      iconBg: "var(--sky-soft)",
-      iconColor: "var(--sky)",
-      valueColor: "var(--sky)",
-    },
-    {
-      label: "Cultivos modelados",
-      value: 37,
-      sub: "Granos · hortalizas · frutas · cultivos comerciales",
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/>
-          <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
-        </svg>
-      ),
-      iconBg: "rgba(38,99,36,0.1)",
-      iconColor: "var(--green)",
-      valueColor: "var(--text-primary)",
-    },
-    {
-      label: "Alertas de riesgo",
-      value: riskCounts.total,
-      sub: `${riskCounts.highCount} críticas · ${riskCounts.mediumCount} preventivas`,
-      alert: true,
-      icon: (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-          <line x1="12" y1="9" x2="12" y2="13"/>
-          <line x1="12" y1="17" x2="12.01" y2="17"/>
-        </svg>
-      ),
-      iconBg: "rgba(185,28,28,0.1)",
-      iconColor: "var(--red)",
-      valueColor: "var(--red)",
-    },
-  ];
-
   const pages = {
     dashboard: (
       <Dashboard
@@ -435,6 +388,7 @@ function UserApp({ onLogout, userEmail }) {
       />
     ),
     dataset: <Dataset dataset={dataset} />,
+    risk_map: <RiskMap selectedCrop={form.crop} />,
     alerts:  <Alerts alerts={alerts} dataset={dataset} showToast={showToast} setActiveSection={setActiveSection} />,
     reports: (
       <Reports
@@ -474,6 +428,7 @@ function UserApp({ onLogout, userEmail }) {
             </div>
             <div className="topbar-actions">
               <span className={`chip ${apiOnline ? "" : "orange"}`}>{apiOnline ? "API activa" : "Modo local"}</span>
+              <ThemeToggle theme={theme} onToggle={onToggleTheme} />
               <button className="btn ghost" onClick={exportDataset}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -495,7 +450,7 @@ function UserApp({ onLogout, userEmail }) {
 
 // ── Panel de administrador ─────────────────────────────────────────────────
 
-function AdminApp({ onLogout }) {
+function AdminApp({ onLogout, theme, onToggleTheme }) {
   const [activeSection, setActiveSection] = useState("admin_dashboard");
   const [menuOpen, setMenuOpen]           = useState(false);
 
@@ -533,6 +488,7 @@ function AdminApp({ onLogout }) {
             </div>
             <div className="topbar-actions">
               <span className="chip green">Admin</span>
+              <ThemeToggle theme={theme} onToggle={onToggleTheme} />
               <button className="btn ghost" onClick={onLogout} style={{ fontSize: "0.78rem" }}>
                 Cerrar sesion
               </button>
@@ -550,7 +506,17 @@ function AdminApp({ onLogout }) {
 export default function App() {
   const [role, setRole] = useState(() => sessionStorage.getItem("role") || null);
   const [email, setEmail] = useState(() => sessionStorage.getItem("email") || null);
+  const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "light");
   const [sessionTransition, setSessionTransition] = useState(null);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  function toggleTheme() {
+    setTheme((prev) => prev === "dark" ? "light" : "dark");
+  }
 
   useEffect(() => {
     if (!sessionTransition) return undefined;
@@ -591,7 +557,7 @@ export default function App() {
   if (!role) {
     return (
       <>
-        <Login onLogin={handleLogin} />
+        <Login onLogin={handleLogin} theme={theme} onToggleTheme={toggleTheme} />
         {sessionTransition && (
           <SessionPopup
             mode={sessionTransition.mode}
@@ -606,9 +572,9 @@ export default function App() {
   return (
     <>
       {role === "admin" ? (
-        <AdminApp onLogout={handleLogout} />
+        <AdminApp onLogout={handleLogout} theme={theme} onToggleTheme={toggleTheme} />
       ) : (
-        <UserApp onLogout={handleLogout} userEmail={email} />
+        <UserApp onLogout={handleLogout} userEmail={email} theme={theme} onToggleTheme={toggleTheme} />
       )}
       {sessionTransition && (
         <SessionPopup

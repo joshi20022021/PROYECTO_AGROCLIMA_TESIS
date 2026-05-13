@@ -11,7 +11,7 @@ function ArrowIcon() {
   );
 }
 
-export default function Login({ onLogin }) {
+export default function Login({ onLogin, theme = "light", onToggleTheme }) {
   const [user, setUser]       = useState("");
   const [pass, setPass]       = useState("");
   const [error, setError]     = useState("");
@@ -55,6 +55,27 @@ export default function Login({ onLogin }) {
       {orb("-18%", "-12%", undefined, undefined, "58vw", "58vw", "rgba(34,197,94,0.12)", 1)}
       {orb(undefined, undefined, "-12%", "-22%", "62vw", "62vw", "rgba(59,130,246,0.10)", 2)}
       {orb("42%", undefined, "12%", undefined, "26vw", "26vw", "rgba(16,185,129,0.08)", 3)}
+      <button
+        onClick={onToggleTheme}
+        aria-label="Cambiar modo claro u oscuro"
+        title="Modo claro/oscuro"
+        style={{
+          position: "absolute",
+          top: "1rem",
+          right: "1rem",
+          zIndex: 2,
+          width: 40,
+          height: 40,
+          borderRadius: 10,
+          border: "1px solid rgba(255,255,255,0.16)",
+          background: "rgba(255,255,255,0.08)",
+          color: "#fff",
+          cursor: "pointer",
+          fontWeight: 800,
+        }}
+      >
+        {theme === "dark" ? "☀" : "☾"}
+      </button>
 
       {/* Cuadrícula decorativa */}
       <div style={{
@@ -141,6 +162,31 @@ export default function Login({ onLogin }) {
           <p style={{ color:"rgba(255,255,255,0.28)", fontSize:"0.7rem", textAlign:"center", margin:"0.75rem 0 0" }}>
             Acceso sin credenciales — visualizacion y analisis
           </p>
+        </div>
+
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "0.55rem",
+          marginBottom: "0.9rem",
+        }}>
+          {[
+            ["1", "Analiza", "Ingresa clima, cultivo y pH."],
+            ["2", "Explora", "Revisa mapa, dataset y alertas."],
+            ["3", "Exporta", "Genera CSV y reporte PDF."],
+          ].map(([step, title, text]) => (
+            <div key={step} style={{
+              background: "rgba(255,255,255,0.045)",
+              border: "1px solid rgba(255,255,255,0.10)",
+              borderRadius: 12,
+              padding: "0.7rem",
+              minHeight: 92,
+            }}>
+              <div style={{ color: "#8ce8a4", fontWeight: 900, fontSize: "0.72rem" }}>{step}</div>
+              <strong style={{ display: "block", color: "rgba(255,255,255,0.82)", fontSize: "0.8rem", marginTop: 3 }}>{title}</strong>
+              <p style={{ color: "rgba(255,255,255,0.42)", fontSize: "0.68rem", lineHeight: 1.35, margin: "0.25rem 0 0" }}>{text}</p>
+            </div>
+          ))}
         </div>
 
         {/* Divider */}

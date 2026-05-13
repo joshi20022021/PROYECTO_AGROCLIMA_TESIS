@@ -30,6 +30,79 @@
   min-height: 100vh;
 }
 
+/* Dark mode: suppress light radial glow on admin background */
+[data-theme="dark"] .admin-theme::before {
+  background: radial-gradient(ellipse, rgba(56,189,248,0.04) 0%, transparent 65%);
+}
+
+/* Dark mode overrides for admin panel */
+[data-theme="dark"] .admin-theme {
+  --bg:            #0d1520;
+  --bg-inner:      #090f1a;
+  --surface:       #131d2e;
+  --surface-alt:   #172236;
+  --surface-hover: #1c293f;
+  --text-primary:  #e2e8f0;
+  --text-secondary:#94a3b8;
+  --text-muted:    #64748b;
+  --text-faint:    #475569;
+  --border:        rgba(148,163,184,0.10);
+  --border-strong: rgba(148,163,184,0.20);
+  --border-focus:  rgba(148,163,184,0.40);
+  --green:         #7c8fa1;
+  --green-light:   #94a3b8;
+  --green-vivid:   #bae6fd;
+  --green-soft:    rgba(148,163,184,0.08);
+  --green-mid:     rgba(148,163,184,0.14);
+  --green-glow:    rgba(148,163,184,0.20);
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.30);
+  --shadow-sm: 0 1px 4px rgba(0,0,0,0.40), 0 1px 2px rgba(0,0,0,0.25);
+  --shadow-md: 0 4px 14px rgba(0,0,0,0.45), 0 2px 5px rgba(0,0,0,0.25);
+  --shadow-lg: 0 10px 36px rgba(0,0,0,0.50), 0 4px 10px rgba(0,0,0,0.28);
+  --shadow-xl: 0 22px 50px rgba(0,0,0,0.55), 0 8px 18px rgba(0,0,0,0.30);
+  background-color: var(--bg);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .admin-theme .card {
+  background: var(--surface);
+  border-color: var(--border);
+}
+[data-theme="dark"] .admin-theme .card-header {
+  background: var(--surface-alt);
+  border-bottom-color: var(--border);
+}
+[data-theme="dark"] .admin-theme table th {
+  background: var(--surface-alt);
+  color: var(--text-secondary);
+  border-bottom-color: var(--border);
+}
+[data-theme="dark"] .admin-theme table td {
+  border-bottom-color: var(--border);
+  color: var(--text-primary);
+}
+[data-theme="dark"] .admin-theme table tr:hover td {
+  background: var(--surface-hover);
+}
+[data-theme="dark"] .admin-theme .form-select,
+[data-theme="dark"] .admin-theme .form-input,
+[data-theme="dark"] .admin-theme select,
+[data-theme="dark"] .admin-theme input {
+  background: var(--surface) !important;
+  border-color: var(--border-strong) !important;
+  color: var(--text-primary) !important;
+}
+[data-theme="dark"] .admin-theme .btn-secondary {
+  background: var(--surface-hover);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+[data-theme="dark"] .admin-theme .chip {
+  background: var(--surface-hover);
+  border-color: var(--border);
+  color: var(--text-secondary);
+}
+
 .admin-theme::before {
   content: ""; position: fixed; top: -15%; right: -8%; width: 55vw; height: 55vh;
   background: radial-gradient(ellipse, rgba(100,116,139,0.05) 0%, transparent 65%);
@@ -38,7 +111,7 @@
 
 .admin-theme .card { background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
 .admin-theme .card:hover { box-shadow: var(--shadow-md); border-color: rgba(100,116,139,0.22); }
-.admin-theme .card-header { border-bottom: 1px solid var(--border); background: linear-gradient(180deg, var(--surface-alt), var(--surface)); }
+.admin-theme .card-header { border-bottom: 1px solid var(--border); background: var(--surface-alt); }
 .admin-theme .card-header h3 { color: var(--text-primary); }
 
 .admin-theme .chip              { background: var(--surface-hover); border: 1px solid var(--border); color: var(--text-secondary); }
@@ -61,22 +134,22 @@
 
 /* Admin sidebar */
 .admin-sidebar {
-  background: linear-gradient(180deg, #1a2535 0%, #1e2d40 100%) !important;
+  background: #1a2535 !important;
   border-right: 1px solid rgba(255,255,255,0.06) !important;
   z-index: 100; box-shadow: 4px 0 20px rgba(0,0,0,0.14) !important;
 }
 .admin-sidebar .brand { border-bottom: 1px solid rgba(255,255,255,0.06) !important; }
 .admin-sidebar .brand-text h1 { color: #f1f5f9 !important; font-weight: 800; }
 .admin-sidebar .brand-text p  { color: rgba(148,163,184,0.5) !important; }
-.admin-sidebar .brand-icon { background: linear-gradient(145deg, #64748b, #334155) !important; box-shadow: 0 0 0 1px rgba(255,255,255,0.12), 0 4px 12px rgba(0,0,0,0.25) !important; color: #ffffff !important; }
+.admin-sidebar .brand-icon { background: #334155 !important; box-shadow: 0 0 0 1px rgba(255,255,255,0.10), 0 4px 10px rgba(0,0,0,0.22) !important; color: #ffffff !important; }
 .admin-sidebar .menu-item       { color: #7c8fa1 !important; }
 .admin-sidebar .menu-item:hover { background: rgba(100,116,139,0.14) !important; color: #e2e8f0 !important; border-color: rgba(100,116,139,0.18) !important; }
 .admin-sidebar .menu-item.active {
   background: rgba(56,189,248,0.12) !important; color: #bae6fd !important; border-color: rgba(56,189,248,0.20) !important;
 }
 .admin-sidebar .menu-item.active::before {
-  background: linear-gradient(180deg, #38bdf8, #0284c7) !important;
-  box-shadow: 0 0 10px rgba(56,189,248,0.6) !important;
+  background: #38bdf8 !important;
+  box-shadow: 0 0 8px rgba(56,189,248,0.5) !important;
 }
 .admin-sidebar .menu-item.active .menu-icon { filter: drop-shadow(0 0 4px rgba(56,189,248,0.5)) !important; }
 .admin-sidebar .nav-label { color: rgba(148,163,184,0.35) !important; }

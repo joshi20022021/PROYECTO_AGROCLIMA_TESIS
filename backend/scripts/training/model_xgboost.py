@@ -24,7 +24,10 @@ import pandas as pd
 from datetime import datetime
 
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.metrics import (
+    f1_score, mean_absolute_error, mean_squared_error,
+    precision_score, r2_score, recall_score,
+)
 from sklearn.model_selection import train_test_split, cross_val_score
 from sklearn.preprocessing import LabelEncoder
 from xgboost import XGBRegressor
@@ -65,6 +68,21 @@ FEATURES_EXTRA = [
 ]
 TARGET   = "yield_pct"
 CAT_COLS = ["municipio", "crop"]
+
+# Umbral que define "bajo rendimiento" para métricas de clasificación (sección 5.1 tesis)
+# yield_pct < 50 → clase positiva (bajo rendimiento detectado)
+LOW_YIELD_THRESHOLD = 50
+
+
+def _classification_metrics(y_true, y_pred) -> dict:
+    """Convierte predicciones de regresión a clasificación binaria y calcula F1/Precisión/Recall."""
+    y_true_cls = (y_true < LOW_YIELD_THRESHOLD).astype(int)
+    y_pred_cls = (np.array(y_pred) < LOW_YIELD_THRESHOLD).astype(int)
+    return {
+        "precision": round(float(precision_score(y_true_cls, y_pred_cls, zero_division=0)), 4),
+        "recall":    round(float(recall_score(y_true_cls, y_pred_cls, zero_division=0)), 4),
+        "f1":        round(float(f1_score(y_true_cls, y_pred_cls, zero_division=0)), 4),
+    }
 
 
 def load_data() -> pd.DataFrame:
@@ -155,6 +173,12 @@ def cmd_train():
     print(f"  RMSE : {rmse:.2f} %")
     print(f"  R2   : {r2:.4f}")
 
+    cls = _classification_metrics(y_test, y_pred)
+    print(f"\nDeteccion de bajo rendimiento (yield_pct < {LOW_YIELD_THRESHOLD}%):")
+    print(f"  Precision : {cls['precision']:.4f}")
+    print(f"  Recall    : {cls['recall']:.4f}")
+    print(f"  F1-Score  : {cls['f1']:.4f}")
+
     importance = pd.Series(model.feature_importances_, index=active_features)
     print("\nImportancia de variables:")
     for feat, imp in importance.sort_values(ascending=False).items():
@@ -181,6 +205,10 @@ def cmd_train():
             "r2_test": round(r2, 4),
             "mae": round(mae, 2),
             "rmse": round(rmse, 2),
+            "precision": cls["precision"],
+            "recall":    cls["recall"],
+            "f1":        cls["f1"],
+            "low_yield_threshold": LOW_YIELD_THRESHOLD,
             "crossval_r2": round(float(cv.mean()), 4),
             "crossval_std": round(float(cv.std()), 4),
             "hiperparametros": {
@@ -206,6 +234,9 @@ def cmd_evaluate():
     print(f"MAE: {mean_absolute_error(y_test, y_pred):.2f}%  "
           f"RMSE: {mean_squared_error(y_test, y_pred)**0.5:.2f}%  "
           f"R2: {r2_score(y_test, y_pred):.4f}")
+    cls = _classification_metrics(y_test, y_pred)
+    print(f"Precision: {cls['precision']:.4f}  Recall: {cls['recall']:.4f}  F1: {cls['f1']:.4f}  "
+          f"(umbral bajo rendimiento < {LOW_YIELD_THRESHOLD}%)")
 
 
 def cmd_predict(json_str: str):
@@ -227,7 +258,7 @@ def cmd_predict(json_str: str):
 COMPARE_PATH = os.path.join(MODEL_DIR, "model_comparison.json")
 
 RF_PARAMS = dict(
-    n_estimators=300, max_depth=10, min_samples_leaf=3,
+    n_estimators=100, max_depth=8, min_samples_leaf=3,
     max_features="sqrt", random_state=42, n_jobs=-1,
 )
 
@@ -243,6 +274,14 @@ def cmd_compare():
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
+    # Para datasets grandes, usar muestra estratificada para cross-val es suficiente
+    CV_SAMPLE = 50_000
+    if len(X_train) > CV_SAMPLE:
+        idx = np.random.RandomState(42).choice(len(X_train), CV_SAMPLE, replace=False)
+        X_cv, y_cv = X_train.iloc[idx], y_train.iloc[idx]
+    else:
+        X_cv, y_cv = X_train, y_train
+
     models = [
         ("XGBoost",      build_model()),
         ("RandomForest", RandomForestRegressor(**RF_PARAMS)),
@@ -254,13 +293,17 @@ def cmd_compare():
         model.fit(X_train, y_train)
         elapsed = round((datetime.now() - t0).total_seconds(), 1)
 
-        cv = cross_val_score(model, X_train, y_train, cv=5, scoring="r2", n_jobs=-1)
+        cv = cross_val_score(model, X_cv, y_cv, cv=5, scoring="r2", n_jobs=-1)
         y_pred = model.predict(X_test)
+        cls = _classification_metrics(y_test, y_pred)
 
         results[name] = {
             "r2":           round(float(r2_score(y_test, y_pred)), 4),
             "mae":          round(float(mean_absolute_error(y_test, y_pred)), 2),
             "rmse":         round(float(mean_squared_error(y_test, y_pred) ** 0.5), 2),
+            "precision":    cls["precision"],
+            "recall":       cls["recall"],
+            "f1":           cls["f1"],
             "crossval_r2":  round(float(cv.mean()), 4),
             "crossval_std": round(float(cv.std()), 4),
             "train_time_s": elapsed,
@@ -272,11 +315,12 @@ def cmd_compare():
         )
 
     payload = {
-        "compared_at": datetime.now().isoformat(),
-        "n_train":     len(X_train),
-        "n_test":      len(X_test),
-        "n_features":  len(active_features),
-        "results":     results,
+        "compared_at":          datetime.now().isoformat(),
+        "n_train":              len(X_train),
+        "n_test":               len(X_test),
+        "n_features":           len(active_features),
+        "low_yield_threshold":  LOW_YIELD_THRESHOLD,
+        "results":              results,
     }
     os.makedirs(MODEL_DIR, exist_ok=True)
     with open(COMPARE_PATH, "w") as f:

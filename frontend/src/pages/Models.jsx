@@ -160,6 +160,57 @@ export default function Models() {
     },
   }), [model?.r2]);
 
+  const xgb = comparison?.results?.XGBoost;
+  const rf = comparison?.results?.RandomForest;
+  const comparisonChart = useMemo(() => ({
+    type: "bar",
+    data: {
+      labels: ["R2", "MAE", "RMSE"],
+      datasets: [
+        {
+          label: "XGBoost",
+          data: [
+            xgb?.r2 != null ? +(Number(xgb.r2) * 100).toFixed(2) : null,
+            xgb?.mae != null ? +Number(xgb.mae).toFixed(2) : null,
+            xgb?.rmse != null ? +Number(xgb.rmse).toFixed(2) : null,
+          ],
+          backgroundColor: "rgba(37,99,235,0.18)",
+          borderColor: "#2563eb",
+          borderWidth: 1.4,
+          borderRadius: 8,
+        },
+        {
+          label: "Random Forest",
+          data: [
+            rf?.r2 != null ? +(Number(rf.r2) * 100).toFixed(2) : null,
+            rf?.mae != null ? +Number(rf.mae).toFixed(2) : null,
+            rf?.rmse != null ? +Number(rf.rmse).toFixed(2) : null,
+          ],
+          backgroundColor: "rgba(100,116,139,0.18)",
+          borderColor: "#64748b",
+          borderWidth: 1.4,
+          borderRadius: 8,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: "bottom", labels: { boxWidth: 10, usePointStyle: true } },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => ` ${ctx.dataset.label}: ${ctx.label === "R2" ? `${ctx.parsed.y.toFixed(2)}%` : `${ctx.parsed.y.toFixed(2)} pts`}`,
+          },
+        },
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: "#64748b" } },
+        y: { grid: { color: "rgba(148,163,184,0.18)" }, ticks: { color: "#64748b" } },
+      },
+    },
+  }), [xgb, rf]);
+
   async function handleRetrain() {
     setRetrainLoading(true);
     setActionMsg("");
@@ -220,11 +271,12 @@ export default function Models() {
     { label: "R² cross-validation", key: "crossval_r2", fmt: (v) => fmtPct(v), higher: true },
     { label: "MAE", key: "mae", fmt: (v) => `${Number(v).toFixed(2)}%`, higher: false },
     { label: "RMSE", key: "rmse", fmt: (v) => `${Number(v).toFixed(2)}%`, higher: false },
+    { label: "Precision (bajo rendimiento)", key: "precision", fmt: (v) => fmtPct(v), higher: true },
+    { label: "Recall (bajo rendimiento)", key: "recall", fmt: (v) => fmtPct(v), higher: true },
+    { label: "F1-Score (bajo rendimiento)", key: "f1", fmt: (v) => fmtPct(v), higher: true },
     { label: "Tiempo de entreno", key: "train_time_s", fmt: (v) => `${v}s`, higher: false },
   ];
 
-  const xgb = comparison?.results?.XGBoost;
-  const rf = comparison?.results?.RandomForest;
 
   return (
     <div className="page-content">
@@ -353,6 +405,11 @@ export default function Models() {
                   ["R2 test", fmtPct(model.r2, 2)],
                   ["R2 cross-validation", fmtPct(model.crossValR2, 2)],
                   ["Desviacion cross-validation", fmtSignedPct(model.crossValStd)],
+                  ["MAE", model.mae != null ? `${Number(model.mae).toFixed(2)}%` : "N/D"],
+                  ["RMSE", model.rmse != null ? `${Number(model.rmse).toFixed(2)}%` : "N/D"],
+                  ["Precision (bajo rendimiento)", fmtPct(model.precision, 2)],
+                  ["Recall (bajo rendimiento)", fmtPct(model.recall, 2)],
+                  ["F1-Score (bajo rendimiento)", fmtPct(model.f1, 2)],
                   ["Muestras de entrenamiento", fmtNumber(model.trainSamples)],
                   ["Muestras de prueba", fmtNumber(model.testSamples)],
                   ["Ventana temporal", model.yearsRange || "N/D"],
@@ -420,7 +477,11 @@ export default function Models() {
           )}
 
           {comparison && (
-            <div style={{ overflowX: "auto" }}>
+            <div>
+              <div className="model-comparison-chart">
+                <ChartCanvas config={comparisonChart} />
+              </div>
+              <div style={{ overflowX: "auto" }}>
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                 <thead>
                   <tr style={{ borderBottom: "1px solid var(--border)" }}>
@@ -451,6 +512,7 @@ export default function Models() {
                   })}
                 </tbody>
               </table>
+              </div>
 
               {comparison.compared_at && (
                 <p style={{ marginTop: 12, fontSize: 11, color: "var(--text-secondary)" }}>

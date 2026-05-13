@@ -27,40 +27,25 @@
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #4caf72, #246222 48%, #8b5e19);
-  opacity: 0.50;
+  background: #3b9348;
+  opacity: 0.45;
   transition: opacity var(--t-slow);
-}
-
-.kpi-card::after {
-  content: "";
-  position: absolute;
-  top: -20px; right: -20px;
-  width: 80px; height: 80px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(76,175,114,0.08), transparent 70%);
-  pointer-events: none;
-  transition: transform var(--t-slow), opacity var(--t-slow);
 }
 
 .kpi-card:hover {
   box-shadow: var(--shadow-md);
   transform: translateY(-3px);
-  border-color: rgba(38,99,36,0.18);
+  border-color: rgba(38,99,36,0.22);
 }
-.kpi-card:hover::before { opacity: 1; }
-.kpi-card:hover::after  { transform: scale(1.6); opacity: 0.55; }
+.kpi-card:hover::before { opacity: 0.85; }
 
 .kpi-card.alert-card {
-  background: linear-gradient(145deg, rgba(185,28,28,0.04), var(--surface) 60%);
-  border-color: rgba(185,28,28,0.16);
+  background: var(--surface);
+  border-color: rgba(185,28,28,0.20);
 }
 .kpi-card.alert-card::before {
   opacity: 1;
-  background: linear-gradient(90deg, #b91c1c, #ea580c);
-}
-.kpi-card.alert-card::after {
-  background: radial-gradient(circle, rgba(185,28,28,0.08), transparent 70%);
+  background: #b91c1c;
 }
 
 .kpi-icon {

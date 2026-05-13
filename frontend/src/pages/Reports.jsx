@@ -249,23 +249,14 @@ export default function Reports({
 }) {
   const [steps, setSteps] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(true);
   const [exportingPdf, setExportingPdf] = useState(false);
   const reportRef = useRef(null);
 
-  if (!analysisReady || selectedEntry?.pending) {
-    return (
-      <div className="page-content">
-        <div className="card">
-          <div className="card-body" style={{ padding: "1.4rem" }}>
-            <h3 style={{ margin: "0 0 0.45rem", fontSize: "1.1rem", color: "var(--text-primary)" }}>Aun no hay resultados para mostrar</h3>
-            <p style={{ margin: 0, color: "var(--text-secondary)", lineHeight: 1.6 }}>
-              Vuelve a Inicio, ingresa las metricas del lote y ejecuta un nuevo analisis para generar el resumen de resultados.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    const id = window.setTimeout(() => setPageLoading(false), 350);
+    return () => window.clearTimeout(id);
+  }, [selectedEntry]);
 
   const variables = [
     rainfallStatus(selectedEntry.rainfall),
@@ -306,6 +297,35 @@ export default function Reports({
     selectedEntry.humidity,
     selectedEntry.soilPh,
   ]);
+
+  if (pageLoading) {
+    return (
+      <div className="page-content">
+        <div className="card">
+          <div className="card-body skeleton-panel">
+            <div className="skeleton-line wide" />
+            <div className="skeleton-line" />
+            <div className="skeleton-box" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!analysisReady || selectedEntry?.pending) {
+    return (
+      <div className="page-content">
+        <div className="card">
+          <div className="card-body" style={{ padding: "1.4rem" }}>
+            <h3 style={{ margin: "0 0 0.45rem", fontSize: "1.1rem", color: "var(--text-primary)" }}>Aun no hay resultados para mostrar</h3>
+            <p style={{ margin: 0, color: "var(--text-secondary)", lineHeight: 1.6 }}>
+              Vuelve a Inicio, ingresa las metricas del lote y ejecuta un nuevo analisis para generar el resumen de resultados.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   async function exportPdf() {
     if (!reportRef.current || exportingPdf) return;

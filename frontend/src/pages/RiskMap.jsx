@@ -14,6 +14,39 @@ function colorByRisk(level) {
   return "#16a34a";
 }
 
+const DEPARTMENT_TILES = {
+  Peten: [330, 72],
+  Huehuetenango: [150, 220],
+  Quiche: [235, 225],
+  "Alta Verapaz": [320, 230],
+  Coban: [320, 230],
+  Izabal: [440, 248],
+  "San Marcos": [108, 315],
+  Quetzaltenango: [170, 322],
+  Totonicapan: [230, 315],
+  Solola: [235, 382],
+  Chimaltenango: [300, 382],
+  Sacatepequez: [332, 430],
+  Guatemala: [380, 405],
+  "Baja Verapaz": [360, 330],
+  "El Progreso": [430, 360],
+  Zacapa: [490, 355],
+  Chiquimula: [520, 430],
+  Retalhuleu: [148, 410],
+  Suchitepequez: [212, 438],
+  Escuintla: [315, 490],
+  "Santa Rosa": [420, 492],
+  Jalapa: [465, 430],
+  Jutiapa: [500, 515],
+};
+
+function hexPoints(cx, cy, radius = 34) {
+  return Array.from({ length: 6 }, (_, i) => {
+    const angle = (Math.PI / 180) * (60 * i - 30);
+    return `${cx + radius * Math.cos(angle)},${cy + radius * Math.sin(angle)}`;
+  }).join(" ");
+}
+
 export default function RiskMap({ selectedCrop }) {
   const [loading, setLoading] = useState(true);
   const [points, setPoints] = useState([]);
@@ -34,6 +67,36 @@ export default function RiskMap({ selectedCrop }) {
     const low = points.filter((p) => p.risk_level === "low").length;
     return { high, medium, low };
   }, [points]);
+
+  const departmentRisk = useMemo(() => {
+    const grouped = {};
+    points.forEach((point) => {
+      const depto = point.depto || point.municipio;
+      if (!depto) return;
+      if (!grouped[depto]) grouped[depto] = { depto, score: 0, samples: 0, high: 0, medium: 0, low: 0 };
+      grouped[depto].score += Number(point.risk_score || 0);
+      grouped[depto].samples += Number(point.samples || 1);
+      grouped[depto][point.risk_level || "low"] += 1;
+    });
+    return Object.values(grouped).map((row) => {
+      const totalLevels = row.high + row.medium + row.low || 1;
+      const level = row.high / totalLevels >= 0.34
+        ? "high"
+        : row.medium / totalLevels >= 0.34
+          ? "medium"
+          : "low";
+      return {
+        ...row,
+        avgScore: Math.round(row.score / totalLevels),
+        level,
+      };
+    });
+  }, [points]);
+
+  const tileRows = useMemo(() => departmentRisk.map((row) => ({
+    ...row,
+    tile: DEPARTMENT_TILES[row.depto] || DEPARTMENT_TILES[row.depto?.replace("Alta Verapaz", "Coban")],
+  })).filter((row) => row.tile), [departmentRisk]);
 
   return (
     <div className="page-content">
@@ -96,6 +159,33 @@ export default function RiskMap({ selectedCrop }) {
               </MapContainer>
             </div>
           )}
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="card-header">
+          <h3>Coropletico departamental</h3>
+          <span className="chip">{tileRows.length} departamentos</span>
+        </div>
+        <div className="card-body risk-choropleth-shell">
+          <svg className="risk-choropleth" viewBox="60 30 520 540" role="img" aria-label="Mapa coropletico de riesgo por departamento">
+            {tileRows.map((row) => {
+              const [cx, cy] = row.tile;
+              return (
+                <g key={row.depto} className="risk-tile">
+                  <polygon points={hexPoints(cx, cy)} fill={colorByRisk(row.level)} opacity={0.78} />
+                  <title>{`${row.depto}: riesgo ${row.level}, score ${row.avgScore}/100`}</title>
+                  <text x={cx} y={cy - 2} textAnchor="middle">{row.depto.length > 12 ? row.depto.slice(0, 11) : row.depto}</text>
+                  <text x={cx} y={cy + 14} textAnchor="middle" className="risk-tile-score">{row.avgScore}</text>
+                </g>
+              );
+            })}
+          </svg>
+          <div className="risk-map-legend">
+            <span><i style={{ background: "#dc2626" }} /> Alto</span>
+            <span><i style={{ background: "#d97706" }} /> Medio</span>
+            <span><i style={{ background: "#16a34a" }} /> Bajo</span>
+          </div>
         </div>
       </div>
     </div>

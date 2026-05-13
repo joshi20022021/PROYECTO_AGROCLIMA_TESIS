@@ -1,0 +1,622 @@
+\documentclass[12pt, a4paper]{article}
+
+% ─── Paquetes ────────────────────────────────────────────────────────────────
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{parskip}
+
+\geometry{margin=2.5cm}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+
+% ─── Colores y formato ───────────────────────────────────────────────────────
+\definecolor{cafeoscuro}{RGB}{80, 50, 20}
+\titleformat{\section}{\large\bfseries\color{cafeoscuro}}{}{0em}{}[\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries}{}{0em}{}
+
+% ─── Comandos utiles ─────────────────────────────────────────────────────────
+\newcommand{\feat}[1]{\texttt{#1}}
+\newcommand{\eq}[1]{\textbf{Ec.~(#1)}}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\begin{document}
+
+\begin{center}
+  {\LARGE \textbf{AgroClima GT}}\\[0.4em]
+  {\large Fundamentos Matemáticos del Sistema de Predicción de Rendimiento Agrícola}\\[0.4em]
+  {\small Documento de referencia para tesis universitaria}\\[1em]
+  \rule{\linewidth}{0.4pt}
+\end{center}
+
+\tableofcontents
+\newpage
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Modelo Principal: XGBoost para Predicción de Rendimiento}
+% ══════════════════════════════════════════════════════════════════════════════
+
+\subsection{Función Objetivo}
+
+XGBoost (\textit{Extreme Gradient Boosting}) minimiza la función objetivo regularizada:
+
+\begin{equation}
+  \mathcal{L}(\theta) = \sum_{i=1}^{n} \ell\!\left(y_i,\, \hat{y}_i\right) + \sum_{k=1}^{K} \Omega(f_k)
+  \label{eq:xgb_objetivo}
+\end{equation}
+
+donde:
+\begin{itemize}[leftmargin=2cm]
+  \item $\ell(y_i, \hat{y}_i)$ es la función de pérdida por observación (error cuadrático medio para regresión)
+  \item $\Omega(f_k)$ es el término de regularización del árbol $k$
+  \item $n$ es el número de muestras de entrenamiento
+  \item $K$ es el número total de árboles
+\end{itemize}
+
+\subsection{Término de Regularización}
+
+La regularización controla la complejidad de cada árbol para evitar sobreajuste:
+
+\begin{equation}
+  \Omega(f_k) = \gamma\, T + \frac{1}{2}\lambda \sum_{j=1}^{T} w_j^2
+  \label{eq:regularizacion}
+\end{equation}
+
+donde:
+\begin{itemize}[leftmargin=2cm]
+  \item $T$ es el número de hojas del árbol
+  \item $w_j$ es el peso (score) de la hoja $j$
+  \item $\gamma \geq 0$ penaliza la cantidad de hojas (complejidad estructural)
+  \item $\lambda \geq 0$ aplica regularización L2 sobre los pesos
+\end{itemize}
+
+\subsection{Predicción del Conjunto (\textit{Ensemble})}
+
+La predicción final es la suma aditiva de todos los árboles:
+
+\begin{equation}
+  \hat{y}_i = \sum_{k=1}^{K} f_k(\mathbf{x}_i), \quad f_k \in \mathcal{F}
+  \label{eq:ensemble}
+\end{equation}
+
+donde $\mathcal{F}$ es el espacio de árboles de regresión y $\mathbf{x}_i \in \mathbb{R}^{17}$ es el vector de características de la muestra $i$.
+
+\subsection{Actualización Iterativa por Gradiente}
+
+En cada iteración $t$, se añade un nuevo árbol $f_t$ que minimiza la aproximación de segundo orden de la pérdida:
+
+\begin{equation}
+  \tilde{\mathcal{L}}^{(t)} = \sum_{i=1}^{n}\left[ g_i f_t(\mathbf{x}_i) + \frac{1}{2} h_i f_t^2(\mathbf{x}_i) \right] + \Omega(f_t)
+  \label{eq:iteracion}
+\end{equation}
+
+donde $g_i = \partial_{\hat{y}^{(t-1)}} \ell(y_i, \hat{y}^{(t-1)})$ y $h_i = \partial^2_{\hat{y}^{(t-1)}} \ell(y_i, \hat{y}^{(t-1)})$ son el gradiente y Hessiano de la pérdida.
+
+\subsection{Hiperparámetros del Modelo AgroClima GT}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Hiperparámetro} & \textbf{Valor} & \textbf{Descripción} \\
+\midrule
+\texttt{n\_estimators}      & 400  & Número de árboles $K$ \\
+\texttt{max\_depth}         & 6    & Profundidad máxima por árbol \\
+\texttt{learning\_rate}     & 0.05 & Tasa de aprendizaje $\eta$ \\
+\texttt{subsample}          & 0.8  & Fracción de muestras por árbol \\
+\texttt{colsample\_bytree}  & 0.8  & Fracción de características por árbol \\
+\texttt{min\_child\_weight} & 3    & Peso mínimo en hoja hija \\
+\texttt{reg\_alpha}         & 0.1  & Regularización L1 \\
+\texttt{reg\_lambda}        & 1.0  & Regularización L2 ($\lambda$) \\
+\bottomrule
+\end{tabular}
+\caption{Hiperparámetros del modelo XGBoost v3.0 entrenado para AgroClima GT.}
+\end{table}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Variables de Entrada (Features)}
+% ══════════════════════════════════════════════════════════════════════════════
+
+El modelo recibe un vector $\mathbf{x} \in \mathbb{R}^{17}$:
+
+\begin{equation}
+  \mathbf{x} = \bigl[\,\texttt{mun\_enc},\; \texttt{crop\_enc},\; \texttt{month},\;
+    T,\; R,\; H,\; \text{pH},\; \theta_1,\; L,\; G,\; \theta_2,\; \theta_3,\;
+    T_s,\; T_{max},\; T_{min},\; v_w,\; z\,\bigr]
+  \label{eq:vector_features}
+\end{equation}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{clll}
+\toprule
+\textbf{Símbolo} & \textbf{Variable} & \textbf{Unidad} & \textbf{Fuente} \\
+\midrule
+$T$        & Temperatura media       & $^\circ$C     & Sensor DS18B20 / ERA5-Land \\
+$R$        & Precipitación           & mm/mes        & ERA5-Land / Open-Meteo \\
+$H$        & Humedad relativa        & \%            & ERA5-Land / Open-Meteo \\
+$\text{pH}$ & pH del suelo           & adim.         & Medición manual / SoilGrids \\
+$\theta_1$ & Humedad suelo 0--7 cm   & m$^3$/m$^3$   & Higrómetro capacitivo \\
+$L$        & Luminosidad             & lux           & Sensor TSL2561 \\
+$G$        & Índice de verdor        & \%            & Sensor TCS3200 \\
+$\theta_2$ & Humedad suelo 7--28 cm  & m$^3$/m$^3$   & ERA5-Land swvl2 \\
+$\theta_3$ & Humedad suelo 28--100 cm & m$^3$/m$^3$  & ERA5-Land swvl3 \\
+$T_s$      & Temperatura del suelo   & $^\circ$C     & ERA5-Land \\
+$T_{max}$  & Temperatura máxima      & $^\circ$C     & NASA POWER \\
+$T_{min}$  & Temperatura mínima      & $^\circ$C     & NASA POWER \\
+$v_w$      & Velocidad del viento    & m/s           & NASA POWER \\
+$z$        & Altitud del municipio   & m.s.n.m.      & Tabla de referencia interna \\
+\bottomrule
+\end{tabular}
+\caption{Descripción de los 17 features del modelo. Las dos primeras entradas son codificaciones enteras de municipio y cultivo.}
+\end{table}
+
+\subsection{Índice de Verdor (TCS3200)}
+
+El sensor de color TCS3200 captura los canales R, G y B por reflectancia de la hoja. El índice de verdor se calcula como:
+
+\begin{equation}
+  G = \frac{G_{\text{raw}}}{R_{\text{raw}} + G_{\text{raw}} + B_{\text{raw}}} \times 100
+  \label{eq:greenness}
+\end{equation}
+
+Valores de referencia: $G \geq 70$ indica follaje sano; $G < 45$ indica estrés visible o senescencia.
+
+\subsection{Valores por Defecto para Sensores Opcionales}
+
+Cuando un sensor no está disponible, el sistema aplica estimaciones derivadas de las variables principales:
+
+\begin{align}
+  \theta_2 &= \theta_1 + 0.03 \label{eq:swvl2} \\
+  \theta_3 &= \theta_1 + 0.05 \label{eq:swvl3} \\
+  T_s      &= T - 3.0         \label{eq:soil_temp} \\
+  T_{max}  &= T + 8.0         \label{eq:temp_max} \\
+  T_{min}  &= T - 6.0         \label{eq:temp_min}
+\end{align}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Calibración FAOSTAT del Rendimiento Objetivo}
+% ══════════════════════════════════════════════════════════════════════════════
+
+La variable objetivo \feat{yield\_pct} fue calibrada para anclarla a rendimientos reales reportados por la FAO en Guatemala, usando el siguiente procedimiento:
+
+\subsection{Factor de Calibración por Cultivo-Año}
+
+Para cada combinación (cultivo, año) con datos FAOSTAT disponibles:
+
+\begin{equation}
+  f_{\text{FAO}}(c, a) = \frac{\hat{R}(c, a)}{R_{\text{ref}}(c)}
+  \label{eq:fao_factor}
+\end{equation}
+
+donde $\hat{R}(c, a)$ es el rendimiento FAOSTAT del cultivo $c$ en el año $a$ (kg/ha) y $R_{\text{ref}}(c)$ es el rendimiento de referencia máximo histórico del cultivo.
+
+\subsection{Ajuste del Rendimiento Porcentual}
+
+El rendimiento ajustado se calcula como:
+
+\begin{equation}
+  \hat{y}_{\text{adj}} = \text{clip}\!\left(\hat{y}_{\text{base}} \cdot \left(0.75 + 0.50 \cdot f_{\text{FAO}}\right),\; 5.0,\; 100.0\right)
+  \label{eq:faostat_cal}
+\end{equation}
+
+El multiplicador $(0.75 + 0.50 \cdot f_{\text{FAO}})$ mapea:
+\begin{itemize}
+  \item $f_{\text{FAO}} = 0 \Rightarrow$ factor $= 0.75$ (año de baja producción, rendimiento reducido 25\%)
+  \item $f_{\text{FAO}} = 0.5 \Rightarrow$ factor $= 1.00$ (año promedio, sin ajuste)
+  \item $f_{\text{FAO}} = 1.0 \Rightarrow$ factor $= 1.25$ (año de alta producción, rendimiento aumentado 25\%)
+\end{itemize}
+
+\subsection{Cobertura para Años sin Datos FAOSTAT}
+
+Para combinaciones (cultivo, año) sin cobertura FAOSTAT, se aplica el promedio del factor por cultivo:
+
+\begin{equation}
+  f_{\text{FAO}}(c, a) = \bar{f}(c) = \frac{1}{|A_c|} \sum_{a \in A_c} f_{\text{FAO}}(c, a)
+  \label{eq:fao_fallback}
+\end{equation}
+
+donde $A_c$ es el conjunto de años con datos disponibles para el cultivo $c$. Esto garantiza cobertura del 100\% del dataset.
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Intervalos de Confianza de la Predicción}
+% ══════════════════════════════════════════════════════════════════════════════
+
+\subsection{Dispersión por Árboles Parciales}
+
+Para cuantificar la incertidumbre del modelo, se evalúa la predicción usando subconjuntos incrementales de los 400 árboles. Se toman 10 puntos igualmente espaciados:
+
+\begin{equation}
+  \mathcal{P} = \left\{ f_{k^*}(\mathbf{x}) \;\Big|\; k^* = \left\lfloor \frac{K}{10} \right\rfloor,\, \left\lfloor \frac{2K}{10} \right\rfloor,\, \ldots,\, K \right\}
+  \label{eq:pred_parciales}
+\end{equation}
+
+La desviación estándar de estas predicciones se usa como proxy de incertidumbre:
+
+\begin{equation}
+  \sigma = \text{std}(\mathcal{P})
+  \label{eq:sigma_ic}
+\end{equation}
+
+\subsection{Margen e Intervalo}
+
+El margen sigue el criterio de confianza del 95\% con un mínimo garantizado de $\pm 3.5\%$:
+
+\begin{equation}
+  m = \max\!\left(1.96\,\sigma,\; 3.5\right)
+  \label{eq:margen}
+\end{equation}
+
+\begin{align}
+  \hat{y}_{\text{low}}  &= \text{clip}\!\left(\hat{y} - m,\; 0,\; 100\right) \label{eq:ic_low} \\
+  \hat{y}_{\text{high}} &= \text{clip}\!\left(\hat{y} + m,\; 0,\; 100\right) \label{eq:ic_high}
+\end{align}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Explicabilidad con Valores SHAP}
+% ══════════════════════════════════════════════════════════════════════════════
+
+\subsection{Descomposición Aditiva}
+
+Los valores SHAP (\textit{SHapley Additive exPlanations}) descomponen la predicción del modelo como suma de contribuciones individuales:
+
+\begin{equation}
+  \hat{y} = \phi_0 + \sum_{j=1}^{p} \phi_j
+  \label{eq:shap}
+\end{equation}
+
+donde:
+\begin{itemize}[leftmargin=2cm]
+  \item $\phi_0$ es el valor base (predicción promedio del modelo, $\mathbb{E}[\hat{y}]$)
+  \item $\phi_j$ es la contribución marginal de la característica $j$ sobre la predicción
+  \item $p = 17$ es el número de características
+\end{itemize}
+
+\subsection{Cálculo del Valor SHAP para un Feature}
+
+El valor SHAP de la característica $j$ se calcula como el promedio ponderado de sus contribuciones marginales sobre todas las posibles coaliciones de características:
+
+\begin{equation}
+  \phi_j = \sum_{S \subseteq \mathcal{F} \setminus \{j\}} \frac{|S|!\,(p - |S| - 1)!}{p!}
+    \left[ f_{S \cup \{j\}}(\mathbf{x}) - f_S(\mathbf{x}) \right]
+  \label{eq:shap_formula}
+\end{equation}
+
+Para XGBoost, el algoritmo TreeSHAP calcula los valores exactos en tiempo $\mathcal{O}(TLD^2)$ sin necesidad de muestreo Monte Carlo, donde $T$ es el número de árboles, $L$ el número de hojas y $D$ la profundidad máxima.
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Sistema de Riesgo Basado en Reglas}
+% ══════════════════════════════════════════════════════════════════════════════
+
+Paralelamente al modelo ML, el sistema aplica una función de puntuación heurística definida para las condiciones tropicales de Guatemala.
+
+\subsection{Puntuación por Variable}
+
+Cada variable ambiental contribuye con una puntuación de riesgo $s_v \in [0, 35]$:
+
+\subsubsection*{Precipitación ($R$ en mm/mes)}
+\begin{equation}
+  s_R =
+  \begin{cases}
+    35 & \text{si } R > 150 \quad (\text{exceso hídrico}) \\
+    20 & \text{si } 100 < R \leq 150 \\
+    0  & \text{si } 50 \leq R \leq 100 \quad (\text{óptimo}) \\
+    15 & \text{si } 30 \leq R < 50 \quad (\text{déficit leve}) \\
+    28 & \text{si } R < 30 \quad (\text{sequía})
+  \end{cases}
+  \label{eq:score_lluvia}
+\end{equation}
+
+\subsubsection*{Temperatura ($T$ en $^\circ$C)}
+\begin{equation}
+  s_T =
+  \begin{cases}
+    32 & \text{si } T \geq 34 \quad (\text{estrés térmico severo}) \\
+    18 & \text{si } 30 \leq T < 34 \\
+    0  & \text{si } 20 \leq T \leq 28 \quad (\text{óptimo}) \\
+    10 & \text{si } 18 < T < 20 \\
+    28 & \text{si } T \leq 14 \quad (\text{riesgo de helada}) \\
+    5  & \text{en otro caso}
+  \end{cases}
+  \label{eq:score_temp}
+\end{equation}
+
+\subsubsection*{Humedad relativa ($H$ en \%)}
+\begin{equation}
+  s_H =
+  \begin{cases}
+    28 & \text{si } H \geq 88 \quad (\text{exceso, riesgo fúngico}) \\
+    8  & \text{si } 80 \leq H < 88 \\
+    0  & \text{si } 60 \leq H \leq 78 \quad (\text{óptimo}) \\
+    16 & \text{si } 55 \leq H < 60 \\
+    28 & \text{si } H < 40 \quad (\text{sequía ambiental}) \\
+    5  & \text{en otro caso}
+  \end{cases}
+  \label{eq:score_hum}
+\end{equation}
+
+\subsubsection*{pH del suelo}
+\begin{equation}
+  s_{\text{pH}} =
+  \begin{cases}
+    32 & \text{si pH} < 4.5 \quad (\text{suelo muy ácido}) \\
+    18 & \text{si } 4.5 \leq \text{pH} < 5.5 \\
+    0  & \text{si } 6.0 \leq \text{pH} \leq 7.0 \quad (\text{óptimo}) \\
+    12 & \text{si } 7.0 < \text{pH} \leq 7.2 \\
+    28 & \text{si pH} > 8.0 \quad (\text{suelo alcalino severo}) \\
+    5  & \text{en otro caso}
+  \end{cases}
+  \label{eq:score_ph}
+\end{equation}
+
+\subsection{Factor de Sensibilidad por Cultivo}
+
+Cada cultivo tiene un factor de penalización $c_f$ que refleja su sensibilidad a condiciones adversas:
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{lclc}
+\toprule
+\textbf{Cultivo} & $c_f$ & \textbf{Cultivo} & $c_f$ \\
+\midrule
+Maíz     & 3 & Papa    & 4 \\
+Frijol   & 2 & Tomate  & 6 \\
+Café     & 5 & Aguacate & 5 \\
+Arroz    & 4 & Cacao   & 4 \\
+\bottomrule
+\end{tabular}
+\caption{Factor de sensibilidad $c_f$ por cultivo. A mayor valor, el cultivo es más sensible a desviaciones ambientales.}
+\end{table}
+
+\subsection{Puntuación Total de Riesgo}
+
+\begin{equation}
+  \text{score} = \text{clip}\!\left(s_R + s_T + s_H + s_{\text{pH}} + c_f,\; 0,\; 100\right)
+  \label{eq:score_total}
+\end{equation}
+
+\subsection{Clasificación del Nivel de Riesgo}
+
+\begin{equation}
+  \text{nivel} =
+  \begin{cases}
+    \texttt{alto}   & \text{si score} \geq 55 \\
+    \texttt{bajo}   & \text{si score} \leq 18 \\
+    \texttt{medio}  & \text{en otro caso}
+  \end{cases}
+  \label{eq:nivel_riesgo}
+\end{equation}
+
+\subsection{Sistema de Dos Capas}
+
+La puntuación final combina la capa ML y la capa de reglas:
+
+\begin{equation}
+  \text{score}_{\text{final}} =
+  \begin{cases}
+    \max\!\left(\text{score}_{\text{ML}},\; \text{score}_{\text{reglas}}\right) & \text{si existen alertas críticas} \\
+    \text{score}_{\text{ML}} & \text{en otro caso}
+  \end{cases}
+  \label{eq:dos_capas}
+\end{equation}
+
+Esto garantiza que el riesgo nunca se subestime cuando los sensores reportan condiciones extremas, aunque el modelo ML haya producido un puntaje alto.
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Motor de Alertas por Umbral}
+% ══════════════════════════════════════════════════════════════════════════════
+
+\subsection{Desviación Porcentual del Rango Óptimo}
+
+Para cada variable $v$ del sensor con rango óptimo $[v_{\min},\, v_{\max}]$:
+
+\begin{equation}
+  \Delta_v =
+  \begin{cases}
+    \dfrac{v_{\min} - x}{\max(v_{\max} - v_{\min},\, 1)} \times 100 & \text{si } x < v_{\min} \quad (\text{deficiencia}) \\[1em]
+    \dfrac{x - v_{\max}}{\max(v_{\max} - v_{\min},\, 1)} \times 100 & \text{si } x > v_{\max} \quad (\text{exceso}) \\[0.5em]
+    0 & \text{si } v_{\min} \leq x \leq v_{\max}
+  \end{cases}
+  \label{eq:desviacion}
+\end{equation}
+
+\subsection{Clasificación de Severidad}
+
+\begin{equation}
+  \text{severidad} =
+  \begin{cases}
+    \texttt{severo}   & \text{si } \Delta_v \geq 50\% \\
+    \texttt{moderado} & \text{si } 25\% \leq \Delta_v < 50\% \\
+    \texttt{leve}     & \text{si } 10\% \leq \Delta_v < 25\% \\
+    \text{(sin alerta)} & \text{si } \Delta_v < 10\%
+  \end{cases}
+  \label{eq:severidad}
+\end{equation}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Detección de Anomalías (Isolation Forest)}
+% ══════════════════════════════════════════════════════════════════════════════
+
+\subsection{Principio del Algoritmo}
+
+Isolation Forest asigna una puntuación de anomalía basada en el número esperado de particiones necesarias para aislar una observación. Una observación anómala requiere menos particiones:
+
+\begin{equation}
+  s(\mathbf{x}, n) = 2^{-\frac{\mathbb{E}[h(\mathbf{x})]}{c(n)}}
+  \label{eq:iforest}
+\end{equation}
+
+donde $h(\mathbf{x})$ es la longitud del camino del punto $\mathbf{x}$ en el árbol y $c(n) = 2H(n-1) - 2(n-1)/n$ es la longitud de camino promedio para una muestra de tamaño $n$ (siendo $H$ la función armónica).
+
+\subsection{Puntuación de Anomalía Normalizada}
+
+El sistema convierte la función de decisión $d(\mathbf{x})$ del Isolation Forest en una puntuación 0--100:
+
+\begin{equation}
+  z_a = \frac{d(\mathbf{x}) - \mu_d}{\sigma_d}
+  \label{eq:z_anomaly}
+\end{equation}
+
+\begin{equation}
+  \text{score\_anomalía} = \text{clip}\!\left(100 - (z_a + 2) \times 25,\; 0,\; 100\right)
+  \label{eq:anomaly_score}
+\end{equation}
+
+\begin{equation}
+  \text{etiqueta} =
+  \begin{cases}
+    \texttt{anomalía}    & \text{si } d(\mathbf{x}) \leq p_{05} \text{ o predicción} = -1 \\
+    \texttt{sospechoso}  & \text{si score\_anomalía} \geq 60 \\
+    \texttt{normal}      & \text{en otro caso}
+  \end{cases}
+  \label{eq:anomaly_label}
+\end{equation}
+
+donde $\mu_d$ y $\sigma_d$ son la media y desviación estándar de $d(\mathbf{x})$ sobre el conjunto de entrenamiento, y $p_{05}$ es el percentil 5.
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Monitoreo de Data Drift}
+% ══════════════════════════════════════════════════════════════════════════════
+
+\subsection{Z-Score por Variable}
+
+Para cada característica $j$, se calcula la distancia estandarizada entre el valor de entrada $x_j$ y la distribución de entrenamiento $(\mu_j, \sigma_j)$:
+
+\begin{equation}
+  z_j = \left| \frac{x_j - \mu_j}{\sigma_j} \right|
+  \label{eq:zscore}
+\end{equation}
+
+\subsection{Similaridad por Feature}
+
+\begin{equation}
+  \text{sim}_j = \text{clip}\!\left(100 - 22\, z_j,\; 0,\; 100\right)
+  \label{eq:similitud}
+\end{equation}
+
+\subsection{Similaridad Global}
+
+\begin{equation}
+  \bar{\text{sim}} = \frac{1}{p} \sum_{j=1}^{p} \text{sim}_j
+  \label{eq:sim_global}
+\end{equation}
+
+\subsection{Clasificación del Estado del Drift}
+
+\begin{equation}
+  \text{estado} =
+  \begin{cases}
+    \texttt{estable}          & \text{si } \bar{\text{sim}} \geq 75 \\
+    \texttt{vigilancia}       & \text{si } 55 \leq \bar{\text{sim}} < 75 \\
+    \texttt{drift\_detectado} & \text{si } \bar{\text{sim}} < 55
+  \end{cases}
+  \label{eq:drift_estado}
+\end{equation}
+
+\subsection{Nivel de Drift por Variable}
+
+\begin{equation}
+  \text{nivel\_drift}_j =
+  \begin{cases}
+    \texttt{alto}  & \text{si } z_j \geq 3.0 \\
+    \texttt{medio} & \text{si } 2.0 \leq z_j < 3.0 \\
+    \texttt{bajo}  & \text{si } z_j < 2.0
+  \end{cases}
+  \label{eq:drift_nivel}
+\end{equation}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Métricas de Evaluación del Modelo}
+% ══════════════════════════════════════════════════════════════════════════════
+
+Las métricas se calculan sobre el conjunto de prueba (20\% del dataset, $n_{\text{test}} \approx 422{,}244$ muestras):
+
+\begin{align}
+  \text{MAE}  &= \frac{1}{n} \sum_{i=1}^{n} \left| y_i - \hat{y}_i \right|
+  \label{eq:mae} \\[0.5em]
+  \text{RMSE} &= \sqrt{\frac{1}{n} \sum_{i=1}^{n} \left( y_i - \hat{y}_i \right)^2}
+  \label{eq:rmse} \\[0.5em]
+  R^2         &= 1 - \frac{\displaystyle\sum_{i=1}^{n}(y_i - \hat{y}_i)^2}{\displaystyle\sum_{i=1}^{n}(y_i - \bar{y})^2}
+  \label{eq:r2}
+\end{align}
+
+\subsection{Validación Cruzada}
+
+Se aplica $k$-fold cross-validation con $k = 5$ sobre el conjunto de entrenamiento:
+
+\begin{equation}
+  \overline{R^2}_{\text{CV}} = \frac{1}{5} \sum_{k=1}^{5} R^2_k
+  \label{eq:cv_r2}
+\end{equation}
+
+\subsection{Resultados Obtenidos}
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Modelo} & \textbf{R\textsuperscript{2}} & \textbf{MAE (\%)} & \textbf{RMSE (\%)} & \textbf{CV R\textsuperscript{2}} \\
+\midrule
+XGBoost v3.0  & 0.6334 & --- & --- & --- \\
+Random Forest & 0.4485 & 6.84 & 8.42 & 0.4538 \\
+\bottomrule
+\end{tabular}
+\caption{Comparativa de modelos sobre el mismo split de datos. XGBoost supera consistentemente a Random Forest en todas las métricas.}
+\end{table}
+
+\textit{Nota: Las métricas de XGBoost v3.0 con dataset FAOSTAT deben actualizarse con los resultados del comando \texttt{python model\_xgboost.py compare} usando el dataset calibrado.}
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Pronóstico Meteorológico (Open-Meteo)}
+% ══════════════════════════════════════════════════════════════════════════════
+
+El endpoint de pronóstico obtiene datos de la API Open-Meteo para los 22 departamentos de Guatemala usando sus coordenadas geográficas $(\lambda_i, \phi_i)$. Los datos se almacenan en caché por $\Delta t = 3$ horas:
+
+\begin{equation}
+  \text{cache\_válido} =
+  \begin{cases}
+    \text{Sí} & \text{si } t_{\text{actual}} - t_{\text{consulta}} < 3\,\text{h} \\
+    \text{No} & \text{en otro caso}
+  \end{cases}
+  \label{eq:cache}
+\end{equation}
+
+Las variables meteorológicas obtenidas diariamente para 7 días incluyen:
+temperatura máxima y mínima ($^\circ$C), precipitación (mm), humedad relativa (\%), velocidad del viento (m/s), radiación solar (MJ/m\textsuperscript{2}/día) y código de condición meteorológica WMO.
+
+% ══════════════════════════════════════════════════════════════════════════════
+\section{Resumen de Parámetros Clave}
+% ══════════════════════════════════════════════════════════════════════════════
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{lll}
+\toprule
+\textbf{Parámetro} & \textbf{Valor} & \textbf{Referencia} \\
+\midrule
+Confianza intervalo          & 95\% ($z = 1.96$)     & \eq{\ref{eq:margen}} \\
+Margen mínimo garantizado    & $\pm 3.5\%$           & \eq{\ref{eq:margen}} \\
+Puntos de evaluación parcial & 10 de 400 árboles     & \eq{\ref{eq:pred_parciales}} \\
+Umbral alerta (mínimo)       & 10\% desviación       & \eq{\ref{eq:severidad}} \\
+Umbral alerta severa         & $\geq 50\%$ desviación & \eq{\ref{eq:severidad}} \\
+Contaminación Isolation Forest & 5\%                 & Sección 8 \\
+Divisor de normalización drift & 22 por unidad $z$   & \eq{\ref{eq:similitud}} \\
+Caché pronóstico             & 3 horas               & \eq{\ref{eq:cache}} \\
+Split entrenamiento/prueba   & 80\% / 20\%           & \eq{\ref{eq:mae}} \\
+\bottomrule
+\end{tabular}
+\caption{Consolidado de parámetros matemáticos utilizados en el sistema.}
+\end{table}
+
+\vspace{2em}
+\hrule
+\vspace{0.5em}
+{\small \textit{Documento generado para AgroClima GT — Tesis Universitaria. Todos los cálculos corresponden a la implementación en} \texttt{ml\_insights.py}, \texttt{model\_xgboost.py}, \texttt{alert\_engine.py} \textit{y} \texttt{riskUtils.js}.}
+
+\end{document}

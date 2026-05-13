@@ -345,7 +345,7 @@ export default function Forecast({ form }) {
                   fontWeight: 700,
                   padding: "0.35rem 0.7rem",
                   borderRadius: 999,
-                  background: "rgba(15,23,42,0.05)",
+                  background: "var(--surface-hover)",
                   color: "var(--text-secondary)",
                 }}>
                   Principal: {forecastSummary.primary.title}
@@ -358,8 +358,8 @@ export default function Forecast({ form }) {
             <div style={{
               minWidth: 190,
               textAlign: "center",
-              background: "rgba(255,255,255,0.65)",
-              border: "1px solid rgba(15,23,42,0.08)",
+              background: "var(--surface)",
+              border: "1px solid var(--border-strong)",
               borderRadius: 12,
               padding: "0.8rem 1rem",
             }}>

@@ -97,6 +97,8 @@ WATER_STRESS_PATH    = os.path.join(BASE_DIR, "data", "processed", "water_stress
 SOWING_CALENDAR_PATH = os.path.join(BASE_DIR, "data", "processed", "sowing_calendar.csv")
 CROP_OPTIMAL_PATH    = os.path.join(BASE_DIR, "data", "datasets", "crop_optimal_conditions.csv")
 COMPARISON_PATH      = os.path.join(BASE_DIR, "data", "models", "model_comparison.json")
+DATASET_FAO_PATH     = os.path.join(BASE_DIR, "data", "datasets", "dataset_faostat.csv")
+DATASET_META_PATH    = os.path.join(BASE_DIR, "data", "models", "dataset_meta.json")
 LOGS_DIR             = os.path.join(BASE_DIR, "data", "logs")
 OPEN_METEO_USAGE_PATH = os.path.join(LOGS_DIR, "open_meteo_usage.json")
 INSIVUMEH_DAILY_PATH = os.path.join(BASE_DIR, "data", "raw", "insivumeh", "insivumeh_stations_daily.csv")
@@ -1138,12 +1140,18 @@ def risk_map(crop: Optional[str] = None):
 
     if not rows:
         df = pd.DataFrame()
-        if _DB_MODULE and db_available():
-            df = load_training_dataframe("dataset_v2.csv")
-            if df.empty:
-                df = load_training_dataframe()
-        if df.empty and os.path.exists(os.path.join(BASE_DIR, "data", "datasets", "dataset_v2.csv")):
-            df = pd.read_csv(os.path.join(BASE_DIR, "data", "datasets", "dataset_v2.csv"))
+        # Priorizar FAOSTAT (2.1M filas) sobre dataset legado
+        for csv_path in [
+            DATASET_FAO_PATH,
+            os.path.join(BASE_DIR, "data", "datasets", "dataset_combinado.csv"),
+            os.path.join(BASE_DIR, "data", "datasets", "dataset_openmeteo.csv"),
+        ]:
+            if os.path.exists(csv_path):
+                try:
+                    df = pd.read_csv(csv_path, usecols=["municipio", "crop", "yield_pct"])
+                    break
+                except Exception:
+                    continue
         if not df.empty:
             if crop:
                 df = df[df["crop"].str.lower() == crop.lower()]
@@ -1695,15 +1703,18 @@ def get_recommendations(cultivo: str,
 
 @app.get("/dataset")
 def get_dataset():
-    if _DB_MODULE and db_available():
-        df = load_training_dataframe("dataset_v2.csv")
-        if df.empty:
-            df = load_training_dataframe()
-        if not df.empty:
-            return df.head(200).to_dict(orient="records")
-    if not os.path.exists(DATASET_PATH):
-        raise HTTPException(404, "Dataset no encontrado. Ejecuta: python generate_dataset.py")
-    return pd.read_csv(DATASET_PATH).head(200).to_dict(orient="records")
+    for csv_path in [
+        DATASET_FAO_PATH,
+        os.path.join(BASE_DIR, "data", "datasets", "dataset_combinado.csv"),
+        os.path.join(BASE_DIR, "data", "datasets", "dataset_openmeteo.csv"),
+        DATASET_PATH,
+    ]:
+        if os.path.exists(csv_path):
+            try:
+                return pd.read_csv(csv_path).head(200).to_dict(orient="records")
+            except Exception:
+                continue
+    raise HTTPException(404, "Dataset no encontrado.")
 
 
 # ---------------------------------------------------------------------------
@@ -2044,7 +2055,8 @@ def _read_active_model_row():
         with get_cursor() as cur:
             cur.execute(
                 """
-                SELECT nombre, version, dataset_usado, n_filas, n_features, r2_test, mae, rmse,
+                SELECT nombre, version, dataset_usado, n_filas, n_features,
+                       r2_test, mae, rmse, precision, recall, f1, low_yield_threshold,
                        crossval_r2, crossval_std, hiperparametros, activo, fecha_entrenamiento
                 FROM modelos_ml
                 WHERE activo = TRUE
@@ -2058,39 +2070,17 @@ def _read_active_model_row():
 
 
 def _read_training_summary(dataset_name: str | None = None):
-    if not db_available():
-        return {}
-    try:
-        with get_cursor() as cur:
-            if dataset_name:
-                cur.execute(
-                    """
-                    SELECT COUNT(*) AS total_rows,
-                           COUNT(DISTINCT cultivo) AS n_crops,
-                           COUNT(DISTINCT municipio) AS n_municipalities,
-                           MIN(anio) AS min_year,
-                           MAX(anio) AS max_year
-                    FROM dataset_entrenamiento
-                    WHERE dataset_nombre = %s
-                    """,
-                    (dataset_name,),
-                )
-                row = cur.fetchone()
-                if row and row["total_rows"]:
-                    return row
-            cur.execute(
-                """
-                SELECT COUNT(*) AS total_rows,
-                       COUNT(DISTINCT cultivo) AS n_crops,
-                       COUNT(DISTINCT municipio) AS n_municipalities,
-                       MIN(anio) AS min_year,
-                       MAX(anio) AS max_year
-                FROM dataset_entrenamiento
-                """
-            )
-            return cur.fetchone() or {}
-    except Exception:
-        return {}
+    """Devuelve stats del dataset activo. Prioriza el meta JSON del CSV FAOSTAT."""
+    meta = _faostat_meta()
+    if meta:
+        return {
+            "total_rows":       meta.get("total_rows"),
+            "n_crops":          meta.get("n_crops"),
+            "n_municipalities": meta.get("n_municipalities"),
+            "min_year":         2010,
+            "max_year":         2024,
+        }
+    return {}
 
 
 def _infer_feature_order(model):
@@ -2124,6 +2114,32 @@ def _build_feature_importance_payload(model):
     return rows
 
 
+def _faostat_meta() -> dict:
+    """Lee stats del dataset FAOSTAT y los cachea en dataset_meta.json para evitar re-leer 2M filas."""
+    if os.path.exists(DATASET_META_PATH):
+        try:
+            with open(DATASET_META_PATH) as f:
+                return json.load(f)
+        except Exception:
+            pass
+    if not os.path.exists(DATASET_FAO_PATH):
+        return {}
+    try:
+        import pandas as pd
+        df = pd.read_csv(DATASET_FAO_PATH, usecols=["municipio", "crop"])
+        meta = {
+            "total_rows":       len(df),
+            "n_municipalities": int(df["municipio"].nunique()),
+            "n_crops":          int(df["crop"].nunique()),
+            "dataset":          "dataset_faostat.csv",
+        }
+        with open(DATASET_META_PATH, "w") as f:
+            json.dump(meta, f, indent=2)
+        return meta
+    except Exception:
+        return {}
+
+
 def _build_model_info_payload():
     comparison = _read_model_comparison_payload()
     comparison_xgb = (comparison.get("results") or {}).get("XGBoost") or {}
@@ -2133,9 +2149,16 @@ def _build_model_info_payload():
     dataset_name = active_row.get("dataset_usado")
     summary = _read_training_summary(dataset_name)
 
+    # Fallback al dataset FAOSTAT cuando la DB tiene metadata antigua (< 1M filas)
+    fao_meta = {}
+    db_rows = active_row.get("n_filas") or 0
+    if db_rows < 1_000_000:
+        fao_meta = _faostat_meta()
+
     model_name = active_row.get("nombre") or "XGBoost Yield Predictor"
     version = active_row.get("version") or "sin version"
-    total_rows = active_row.get("n_filas") or summary.get("total_rows") or comparison.get("n_train")
+    total_rows = (fao_meta.get("total_rows") or active_row.get("n_filas")
+                  or summary.get("total_rows") or comparison.get("n_train"))
     n_features = active_row.get("n_features") or comparison.get("n_features") or len(FEATURES)
     train_samples = comparison.get("n_train")
     test_samples = comparison.get("n_test")
@@ -2168,19 +2191,22 @@ def _build_model_info_payload():
             "name": model_name,
             "version": version,
             "status": "Activo" if os.path.exists(MODEL_PATH) else "No disponible",
-            "dataset": dataset_name or ("dataset_openmeteo.csv" if os.path.exists(DATASET_OM_PATH) else "dataset_preliminar.csv"),
+            "dataset": fao_meta.get("dataset") or dataset_name or ("dataset_openmeteo.csv" if os.path.exists(DATASET_OM_PATH) else "dataset_preliminar.csv"),
             "trained_at": trained_at.isoformat() if trained_at else model_file_mtime,
             "r2": active_row.get("r2_test", comparison_xgb.get("r2")),
             "mae": active_row.get("mae", comparison_xgb.get("mae")),
             "rmse": active_row.get("rmse", comparison_xgb.get("rmse")),
+            "precision": active_row.get("precision", comparison_xgb.get("precision")),
+            "recall": active_row.get("recall", comparison_xgb.get("recall")),
+            "f1": active_row.get("f1", comparison_xgb.get("f1")),
             "crossValR2": active_row.get("crossval_r2", comparison_xgb.get("crossval_r2")),
             "crossValStd": active_row.get("crossval_std", comparison_xgb.get("crossval_std")),
             "trainSamples": train_samples,
             "testSamples": test_samples,
             "totalRows": total_rows,
             "nFeatures": n_features,
-            "nCrops": summary.get("n_crops"),
-            "coveredMunicipalities": summary.get("n_municipalities"),
+            "nCrops": fao_meta.get("n_crops") or summary.get("n_crops"),
+            "coveredMunicipalities": fao_meta.get("n_municipalities") or summary.get("n_municipalities"),
             "yearsRange": years_range,
             "hyperparams": active_row.get("hiperparametros") or {},
             "featureImportance": feature_importance,

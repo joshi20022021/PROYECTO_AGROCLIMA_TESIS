@@ -1,24 +1,24 @@
 {
-  "compared_at": "2026-03-31T14:17:59.318447",
-  "n_train": 51948,
-  "n_test": 12987,
-  "n_features": 13,
+  "compared_at": "2026-05-10T23:37:14.025352",
+  "n_train": 1688976,
+  "n_test": 422244,
+  "n_features": 17,
   "results": {
     "XGBoost": {
-      "r2": 0.7157,
-      "mae": 4.86,
-      "rmse": 6.04,
-      "crossval_r2": 0.7092,
-      "crossval_std": 0.002,
-      "train_time_s": 3.4
+      "r2": 0.6334,
+      "mae": 5.91,
+      "rmse": 7.68,
+      "crossval_r2": 0.6051,
+      "crossval_std": 0.0083,
+      "train_time_s": 44.8
     },
     "RandomForest": {
-      "r2": 0.4485,
-      "mae": 6.84,
-      "rmse": 8.42,
-      "crossval_r2": 0.4538,
-      "crossval_std": 0.0028,
-      "train_time_s": 5.4
+      "r2": 0.3474,
+      "mae": 8.26,
+      "rmse": 10.25,
+      "crossval_r2": 0.3479,
+      "crossval_std": 0.0046,
+      "train_time_s": 86.5
     }
   }
 }

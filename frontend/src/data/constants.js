@@ -33,6 +33,11 @@ export const sections = {
     title: "Metricas del Dataset",
     subtitle: "Registro de precipitacion, temperatura, humedad y pH del suelo por cultivo y municipio.",
   },
+  risk_map: {
+    label: "Mapa",
+    title: "Mapa de Riesgo",
+    subtitle: "Visualizacion geografica del riesgo agricola por departamento y municipio.",
+  },
   alerts: {
     label: "Alertas",
     title: "Alertas y Acciones",
