@@ -332,7 +332,7 @@ export default function Arduino() {
             {sensors && (
               <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
                 {[["Rojo", sensors.color_r, "#c04040"], ["Verde", sensors.color_g, "#1e7a4a"], ["Azul", sensors.color_b, "#2a6090"]].map(([label, value, color]) => (
-                  <div key={label} style={{ flex: 1, minWidth: 110, background: "rgba(15,23,42,0.03)", borderRadius: 8, padding: "0.6rem 0.8rem", borderLeft: `3px solid ${color}` }}>
+                  <div key={label} style={{ flex: 1, minWidth: 110, background: "var(--surface-alt)", borderRadius: 8, padding: "0.6rem 0.8rem", borderLeft: `3px solid ${color}` }}>
                     <p style={{ fontSize: "0.7rem", color: "var(--text-muted)", margin: 0 }}>Color {label}</p>
                     <p style={{ fontSize: "1.1rem", fontWeight: 800, color, margin: 0 }}>{value ?? "--"}</p>
                   </div>

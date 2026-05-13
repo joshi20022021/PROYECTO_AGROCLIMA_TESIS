@@ -1,0 +1,837 @@
+\documentclass[12pt,letterpaper,oneside]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage{geometry}
+\geometry{left=3cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,longtable,array,tabularx}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=black,citecolor=black,urlcolor=blue}
+\usepackage{caption}
+\usepackage{hanging}
+\usepackage{fancyhdr}
+\setlength{\headheight}{15pt}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{AgroClima GT}
+\lhead{Trabajo de graduación}
+\cfoot{\thepage}
+
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+\newenvironment{figuraPendiente}[2]{%
+\begin{figure}[H]\centering
+\fbox{\begin{minipage}{0.88\textwidth}\vspace{0.25cm}\textbf{Imagen pendiente:} #1\\[0.15cm]\textit{Indicación:} #2\vspace{0.25cm}\end{minipage}}
+}{\end{figure}}
+
+\newcommand{\codigo}[1]{\texttt{#1}}
+
+\begin{document}
+
+% ===================== PORTADA =====================
+\begin{titlepage}
+\centering
+{\Large Universidad de San Carlos de Guatemala\\}
+{\Large Facultad de Ingeniería\\}
+{\Large Escuela de Ingeniería en Ciencias y Sistemas\\[2.5cm]}
+
+{\bfseries\Large DESARROLLO DE UN SISTEMA BASADO EN MACHINE LEARNING PARA LA DETECCIÓN TEMPRANA DE ESCENARIOS DE BAJO RENDIMIENTO AGRÍCOLA EN ZONAS AGROCLIMÁTICAS DE GUATEMALA\\[2.5cm]}
+
+{\Large Edgar Josías Cán Ajquejay\\[0.5cm]}
+{\large Asesorado por el Ing. Sergio Leonel Gómez Bravo\\[2.5cm]}
+
+{\large Guatemala, mayo de 2026\\}
+\end{titlepage}
+
+\pagenumbering{roman}
+\tableofcontents
+\listoffigures
+\listoftables
+\clearpage
+
+% ===================== SIMBOLOS =====================
+\chapter*{Lista de símbolos}
+\addcontentsline{toc}{chapter}{Lista de símbolos}
+
+\begin{longtable}{p{3cm}p{9.5cm}}
+\toprule
+\textbf{Símbolo} & \textbf{Significado} \\
+\midrule
+$A_c$ & Conjunto de años con datos FAOSTAT disponibles para el cultivo $c$. \\
+$\bar{f}(c)$ & Promedio del factor FAOSTAT para el cultivo $c$. \\
+$\bar{y}$ & Promedio de los valores reales de la variable objetivo. \\
+$\bar{sim}$ & Similitud global promedio usada para clasificar data drift. \\
+$c_f$ & Factor de sensibilidad del cultivo. \\
+$\Delta t$ & Ventana temporal usada para cache de pronóstico. \\
+$\Delta_v$ & Desviación porcentual de una variable fuera de su rango óptimo. \\
+$E[h(\mathbf{x})]$ & Longitud esperada del camino para aislar una observación en Isolation Forest. \\
+$f_k$ & Árbol de regresión $k$ dentro del modelo XGBoost. \\
+$f_{FAO}(c,a)$ & Factor de calibración FAOSTAT para el cultivo $c$ y año $a$. \\
+$G$ & Índice de verdor de la vegetación. \\
+$g_i$ & Gradiente de primer orden de la pérdida para la muestra $i$. \\
+$h_i$ & Gradiente de segundo orden o Hessiano para la muestra $i$. \\
+$H$ & Humedad relativa ambiental. \\
+$K$ & Número total de árboles del ensamble. \\
+$L$ & Luminosidad o intensidad de luz. \\
+$MAE$ & Error absoluto medio entre valores reales y predichos. \\
+$p$ & Número de características de entrada del modelo. \\
+$pH$ & Potencial de hidrógeno del suelo. \\
+$R$ & Precipitación acumulada o lluvia. \\
+$R^2$ & Coeficiente de determinación del modelo. \\
+$R_{ref}(c)$ & Rendimiento histórico de referencia para el cultivo $c$. \\
+$RMSE$ & Raíz del error cuadrático medio. \\
+$s(\mathbf{x},n)$ & Puntaje de anomalía calculado por Isolation Forest. \\
+$score$ & Puntaje total de riesgo calculado por reglas. \\
+$T$ & Temperatura media del aire cuando aparece en el vector agroclimático. \\
+$T_s$ & Temperatura del suelo. \\
+$T_{max}$ & Temperatura máxima. \\
+$T_{min}$ & Temperatura mínima. \\
+$v_w$ & Velocidad del viento. \\
+$\mathbf{x}_i$ & Vector de características de la muestra $i$. \\
+$y_i$ & Valor real de la variable objetivo para la muestra $i$. \\
+$\hat{y}_i$ & Valor predicho por el modelo para la muestra $i$. \\
+$yield\_pct$ & Variable objetivo del sistema; rendimiento agrícola esperado normalizado. \\
+$z$ & Altitud del punto geográfico. \\
+$z_j$ & Distancia estandarizada de una característica respecto al perfil de entrenamiento. \\
+\bottomrule
+\end{longtable}
+
+% ===================== GLOSARIO =====================
+\chapter*{Glosario}
+\addcontentsline{toc}{chapter}{Glosario}
+
+\begin{description}[leftmargin=4cm,style=nextline]
+\item[AgroClima GT.] Prototipo web desarrollado para integrar datos climáticos, edáficos y agronómicos con modelos de aprendizaje automático, con el fin de estimar rendimiento agrícola, visualizar riesgo y generar alertas o recomendaciones para cultivos en Guatemala.
+\item[Alerta agroclimática.] Mensaje generado por el sistema cuando una variable climática, edáfica o de sensor se encuentra fuera de un rango considerado adecuado para un cultivo.
+\item[Altiplano Occidental.] Región del occidente de Guatemala caracterizada por condiciones de altura y variabilidad térmica. En esta tesis se toma como caso de referencia, aunque el prototipo tiene cobertura técnica más amplia.
+\item[API.] Interfaz de programación de aplicaciones. En AgroClima GT, el backend FastAPI expone servicios para predicción, pronóstico, datasets, alertas, Arduino, administración y consulta de métricas.
+\item[Arduino.] Plataforma de hardware libre usada como base para la integración futura de sensores físicos. En el prototipo actual se contempla conexión serial, simulación de lecturas y transmisión por WebSocket.
+\item[Backend.] Capa de software que recibe solicitudes del frontend, valida datos, ejecuta modelos predictivos, consulta archivos, gestiona alertas y expone servicios HTTP y WebSocket.
+\item[CSV.] Formato tabular separado por comas usado para datasets, recomendaciones, fuentes y exportación de registros.
+\item[Data drift.] Cambio en la distribución de los datos de entrada respecto a la distribución usada durante el entrenamiento del modelo.
+\item[Dataset.] Conjunto de datos estructurado usado para análisis, entrenamiento o validación. En AgroClima GT el dataset final de entrenamiento se denomina \codigo{dataset\_faostat.csv}.
+\item[Detección de anomalías.] Proceso de identificar observaciones o lecturas que se alejan del comportamiento esperado. El prototipo utiliza Isolation Forest y reglas de validación por rango.
+\item[ERA5-Land.] Dataset de reanálisis climático terrestre utilizado como fuente histórica de variables climáticas y de suelo.
+\item[FAOSTAT.] Base estadística de la Organización de las Naciones Unidas para la Alimentación y la Agricultura. En el proyecto se usa para calibrar el rendimiento agrícola.
+\item[FastAPI.] Framework de Python usado para desarrollar la API del backend.
+\item[Frontend.] Capa visual de la aplicación. En AgroClima GT fue construida con React y Vite.
+\item[Índice de verdor.] Indicador numérico que aproxima el estado visual de la vegetación a partir de canales RGB.
+\item[INSIVUMEH.] Instituto Nacional de Sismología, Vulcanología, Meteorología e Hidrología de Guatemala. En el prototipo se considera como fuente nacional de referencia climática procesada localmente.
+\item[IoT.] Internet de las Cosas. En esta tesis, la integración IoT física completa se plantea como continuidad posterior; el prototipo actual deja implementada la base de software.
+\item[Isolation Forest.] Algoritmo de detección de anomalías que identifica observaciones atípicas a partir de la facilidad con que pueden ser aisladas dentro de árboles aleatorios.
+\item[MAE.] Error absoluto medio. Métrica de regresión que mide el promedio de las diferencias absolutas entre valores reales y predichos.
+\item[Mapa de riesgo.] Visualización geográfica que permite observar niveles de riesgo o rendimiento esperado por departamento o municipio.
+\item[Modelo predictivo.] Componente de aprendizaje automático que estima una salida a partir de variables de entrada. En AgroClima GT, el modelo principal estima \codigo{yield\_pct}.
+\item[NASA POWER.] Fuente de datos climáticos y energéticos de NASA usada como complemento para variables meteorológicas.
+\item[Open-Meteo.] Servicio de pronóstico meteorológico utilizado para consultar condiciones climáticas mediante coordenadas.
+\item[PostgreSQL.] Sistema gestor de base de datos relacional usado para almacenar usuarios, predicciones, alertas, lecturas, datasets y metadatos del modelo.
+\item[Random Forest.] Modelo de ensamble basado en múltiples árboles de decisión. En el proyecto se utiliza como línea base comparativa frente a XGBoost.
+\item[RMSE.] Raíz del error cuadrático medio. Métrica de regresión que penaliza más los errores grandes.
+\item[SHAP.] Método de explicabilidad que descompone una predicción en contribuciones individuales de cada variable.
+\item[SoilGrids.] Fuente global de información de suelos usada para variables edáficas como pH.
+\item[WebSocket.] Protocolo de comunicación bidireccional utilizado para transmitir lecturas Arduino o simulaciones en tiempo real hacia el frontend.
+\item[XGBoost.] Algoritmo de gradient boosting usado como modelo principal para estimar el rendimiento agrícola esperado.
+\item[Yield\_pct.] Variable objetivo del modelo. Representa el porcentaje estimado de rendimiento agrícola esperado, en una escala de 0 a 100.
+\end{description}
+
+% ===================== RESUMEN =====================
+\chapter*{Resumen}
+\addcontentsline{toc}{chapter}{Resumen}
+
+La variabilidad climática representa un desafío para la producción agrícola en Guatemala, especialmente en cultivos sensibles a cambios de temperatura, precipitación, humedad y condiciones de suelo. Ante esta problemática, se desarrolló AgroClima GT, un prototipo web basado en aprendizaje automático y visualización de datos para identificar escenarios de bajo rendimiento agrícola y apoyar la toma de decisiones mediante indicadores, alertas y recomendaciones.
+
+El sistema integra fuentes climáticas, edáficas y agronómicas, incluyendo datos procesados de ERA5-Land, NASA POWER, SoilGrids, Open-Meteo, INSIVUMEH y FAOSTAT. A partir de estas fuentes se construyó un dataset tabular para entrenar y evaluar modelos predictivos. El modelo principal utiliza XGBoost para estimar el porcentaje de rendimiento esperado, representado como \codigo{yield\_pct}, mientras Random Forest se emplea como referencia comparativa. La evaluación interna actual muestra que XGBoost obtuvo $R^2 = 0.6334$, $MAE = 5.91$ y $RMSE = 7.68$, superando a Random Forest en la comparación registrada.
+
+La arquitectura del prototipo está compuesta por un frontend desarrollado con React/Vite, un backend construido con FastAPI, una base de datos PostgreSQL, archivos locales de datos y modelos, y módulos de análisis para predicción, detección de anomalías, monitoreo de data drift y generación de alertas. Asimismo, el sistema deja implementada la base de software para integrar sensores físicos mediante Arduino, lectura serial, simulación y WebSocket. La instalación física, calibración en campo y comunicación inalámbrica mediante tecnologías como MQTT o LoRaWAN se plantean como una fase posterior de continuidad.
+
+Los resultados demuestran la factibilidad técnica de integrar datos públicos, aprendizaje automático, reglas agronómicas y visualización web en una herramienta de apoyo a la decisión agrícola. La validación realizada corresponde a una etapa técnica y funcional del prototipo; por tanto, la validación agronómica con sensores instalados en parcelas reales y eventos etiquetados queda como trabajo futuro.
+
+\textbf{Palabras clave:} aprendizaje automático, agricultura, XGBoost, riesgo agroclimático, rendimiento agrícola, Guatemala, sensores, FastAPI, React, alertas tempranas.
+
+% ===================== OBJETIVOS =====================
+\chapter*{Objetivos}
+\addcontentsline{toc}{chapter}{Objetivos}
+
+\section*{General}
+Desarrollar un prototipo tecnológico basado en aprendizaje automático y visualización web para identificar escenarios de bajo rendimiento agrícola en Guatemala, mediante el análisis de registros climáticos, variables edáficas, datos agronómicos y métricas locales obtenidas por entrada manual, consulta externa, simulación o integración posterior de sensores.
+
+\section*{Específicos}
+\begin{enumerate}
+\item Caracterizar variables climáticas, edáficas y agronómicas asociadas al rendimiento agrícola en Guatemala mediante la integración de fuentes históricas y recientes como ERA5-Land, NASA POWER, SoilGrids, Open-Meteo, INSIVUMEH y FAOSTAT.
+\item Construir y procesar un dataset tabular que permita entrenar y evaluar modelos predictivos de rendimiento agrícola, incorporando variables como municipio, departamento, cultivo, mes, temperatura, precipitación, humedad, pH del suelo, humedad de suelo, luminosidad, índice de verdor, viento, altitud y rendimiento estimado.
+\item Entrenar y comparar modelos de aprendizaje automático para estimar el porcentaje de rendimiento agrícola esperado, utilizando métricas de regresión como $R^2$, MAE y RMSE para seleccionar el modelo principal.
+\item Implementar un motor de análisis y alertas que combine predicción de rendimiento, detección de anomalías, monitoreo de data drift y reglas agronómicas por cultivo para identificar condiciones de riesgo y generar recomendaciones.
+\item Desarrollar una interfaz web de apoyo a la toma de decisiones que permita ingresar datos, visualizar predicciones, consultar pronósticos, revisar tendencias, analizar mapas de riesgo, exportar CSV, generar reportes y consultar alertas.
+\item Dejar implementada la base de software para la integración posterior de sensores físicos mediante Arduino, simulación de lecturas y transmisión en tiempo real por WebSocket, considerando la validación física en campo como una fase futura del proyecto.
+\end{enumerate}
+
+% ===================== INTRODUCCION =====================
+\chapter*{Introducción}
+\addcontentsline{toc}{chapter}{Introducción}
+
+La agricultura guatemalteca depende de condiciones climáticas que pueden variar significativamente entre regiones, temporadas y cultivos. La precipitación irregular, los cambios de temperatura, la humedad ambiental, las propiedades del suelo y la disponibilidad de agua influyen directamente en el desarrollo de los cultivos y en el rendimiento esperado. En este contexto, los productores y técnicos agrícolas requieren herramientas que permitan interpretar información climática y agronómica de forma oportuna, comprensible y orientada a la toma de decisiones.
+
+El avance de las tecnologías de información, los servicios climáticos abiertos, los sistemas de información geográfica, los sensores de bajo costo y los modelos de aprendizaje automático ha permitido desarrollar soluciones de apoyo a la decisión en agricultura. Estas soluciones pueden integrar datos históricos, pronósticos, mediciones locales y modelos predictivos para anticipar escenarios de riesgo. Sin embargo, para que estas herramientas sean útiles en un contexto académico y operativo, deben presentar resultados de forma clara, documentar sus limitaciones y diferenciar entre predicciones técnicas, validaciones funcionales y validaciones agronómicas en campo.
+
+El presente trabajo desarrolla AgroClima GT, un prototipo web orientado a la identificación de escenarios de bajo rendimiento agrícola en Guatemala. El sistema utiliza datos climáticos, edáficos y agronómicos procesados desde fuentes como ERA5-Land, NASA POWER, SoilGrids, Open-Meteo, INSIVUMEH y FAOSTAT. Con estos datos se construye un dataset para entrenar modelos de aprendizaje automático, siendo XGBoost el modelo principal para estimar el porcentaje de rendimiento agrícola esperado. Además, el prototipo incorpora comparación con Random Forest, detección de anomalías mediante Isolation Forest, monitoreo de data drift, reglas agronómicas por cultivo y visualizaciones interactivas.
+
+La plataforma fue implementada mediante una arquitectura compuesta por frontend React/Vite, backend FastAPI, base de datos PostgreSQL, archivos locales de datos y modelos, y módulos de comunicación para lecturas Arduino por serial o simulación. La interfaz permite al usuario ingresar variables agroclimáticas, obtener predicciones, consultar pronóstico, revisar registros del dataset, filtrar información, exportar datos, generar reportes, observar mapas de riesgo y visualizar alertas. De esta forma, el prototipo no se limita al cálculo del modelo, sino que transforma la información técnica en elementos útiles para la interpretación y el seguimiento agrícola.
+
+Es importante delimitar el alcance del proyecto. La versión actual valida la factibilidad técnica y funcional del sistema de software. El componente de sensores físicos forma parte de la continuidad del proyecto: el sistema ya incluye soporte para lectura Arduino, simulación y transmisión WebSocket, pero la instalación del nodo sensor, la calibración de hardware, la comunicación inalámbrica y la validación en parcelas reales quedan como etapas posteriores. Esta delimitación permite conservar la visión planteada en el protocolo sin atribuir al prototipo resultados de campo que todavía no han sido ejecutados.
+
+\pagenumbering{arabic}
+
+% ===================== CAPITULO 1 =====================
+\chapter{Marco contextual: agricultura y clima en Guatemala}
+
+\section{Importancia del sector agrícola a nivel nacional}
+Guatemala ha construido parte importante de su economía y de su seguridad alimentaria sobre la actividad agrícola. La agricultura no constituye únicamente un sector productivo: también representa empleo rural, ingresos familiares, producción de alimentos y sostenimiento de cadenas de valor asociadas a granos básicos, café, hortalizas y otros cultivos estratégicos. En este contexto, la variabilidad climática se convierte en una amenaza directa porque altera la disponibilidad de agua, la temperatura, la humedad y las condiciones de suelo que determinan el rendimiento de los cultivos.
+
+A nivel social, los efectos de sequías, heladas, exceso de lluvia o cambios bruscos de temperatura no se limitan a pérdidas económicas. En comunidades rurales dependientes del ciclo agrícola, un evento climático adverso puede afectar la alimentación, el ingreso familiar y la capacidad de recuperación productiva. Por ello, modernizar el análisis agroclimático mediante herramientas digitales no debe entenderse solamente como una apuesta tecnológica, sino como una necesidad para apoyar decisiones agrícolas más informadas.
+
+AgroClima GT se ubica dentro de esa problemática. El prototipo no reemplaza la asistencia técnica ni los sistemas oficiales, sino que demuestra la viabilidad de integrar fuentes climáticas, edáficas y agronómicas en una plataforma web capaz de estimar rendimiento, visualizar riesgo y generar recomendaciones comprensibles para el usuario.
+
+\section{Las ocho regiones agroclimáticas de Guatemala}
+La clasificación agroclimática del Ministerio de Agricultura, Ganadería y Alimentación permite comprender que Guatemala no presenta condiciones uniformes de producción. La altitud, el relieve, la precipitación, la temperatura y la humedad cambian entre regiones, afectando calendarios de siembra, selección de cultivos y riesgo de eventos extremos. Esta diversidad territorial justifica que una herramienta como AgroClima GT organice información por ubicación, cultivo y variables ambientales.
+
+\begin{table}[H]
+\centering
+\caption{Regiones agroclimáticas de Guatemala y riesgos principales}
+\begin{tabularx}{\textwidth}{p{3.4cm}p{4.5cm}X}
+\toprule
+\textbf{Región} & \textbf{Departamentos representativos} & \textbf{Riesgos principales} \\
+\midrule
+Altiplano Occidental & San Marcos, Quetzaltenango, Totonicapán, Huehuetenango & Heladas, bajas temperaturas, microclimas de montaña. \\
+Altiplano Central & Guatemala, Chimaltenango, Sacatepéquez & Variabilidad térmica, presión urbana, hortalizas y café. \\
+Bocacosta & Sur de San Marcos y Quetzaltenango & Alta precipitación, transición térmica. \\
+Pacífico & Escuintla, Suchitepéquez, Retalhuleu & Altas temperaturas, sequía, canícula prolongada. \\
+Valles de Oriente & Zacapa, Chiquimula, El Progreso & Déficit hídrico y estrés por calor. \\
+Norte & Petén & Clima tropical, expansión agrícola y ganadera. \\
+Caribe & Izabal & Influencia marítima e inundaciones. \\
+Franja Transversal & Alta Verapaz, norte de Quiché & Alta humedad, nubosidad y precipitación constante. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{figuraPendiente}{Mapa de regiones agroclimáticas de Guatemala.}{Insertar un mapa oficial o elaborado que muestre las ocho regiones agroclimáticas. Si no se cuenta con mapa, puede usarse una tabla como figura explicativa.}\caption{Mapa de regiones agroclimáticas de Guatemala}\end{figuraPendiente}
+
+\section{Anomalías térmicas y heladas agrícolas en Guatemala}
+Las anomalías térmicas son desviaciones respecto a las condiciones esperadas para una zona y época del año. En regiones de altura, las heladas pueden afectar tejidos vegetales y reducir el rendimiento; en regiones cálidas, el exceso de temperatura puede aumentar el estrés hídrico, afectar la floración y disminuir la productividad. Aunque el Altiplano Occidental representa un escenario importante por su exposición a bajas temperaturas, el enfoque del prototipo es más amplio: evalúa temperatura, lluvia, humedad, pH, humedad del suelo, luminosidad, verdor y viento.
+
+En AgroClima GT, el problema de las anomalías agroclimáticas se traduce en un motor de análisis que combina predicción, reglas agronómicas y detección de valores atípicos. El sistema no se limita a detectar heladas; también identifica variables fuera de rango, calcula niveles de riesgo, genera recomendaciones y permite observar tendencias del rendimiento estimado.
+
+\section{Vulnerabilidad de cultivos estratégicos: maíz, frijol y café}
+El maíz, el frijol y el café son cultivos estratégicos para Guatemala por su peso alimentario, económico y social. Cada cultivo responde de forma distinta frente a temperatura, precipitación, humedad y condiciones del suelo. El maíz puede verse afectado por estrés térmico durante floración y polinización; el frijol es sensible al déficit hídrico durante floración y llenado de vainas; el café depende de condiciones térmicas y de lluvia relativamente estables.
+
+En el prototipo, estos cultivos se usan como ejemplos relevantes dentro de una plataforma que puede manejar más cultivos si existen datos compatibles. AgroClima GT incorpora reglas por cultivo y rangos de variables para emitir recomendaciones, pero la validación agronómica fina por fase fenológica se plantea como ampliación posterior.
+
+\begin{table}[H]
+\centering
+\caption{Ejemplos de sensibilidad agroclimática por cultivo}
+\begin{tabularx}{\textwidth}{p{2.5cm}p{4cm}X}
+\toprule
+\textbf{Cultivo} & \textbf{Fase sensible} & \textbf{Variables críticas} \\
+\midrule
+Maíz & Germinación, floración y polinización & Temperatura extrema, déficit hídrico, humedad del suelo. \\
+Frijol & Floración y llenado de vainas & Déficit de agua, temperatura fuera de rango, humedad. \\
+Café & Floración, formación y maduración del fruto & Temperatura, precipitación, humedad y altitud. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Rol del INSIVUMEH y MAGA en la vigilancia climática agrícola}
+El INSIVUMEH y el MAGA cumplen funciones complementarias dentro de la vigilancia agroclimática nacional. El INSIVUMEH aporta observación meteorológica, pronósticos y análisis climáticos; el MAGA traduce parte de esa información hacia perspectivas agroclimáticas, recomendaciones productivas y apoyo técnico a productores. Esta coordinación institucional constituye un marco de referencia para herramientas académicas de apoyo agroclimático.
+
+AgroClima GT debe entenderse como herramienta complementaria y académica. No reemplaza al INSIVUMEH ni al MAGA, ni emite alertas oficiales. Su aporte es integrar datos abiertos, fuentes procesadas y modelos de aprendizaje automático en una interfaz que facilite análisis, visualización y reportes.
+
+\section{Fenología y fases críticas de desarrollo ante estrés térmico}
+La fenología permite explicar por qué una misma condición climática puede tener impactos diferentes según la etapa del cultivo. Una temperatura baja, una sequía moderada o un exceso de lluvia no afectan igual durante germinación, floración, llenado de fruto o maduración. Este fundamento justifica que los sistemas de alerta consideren cultivo, variable y rango óptimo.
+
+En el proyecto actual, la fenología se trata como base conceptual y como mejora futura. El prototipo incorpora rangos óptimos por cultivo, calendario agrícola y recomendaciones, pero no implementa un módulo completo que determine automáticamente la fase fenológica de cada cultivo en campo.
+
+\section{Contexto agroclimático del Altiplano Occidental como área de referencia}
+El Altiplano Occidental se adopta como escenario de referencia por su vulnerabilidad agroclimática, exposición a heladas, variabilidad topográfica, población rural agrícola y presencia de cultivos sensibles. Sin embargo, la aplicación implementada no se limita a esta región, ya que maneja información por departamentos, municipios y múltiples cultivos. Por esa razón, el Altiplano Occidental se entiende como área prioritaria de motivación, mientras que la cobertura técnica del prototipo puede escalar a otros departamentos de Guatemala mediante fuentes climáticas, edáficas y agronómicas integradas en el dataset.
+
+% ===================== CAPITULO 2 =====================
+\chapter{Marco teórico: machine learning y detección de anomalías}
+
+\section{Fundamentos de machine learning para agricultura}
+El aprendizaje automático permite identificar patrones en conjuntos de datos climáticos, edáficos y productivos. En agricultura, estos patrones pueden apoyar estimaciones de rendimiento, detección de condiciones anómalas, clasificación de riesgo y generación de recomendaciones. AgroClima GT aplica esta idea mediante un modelo XGBoost para estimar \codigo{yield\_pct}, comparación con Random Forest, detección de anomalías con Isolation Forest y reglas agronómicas para alertas.
+
+El marco teórico se orienta principalmente a aprendizaje automático tabular, porque el proyecto trabaja con variables estructuradas provenientes de archivos CSV, JSON, NetCDF procesado y entradas del usuario. Las redes neuronales profundas, imágenes satelitales y series temporales minuto a minuto se consideran antecedentes o posibles líneas futuras, pero no el núcleo implementado.
+
+\section{Aprendizaje supervisado vs no supervisado}
+El aprendizaje supervisado utiliza datos con una variable objetivo conocida. En AgroClima GT, este enfoque se aplica a la predicción de rendimiento mediante XGBoost y Random Forest, donde la salida esperada es \codigo{yield\_pct}. La evaluación se realiza mediante métricas de regresión como $R^2$, MAE y RMSE.
+
+El aprendizaje no supervisado busca patrones sin etiquetas previas. En el prototipo se usa con Isolation Forest para identificar entradas atípicas o lecturas que se alejan del comportamiento esperado. Esta detección debe entenderse como apoyo funcional y no como clasificación agronómica validada con eventos reales etiquetados.
+
+\section{Algoritmos para análisis agroclimático}
+
+\subsection{Redes LSTM como antecedente teórico}
+Las redes LSTM son pertinentes para series temporales porque pueden modelar dependencias entre observaciones pasadas y futuras. En agricultura se han usado para predicción climática, humedad, temperatura y eventos extremos. Sin embargo, en AgroClima GT no constituyen el modelo implementado. Se incluyen como antecedente teórico y como posible línea futura cuando existan series continuas etiquetadas provenientes de sensores instalados en campo.
+
+\subsection{Árboles de decisión y XGBoost}
+XGBoost es el algoritmo central del modelo predictivo implementado. Su ventaja es que maneja relaciones no lineales, variables heterogéneas y grandes cantidades de registros tabulares. En AgroClima GT se usa para estimar \codigo{yield\_pct} a partir de variables como temperatura, precipitación, humedad, pH, humedad del suelo, luminosidad, verdor, viento, altitud, cultivo y municipio.
+
+Random Forest se utiliza como línea base comparativa. La comparación interna actual muestra que XGBoost supera a Random Forest al presentar mayor $R^2$ y menores errores MAE y RMSE, por lo que se selecciona como modelo principal.
+
+\subsection{Modelos híbridos para predicción agroclimática}
+Los modelos híbridos combinan varios enfoques para mejorar predicción y detección de eventos atípicos. En AgroClima GT, el enfoque híbrido implementado es pragmático: XGBoost para predicción de rendimiento, Isolation Forest para anomalías, reglas agronómicas para alertas y visualizaciones para decisión. Modelos como transformers, autoencoders o LSTM se mantienen como referentes teóricos y posibles ampliaciones futuras.
+
+\section{Técnicas de detección de anomalías}
+La detección de anomalías permite identificar valores que se alejan del comportamiento esperado. En un sistema agroclimático, una anomalía puede ser un evento real, como temperatura extrema, o un problema técnico, como una lectura errónea de sensor. AgroClima GT aborda este problema con Isolation Forest y validación por rangos.
+
+\subsection{Isolation Forest}
+Isolation Forest es el método de anomalías implementado. Funciona aislando observaciones mediante particiones aleatorias; las observaciones anómalas suelen requerir menos particiones para separarse del resto. En AgroClima GT se usa para analizar entradas de clima o sensores y apoyar la clasificación funcional de condiciones normales, sospechosas o anómalas.
+
+\subsection{Z-Score y Modified Z-Score}
+El Z-Score permite medir cuántas desviaciones estándar se aleja una observación respecto a una media de referencia. En AgroClima GT este principio se aplica principalmente al monitoreo de data drift, comparando entradas actuales contra el perfil estadístico usado durante el entrenamiento. Para detección operativa de anomalías, el prototipo utiliza principalmente Isolation Forest y reglas por umbral.
+
+\section{Estado del arte de sistemas de alerta temprana agroclimática}
+Los sistemas de alerta temprana combinan monitoreo, análisis de riesgo, comunicación y recomendaciones de acción. En agricultura, su valor depende de que la información sea oportuna, comprensible y accionable. AgroClima GT toma este principio para presentar alertas, mapas, reportes y recomendaciones; sin embargo, se define como prototipo académico de apoyo a decisión, no como alerta oficial.
+
+\section{Descomposición de series temporales como antecedente}
+La descomposición de series temporales permite separar tendencia, estacionalidad y residuo, lo cual es útil para estudiar eventos extremos en registros continuos. En esta tesis se incluye como antecedente teórico para comprender el análisis de anomalías en datos agroclimáticos; sin embargo, la versión implementada de AgroClima GT emplea un enfoque tabular basado en XGBoost para predicción, Isolation Forest para anomalías y comparación estadística para data drift.
+
+\begin{equation}
+y_t = T_t + S_t + R_t
+\end{equation}
+
+Donde $y_t$ es la serie observada, $T_t$ es la tendencia, $S_t$ es la estacionalidad y $R_t$ es el residuo. Esta ecuación se incluye como marco conceptual y no como módulo central implementado.
+
+\section{Arquitectura IoT y protocolos de comunicación para agricultura de precisión}
+Las tecnologías MQTT, LoRaWAN, LPWAN, edge computing y fog computing se presentan como referentes teóricos y alternativas de ampliación futura. La versión actual de AgroClima GT no implementa una red LoRaWAN ni un broker MQTT; el prototipo trabaja con Arduino por conexión local o simulación, comunicación con backend FastAPI y transmisión de lecturas hacia el frontend mediante WebSocket.
+
+\subsection{Arquitectura por capas}
+\begin{table}[H]
+\centering
+\caption{Relación entre arquitectura IoT ideal y estado del prototipo}
+\begin{tabularx}{\textwidth}{p{3cm}p{5cm}X}
+\toprule
+\textbf{Capa IoT} & \textbf{Arquitectura ideal} & \textbf{Estado en AgroClima GT} \\
+\midrule
+Percepción & Sensores físicos en parcela & Arduino serial y simulación preparados. \\
+Red & LoRaWAN, MQTT, gateway & WebSocket y backend local implementados. \\
+Datos/nube & Base de datos y procesamiento & PostgreSQL, CSV, JSON y modelos Joblib. \\
+Aplicación & Dashboard y alertas & React/Vite, mapas, gráficas y reportes. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{MQTT, LoRaWAN y edge computing}
+MQTT y LoRaWAN son tecnologías pertinentes para un despliegue rural posterior. MQTT facilitaría mensajería liviana entre sensores, gateway y servidor; LoRaWAN permitiría comunicación de largo alcance y bajo consumo; edge computing permitiría filtrar lecturas o detectar umbrales desde un gateway local. En AgroClima GT, estas tecnologías se mantienen como ruta de escalabilidad futura.
+
+\section{Sistemas de soporte a decisiones y visualización de alertas}
+AgroClima GT funciona como sistema de soporte a decisiones porque integra datos, procesa modelos, calcula riesgo y presenta resultados en dashboard, mapa, gráficas, reportes, alertas y exportación CSV. La interfaz es importante porque traduce variables técnicas en información útil para usuarios no especializados.
+
+\section{Consideraciones éticas y de privacidad de datos agroclimáticos}
+Aunque el prototipo actual se valida en ambiente académico y local, su evolución hacia sensores instalados en parcelas exige considerar principios de privacidad, consentimiento informado y gobernanza de datos. Las lecturas agroclimáticas pueden revelar condiciones productivas de una finca, por lo que el sistema debe evitar transferencias no autorizadas, anonimizar información sensible y comunicar al usuario que las predicciones son apoyo técnico, no decisiones obligatorias ni alertas oficiales.
+
+% ===================== CAPITULO 3 =====================
+\chapter{Metodología y procesamiento de datos}
+
+\section{Enfoque metodológico de la investigación}
+La investigación se desarrolla bajo un enfoque aplicado y tecnológico, porque no se limita a describir el problema agroclimático, sino que construye un prototipo funcional para integrar datos climáticos, edáficos y agrícolas en una plataforma web de apoyo a la decisión. El sistema AgroClima GT procesa fuentes históricas y recientes, ejecuta modelos de aprendizaje automático, genera alertas y presenta resultados mediante una interfaz web.
+
+El prototipo se valida desde una perspectiva técnica y funcional. La validación técnica revisa la disponibilidad de datos, la estructura del dataset, el entrenamiento del modelo, la respuesta de la API y la persistencia de información. La validación funcional revisa que el usuario pueda ingresar variables, obtener una predicción de rendimiento, visualizar riesgo, filtrar registros, exportar datos y consultar recomendaciones. La validación agronómica en campo queda delimitada como trabajo futuro.
+
+\begin{figuraPendiente}{Flujo metodológico general del prototipo.}{Insertar un diagrama con el flujo: fuentes de datos -> procesamiento -> dataset -> entrenamiento -> API FastAPI -> interfaz React -> resultados y alertas.}\caption{Flujo metodológico del prototipo AgroClima GT}\end{figuraPendiente}
+
+\section{Adquisición y procesamiento del dataset}
+El dataset se construyó a partir de varias fuentes complementarias. ERA5-Land se utiliza como base climática histórica por su cobertura terrestre y consistencia espacial; NASA POWER complementa variables meteorológicas; SoilGrids aporta propiedades de suelo, especialmente pH; Open-Meteo se usa para pronóstico y consulta climática; INSIVUMEH funciona como referencia nacional procesada; y FAOSTAT se utiliza para calibrar el rendimiento agrícola con datos reales de Guatemala.
+
+El archivo principal utilizado para el entrenamiento actual es \codigo{dataset\_faostat.csv}, correspondiente al dataset calibrado con FAOSTAT y compuesto por 2,111,220 registros. También existen versiones intermedias como \codigo{dataset\_preliminar.csv}, \codigo{dataset\_openmeteo.csv}, \codigo{dataset\_v2.csv} y \codigo{dataset\_combinado.csv}, que documentan la evolución del procesamiento.
+
+\begin{table}[H]
+\centering
+\caption{Fuentes de datos integradas en AgroClima GT}
+\begin{tabularx}{\textwidth}{p{3cm}p{3.8cm}X}
+\toprule
+\textbf{Fuente} & \textbf{Archivo local o uso} & \textbf{Uso en el sistema} \\
+\midrule
+ERA5-Land & \codigo{era5\_mensual.csv} & Base climática histórica para variables terrestres y climáticas. \\
+NASA POWER & \codigo{nasa\_power\_mensual.csv} & Variables meteorológicas complementarias como temperatura extrema y viento. \\
+SoilGrids & \codigo{soilgrids\_suelo.csv} & Propiedades edáficas, principalmente pH. \\
+INSIVUMEH & \codigo{insivumeh\_recent\_mensual.csv} & Referencia nacional procesada localmente. \\
+Open-Meteo & API y archivos raw & Pronóstico y consulta meteorológica por coordenadas. \\
+FAOSTAT & \codigo{faostat\_yields\_guatemala.csv} & Calibración del rendimiento agrícola. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Descarga, limpieza y normalización de datos}
+La limpieza se orienta a convertir archivos heterogéneos en una estructura tabular común. Los scripts del proyecto normalizan nombres de columnas, convierten formatos, integran datos por municipio, cultivo, mes y año, revisan rangos de variables y generan datasets incrementales. El resultado final usado por el entrenamiento actual es \codigo{dataset\_faostat.csv}.
+
+\begin{table}[H]
+\centering
+\caption{Evolución de datasets del proyecto}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Archivo} & \textbf{Registros} & \textbf{Función} \\
+\midrule
+\codigo{dataset\_preliminar.csv} & 64,935 & Dataset base inicial. \\
+\codigo{dataset\_openmeteo.csv} & 812,520 & Ampliación con Open-Meteo. \\
+\codigo{dataset\_v2.csv} & 1,320,345 & Integración climática ampliada. \\
+\codigo{dataset\_combinado.csv} & 2,111,220 & Unión de fuentes históricas. \\
+\codigo{dataset\_faostat.csv} & 2,111,220 & Dataset calibrado con FAOSTAT. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Validación de ERA5-Land con datos observados}
+La comparación entre ERA5-Land e INSIVUMEH se utiliza como revisión de coherencia y no como validación climatológica definitiva. ERA5-Land aporta continuidad espacial y temporal; INSIVUMEH aporta referencia nacional observada y procesada. Una validación formal posterior debería comparar pares estación-reanálisis mediante sesgo medio, MAE, RMSE, correlación y análisis por época seca o lluviosa.
+
+\section{Tratamiento de datos y limpieza de series temporales}
+El tratamiento de datos consiste en depurar y alinear registros climáticos, edáficos y agronómicos para formar una matriz tabular. Las variables se organizan por municipio, cultivo, mes y año. Se validan rangos plausibles para evitar que el modelo reciba valores fisiológicamente imposibles. Esta validación también se refleja en el backend antes de ejecutar predicciones.
+
+\begin{table}[H]
+\centering
+\caption{Rangos de validación de variables de entrada}
+\begin{tabular}{lcc}
+\toprule
+\textbf{Variable} & \textbf{Mínimo} & \textbf{Máximo} \\
+\midrule
+Temperatura & 5.0 $^\circ$C & 45.0 $^\circ$C \\
+Precipitación & 0.0 mm & 600.0 mm \\
+Humedad relativa & 5.0\% & 100.0\% \\
+pH del suelo & 3.5 & 9.5 \\
+Humedad del suelo & 0.01 & 0.65 \\
+Luminosidad & 500 lux & 130,000 lux \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Integración de datos históricos y datos en tiempo real}
+El sistema combina datos históricos para entrenamiento e inferencia con datos locales o simulados provenientes del módulo Arduino. Los datos históricos alimentan el modelo XGBoost y provienen de archivos climáticos, edáficos y de rendimiento. Los datos en tiempo real o simulados llegan al backend mediante lectura serial o endpoint de simulación y se transmiten al frontend mediante WebSocket.
+
+\begin{figuraPendiente}{Integración de histórico y tiempo real.}{Insertar diagrama: dataset histórico -> XGBoost -> predicción; Arduino/simulación -> WebSocket -> alertas -> gráfica en tiempo real.}\caption{Integración de datos históricos y lecturas locales o simuladas}\end{figuraPendiente}
+
+\section{Alineación temporal y espacial de registros}
+La alineación temporal usa mes y año como llaves de organización para integrar información climática y agrícola. La alineación espacial usa municipio o departamento como unidad geográfica. En el frontend se simplifica la selección para el usuario final, mientras el dataset conserva una granularidad técnica mayor.
+
+\begin{equation}
+D = \{(m,c,t,x_1,x_2,\ldots,x_p,y)\}
+\end{equation}
+
+Donde $m$ representa municipio o departamento, $c$ el cultivo, $t$ el periodo temporal, $x_1,\ldots,x_p$ las variables predictoras y $y$ la variable objetivo \codigo{yield\_pct}.
+
+\section{Tratamiento de valores faltantes e inconsistencias}
+El prototipo aplica valores por defecto y derivaciones cuando algunas variables no están disponibles en una entrada del usuario. Esto permite que el endpoint de predicción funcione aun si no existe lectura de todos los sensores. Estas derivaciones se presentan como aproximaciones operativas para inferencia, no como mediciones físicas validadas.
+
+\begin{align}
+\theta_2 &= \theta_1 + 0.03 \\
+\theta_3 &= \theta_1 + 0.05 \\
+T_s &= T - 3.0 \\
+T_{max} &= T + 8.0 \\
+T_{min} &= T - 6.0
+\end{align}
+
+\textbf{Interpretación.} $\theta_1$ representa humedad superficial del suelo; $\theta_2$ y $\theta_3$ son aproximaciones para capas más profundas. $T_s$ aproxima temperatura del suelo, mientras $T_{max}$ y $T_{min}$ representan extremos diarios derivados. Si existe una lectura real, el sistema debe priorizarla sobre la aproximación.
+
+\section{Ingeniería de características para el modelo predictivo}
+La ingeniería de características transforma datos climáticos, edáficos, temporales y agronómicos en un vector de entrada para el modelo. El modelo XGBoost usa variables como municipio codificado, cultivo codificado, mes, temperatura, lluvia, humedad, pH, humedad de suelo, luz, índice de verdor, humedad de subsuelo, humedad profunda, temperatura de suelo, temperatura máxima, temperatura mínima, viento y altitud.
+
+\begin{equation}
+\mathbf{x}_i = [municipio_{enc}, crop_{enc}, month, T, R, H, pH, \theta_1, L, G, \theta_2, \theta_3, T_s, T_{max}, T_{min}, v_w, z]
+\end{equation}
+
+\textbf{Interpretación.} El vector $\mathbf{x}_i$ agrupa las características que describen una observación. El modelo usa esa información para estimar $\hat{y}_i$, que corresponde al rendimiento agrícola esperado normalizado.
+
+\subsection{Índice de verdor}
+\begin{equation}
+G = \frac{G_{raw}}{R_{raw}+G_{raw}+B_{raw}} \times 100
+\end{equation}
+
+\textbf{Interpretación.} Esta fórmula calcula el porcentaje relativo del canal verde dentro de una lectura RGB. Un valor mayor puede asociarse con vegetación más activa o saludable, aunque en esta tesis debe presentarse como indicador auxiliar y no como sustituto de mediciones agronómicas de laboratorio.
+
+\section{Estrategia de entrenamiento, validación y ajuste de modelos}
+El entrenamiento se realiza con XGBoost para estimar \codigo{yield\_pct}. El modelo entrenado se guarda como \codigo{xgboost\_yield.joblib} y los codificadores como \codigo{label\_encoders.joblib}. Random Forest se usa como línea base comparativa. La comparación actual registrada selecciona XGBoost como modelo principal por obtener mejor desempeño en $R^2$, MAE y RMSE.
+
+\section{Métricas de evaluación y validación de modelos}
+La evaluación del componente predictivo se realiza sobre la variable objetivo \codigo{yield\_pct}, que representa el porcentaje estimado de rendimiento agrícola. Al tratarse de una salida continua, se emplean métricas de regresión como MAE, RMSE y $R^2$. Para anomalías y alertas se realiza validación funcional mediante escenarios controlados, ya que aún no existe un conjunto de eventos reales etiquetados.
+
+\subsection{MAE}
+\begin{equation}
+MAE = \frac{1}{n}\sum_{i=1}^{n}|y_i-\hat{y}_i|
+\end{equation}
+\textbf{Interpretación.} El MAE mide el error absoluto promedio. En AgroClima GT se interpreta en puntos porcentuales de \codigo{yield\_pct}. Por ejemplo, un MAE de 5.91 significa que, en promedio, la predicción se aleja aproximadamente 5.91 puntos porcentuales del valor observado.
+
+\subsection{RMSE}
+\begin{equation}
+RMSE = \sqrt{\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat{y}_i)^2}
+\end{equation}
+\textbf{Interpretación.} El RMSE también mide error de predicción, pero penaliza más los errores grandes porque eleva las diferencias al cuadrado antes de promediarlas. Es útil para identificar si el modelo comete errores fuertes en ciertos casos.
+
+\subsection{$R^2$}
+\begin{equation}
+R^2 = 1 - \frac{\sum_{i=1}^{n}(y_i-\hat{y}_i)^2}{\sum_{i=1}^{n}(y_i-\bar{y})^2}
+\end{equation}
+\textbf{Interpretación.} El coeficiente $R^2$ mide qué proporción de la variabilidad de \codigo{yield\_pct} explica el modelo. Un valor más cercano a 1 indica mejor ajuste.
+
+% ===================== CAPITULO 4 =====================
+\chapter{Diseño e implementación del prototipo}
+
+\section{Arquitectura general del sistema predictivo}
+AgroClima GT se organiza como una arquitectura modular. El frontend en React/Vite permite la interacción con el usuario; el backend en FastAPI recibe solicitudes y ejecuta la lógica principal; PostgreSQL almacena información operativa; y los archivos locales guardan datasets, modelos, codificadores y métricas. El sistema también integra Open-Meteo para pronóstico y Arduino por USB o simulación para lecturas de sensores.
+
+\begin{figuraPendiente}{Diagrama de arquitectura general.}{Insertar diagrama con: usuario -> React/Vite -> FastAPI -> XGBoost/Isolation Forest -> PostgreSQL/datasets/Open-Meteo/Arduino.}\caption{Arquitectura general de AgroClima GT}\end{figuraPendiente}
+
+\section{Casos de uso de alto nivel}
+Los casos de uso principales del prototipo son: acceder al sistema, analizar rendimiento agrícola, consultar pronóstico y apoyo agronómico, monitorear sensores y alertas, consultar resultados y datos, y administrar plataforma y modelo.
+
+\begin{figuraPendiente}{Casos de uso de alto nivel.}{Insertar diagrama PlantUML de actores Usuario agrícola y Administrador, conectado con los módulos principales del sistema.}\caption{Casos de uso de alto nivel del prototipo}\end{figuraPendiente}
+
+\section{Selección y justificación del área de estudio}
+El prototipo trabaja con información municipal y departamental. Esta unidad espacial permite relacionar variables climáticas, de suelo y cultivo con resultados de rendimiento agrícola. Cuando se usa un municipio específico como caso de estudio, este funciona como ejemplo de aplicación dentro de una cobertura más amplia del dataset.
+
+\section{Pipeline de datos y flujo operacional del sistema}
+El pipeline operativo inicia con fuentes climáticas y edáficas, continúa con el procesamiento local de archivos y termina en la predicción y visualización web. ERA5-Land, NASA POWER, SoilGrids, INSIVUMEH procesado y FAOSTAT alimentan el dataset. Luego, XGBoost usa ese dataset para entrenar el modelo de rendimiento. Durante la ejecución, FastAPI carga el modelo y responde a las consultas del frontend.
+
+\begin{figuraPendiente}{Pipeline operativo del sistema.}{Insertar diagrama: ERA5-Land, NASA POWER, SoilGrids, INSIVUMEH y FAOSTAT -> procesamiento -> dataset\_faostat.csv -> XGBoost -> FastAPI -> React/Vite -> resultados.}\caption{Pipeline operativo del sistema AgroClima GT}\end{figuraPendiente}
+
+\section{Motor de detección de anomalías y generación de alertas}
+El motor de análisis combina validación de entradas, predicción de rendimiento, detección de anomalías y recomendaciones. XGBoost estima el rendimiento esperado, mientras que Isolation Forest apoya la identificación de condiciones atípicas. Las alertas funcionan como apoyo a la decisión y se basan en resultados del modelo, rangos de variables y reglas agronómicas incluidas en archivos locales.
+
+\section{Integración de sensores y transmisión de datos}
+La integración de sensores se implementa en software mediante Arduino por puerto serial, simulación de lecturas y comunicación con el backend. Esta capa permite probar el flujo de adquisición de datos sin depender todavía de una instalación física en parcelas. El componente físico se mantiene como etapa de validación posterior y requiere montaje, calibración, pruebas de estabilidad y comparación con instrumentos de referencia.
+
+\begin{table}[H]
+\centering
+\caption{Alcance del componente de sensores}
+\begin{tabularx}{\textwidth}{p{3cm}p{4cm}X}
+\toprule
+\textbf{Elemento} & \textbf{Estado en el prototipo} & \textbf{Uso} \\
+\midrule
+Arduino & Integrado por software & Lectura local por USB y simulación. \\
+WebSocket & Implementado & Visualización de lecturas en vivo. \\
+Sensores físicos & Diseño propuesto & Montaje y calibración posterior. \\
+Red inalámbrica & Evolución futura & Ampliación para campo. \\
+Validación de campo & Pendiente & Evaluación física del sistema. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\section{Diseño de la interfaz}
+La interfaz web traduce datos técnicos en información comprensible para el usuario. AgroClima GT aplica este principio mediante dashboard, pronóstico, alertas, reportes, modelos, mapa de riesgo, módulo Arduino y panel administrativo.
+
+\begin{table}[H]
+\centering
+\caption{Módulos de interfaz y aporte al usuario}
+\begin{tabularx}{\textwidth}{p{3cm}X}
+\toprule
+\textbf{Módulo} & \textbf{Aporte} \\
+\midrule
+Login & Acceso controlado a la plataforma. \\
+Dashboard & Predicción de rendimiento y resumen de variables. \\
+Forecast & Pronóstico meteorológico. \\
+Dataset & Filtros, tendencia de \codigo{yield\_pct} y exportación CSV. \\
+RiskMap & Visualización espacial por municipio o departamento. \\
+Alerts & Advertencias, recomendaciones e historial de lecturas. \\
+Arduino & Lecturas locales o simuladas. \\
+Reportes & Evidencia exportable para análisis técnico. \\
+Admin/Modelos & Seguimiento técnico de datos, predicciones y modelo. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{figuraPendiente}{Pantalla de inicio de sesión.}{Insertar captura del login de AgroClima GT.}\caption{Pantalla de inicio de sesión}\end{figuraPendiente}
+\begin{figuraPendiente}{Dashboard principal.}{Insertar captura del dashboard con formulario, variables y panel de resultado.}\caption{Dashboard principal de AgroClima GT}\end{figuraPendiente}
+\begin{figuraPendiente}{Resultado de predicción.}{Insertar captura donde se observe rendimiento estimado, nivel de riesgo y recomendación.}\caption{Resultado de predicción de rendimiento}\end{figuraPendiente}
+\begin{figuraPendiente}{Módulo de dataset.}{Insertar captura con filtros, tendencia de \codigo{yield\_pct} y botón de exportación CSV.}\caption{Dataset filtrable y tendencia de rendimiento}\end{figuraPendiente}
+\begin{figuraPendiente}{Mapa de riesgo.}{Insertar captura del mapa coroplético o mapa de riesgo departamental/municipal.}\caption{Mapa de riesgo agroclimático}\end{figuraPendiente}
+\begin{figuraPendiente}{Módulo de pronóstico.}{Insertar captura del pronóstico consultado por Open-Meteo.}\caption{Módulo de pronóstico meteorológico}\end{figuraPendiente}
+\begin{figuraPendiente}{Módulo Arduino.}{Insertar captura del estado de conexión, configuración de cultivo/municipio y simulación de lecturas.}\caption{Módulo Arduino con lectura local o simulada}\end{figuraPendiente}
+\begin{figuraPendiente}{Módulo de alertas.}{Insertar captura de alertas, recomendaciones e historial de lecturas Arduino.}\caption{Módulo de alertas y recomendaciones}\end{figuraPendiente}
+\begin{figuraPendiente}{Panel administrativo/modelos.}{Insertar captura del panel administrativo y, si existe, comparación visual XGBoost vs Random Forest.}\caption{Panel administrativo y seguimiento del modelo}\end{figuraPendiente}
+
+\section{Herramientas, frameworks y stack tecnológico utilizado}
+\begin{table}[H]
+\centering
+\caption{Stack tecnológico de AgroClima GT}
+\begin{tabularx}{\textwidth}{p{3cm}p{5cm}X}
+\toprule
+\textbf{Capa} & \textbf{Herramientas} & \textbf{Función} \\
+\midrule
+Frontend & React, Vite, Chart.js, Leaflet & Interfaz, gráficas y mapa. \\
+Backend & FastAPI, Python, Uvicorn & API, validación e inferencia. \\
+Machine Learning & XGBoost, scikit-learn, SHAP, joblib & Entrenamiento, comparación, inferencia y explicabilidad. \\
+Datos & pandas, CSV, JSON, NetCDF & Procesamiento local de fuentes. \\
+Persistencia & PostgreSQL, Docker Compose & Usuarios, predicciones, alertas y registros. \\
+Sensores & Arduino serial, PySerial, WebSocket & Lectura local y transmisión en vivo. \\
+Reportes & html2canvas, jsPDF & Generación de reportes desde frontend. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% ===================== CAPITULO 5 =====================
+\chapter{Análisis de resultados y validación}
+
+\section{Evaluación del desempeño de los modelos}
+La evaluación compara XGBoost contra Random Forest usando el mismo conjunto de datos y el mismo esquema de división entrenamiento/prueba. XGBoost obtuvo mejor desempeño en las tres métricas principales: mayor $R^2$ y menores errores MAE y RMSE. Por esta razón, se selecciona como modelo principal del prototipo.
+
+\begin{table}[H]
+\centering
+\caption{Comparación interna de modelos}
+\begin{tabular}{lccc}
+\toprule
+\textbf{Modelo} & \textbf{$R^2$} & \textbf{MAE} & \textbf{RMSE} \\
+\midrule
+XGBoost & 0.6334 & 5.91 & 7.68 \\
+Random Forest & 0.3474 & 8.26 & 10.25 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Estos resultados deben interpretarse como desempeño técnico interno sobre el dataset del proyecto. No equivalen a validación agronómica final en campo. Para afirmar desempeño productivo real sería necesario contrastar las predicciones con rendimientos observados en parcelas y temporadas específicas.
+
+\begin{figuraPendiente}{Comparación visual de modelos.}{Insertar gráfica de barras XGBoost vs Random Forest usando R2, MAE y RMSE actualizados: XGBoost 0.6334/5.91/7.68 y Random Forest 0.3474/8.26/10.25.}\caption{Comparación de modelos predictivos}\end{figuraPendiente}
+
+\section{Resultados de detección de anomalías}
+La detección de anomalías se presenta como resultado funcional preliminar. El sistema puede evaluar entradas o lecturas simuladas que se alejan de rangos esperados y reflejar esa condición en la lógica de alerta o recomendación. Isolation Forest aporta el mecanismo para identificar comportamiento atípico dentro del flujo del prototipo.
+
+Los resultados actuales permiten comprobar funcionamiento del módulo, mientras que la validación con eventos reales requiere datos etiquetados de campo. Por ello, métricas como precisión, recall, F1-score y matriz de confusión quedan reservadas para una etapa posterior.
+
+\section{Análisis de efectividad en la detección de riesgos}
+La efectividad del sistema se analiza desde la respuesta funcional del prototipo: ingreso de variables, validación de rangos, predicción de rendimiento, cálculo de riesgo, generación de recomendaciones y presentación visual del resultado. Este enfoque confirma que el sistema opera como herramienta de apoyo a decisión, pero no reemplaza diagnósticos agronómicos de campo ni alertas oficiales.
+
+\section{Validación funcional del sistema de alertas}
+La validación funcional verifica que el sistema genere alertas ante entradas fuera de rango, lecturas simuladas anómalas o predicciones de bajo rendimiento. También comprueba que las recomendaciones se presenten en la interfaz y que el usuario pueda revisar información asociada. Esta validación es adecuada para una fase de prototipo, pero debe diferenciarse de una validación estadística de eventos reales.
+
+\section{Discusión sobre factibilidad, escalabilidad y limitaciones}
+AgroClima GT demuestra factibilidad técnica porque integra fuentes de datos, modelo predictivo, motor de anomalías, backend, frontend, almacenamiento y visualizaciones en una solución funcional. También muestra escalabilidad conceptual hacia sensores físicos y comunicación rural mediante tecnologías como MQTT o LoRaWAN.
+
+Sus principales limitaciones son: ausencia de validación física en parcelas reales, falta de eventos etiquetados para evaluar alertas con métricas de clasificación, dependencia de fuentes procesadas, uso de aproximaciones para variables no medidas directamente y necesidad de fortalecer seguridad si el sistema se despliega fuera del entorno local.
+
+% ===================== FORMULAS =====================
+\chapter{Interpretación de fórmulas principales}
+
+\section{Función objetivo de XGBoost}
+\begin{equation}
+\mathcal{L}(\theta)=\sum_{i=1}^{n}\ell(y_i,\hat{y}_i)+\sum_{k=1}^{K}\Omega(f_k)
+\end{equation}
+
+\textbf{Interpretación.} Esta función es la que XGBoost intenta minimizar durante el entrenamiento. La primera suma mide el error entre el valor real $y_i$ y el valor predicho $\hat{y}_i$ para las $n$ observaciones. La segunda suma agrega una penalización de complejidad para los $K$ árboles del modelo. En la tesis, esta fórmula indica que el modelo no solo busca predecir bien el rendimiento, sino también evitar árboles innecesariamente complejos.
+
+\section{Regularización de cada árbol}
+\begin{equation}
+\Omega(f_k)=\gamma T+\frac{1}{2}\lambda\sum_{j=1}^{T}w_j^2
+\end{equation}
+
+\textbf{Interpretación.} Esta expresión penaliza la complejidad del árbol $f_k$. En esta fórmula, $T$ representa el número de hojas del árbol, no temperatura. $\gamma$ penaliza agregar más hojas y $\lambda$ aplica regularización L2 sobre los pesos $w_j$. Esto ayuda a reducir sobreajuste.
+
+\section{Predicción por ensamble de árboles}
+\begin{equation}
+\hat{y}_i=\sum_{k=1}^{K}f_k(\mathbf{x}_i), \qquad f_k \in \mathcal{F}
+\end{equation}
+
+\textbf{Interpretación.} La predicción final se obtiene sumando la contribución de todos los árboles. En AgroClima GT, el resultado se interpreta como rendimiento agrícola esperado normalizado.
+
+\section{Aproximación iterativa por gradiente}
+\begin{equation}
+\tilde{\mathcal{L}}^{(t)}=\sum_{i=1}^{n}\left[g_if_t(\mathbf{x}_i)+\frac{1}{2}h_if_t^2(\mathbf{x}_i)\right]+\Omega(f_t)
+\end{equation}
+
+\textbf{Interpretación.} Esta fórmula resume cómo XGBoost agrega un nuevo árbol en cada iteración. $g_i$ representa el gradiente de primer orden y $h_i$ el gradiente de segundo orden. El nuevo árbol intenta corregir errores anteriores manteniendo penalización de complejidad.
+
+\section{Factor de calibración FAOSTAT}
+\begin{equation}
+f_{FAO}(c,a)=\frac{\hat{R}(c,a)}{R_{ref}(c)}
+\end{equation}
+
+\textbf{Interpretación.} Calcula un factor de calibración para cada cultivo $c$ y año $a$. $\hat{R}(c,a)$ es el rendimiento reportado por FAOSTAT y $R_{ref}(c)$ es el rendimiento histórico de referencia. Su objetivo es anclar el porcentaje de rendimiento a estadísticas agrícolas reales.
+
+\section{Ajuste del rendimiento porcentual}
+\begin{equation}
+\hat{y}_{adj}=clip(\hat{y}_{base}\times f_{FAO}(c,a),0,100)
+\end{equation}
+
+\textbf{Interpretación.} La predicción base se ajusta usando el factor FAOSTAT. La función $clip$ limita el resultado entre 0 y 100 para mantenerlo dentro de la escala de \codigo{yield\_pct}.
+
+\section{Promedio FAOSTAT para años sin dato}
+\begin{equation}
+\bar{f}(c)=\frac{1}{|A_c|}\sum_{a\in A_c}f_{FAO}(c,a)
+\end{equation}
+
+\textbf{Interpretación.} Cuando un cultivo no tiene dato FAOSTAT para un año específico, se usa el promedio histórico del factor de calibración del cultivo. Esta aproximación evita descartar registros por falta de información puntual.
+
+\section{Intervalo de predicción}
+\begin{align}
+\mathcal{P} &= \left\{ f_{k^*}(\mathbf{x})\mid k^*=\left\lfloor\frac{K}{10}\right\rfloor,\left\lfloor\frac{2K}{10}\right\rfloor,\ldots,K\right\} \\
+\sigma &= std(\mathcal{P}) \\
+m &= 1.96\sigma \\
+\hat{y}_{low} &= clip(\hat{y}-m,0,100) \\
+\hat{y}_{high} &= clip(\hat{y}+m,0,100)
+\end{align}
+
+\textbf{Interpretación.} Estas ecuaciones estiman un rango alrededor de la predicción. Si el intervalo es amplio, la predicción debe interpretarse con mayor cautela.
+
+\section{Explicabilidad con SHAP}
+\begin{equation}
+\hat{y}=\phi_0+\sum_{j=1}^{p}\phi_j
+\end{equation}
+
+\begin{equation}
+\phi_j=\sum_{S\subseteq \mathcal{F}\setminus\{j\}}\frac{|S|!(p-|S|-1)!}{p!}\left[f(S\cup\{j\})-f(S)\right]
+\end{equation}
+
+\textbf{Interpretación.} La predicción se descompone en un valor base $\phi_0$ más contribuciones $\phi_j$ de cada variable. Si $\phi_j$ es positivo, la variable empuja la predicción hacia arriba; si es negativo, la reduce.
+
+\section{Riesgo agroclimático por reglas}
+\begin{equation}
+score=clip(s_R+s_T+s_H+s_{pH}+c_f,0,100)
+\end{equation}
+
+\textbf{Interpretación.} El puntaje combina componentes de riesgo asociados a precipitación, temperatura, humedad, pH y sensibilidad del cultivo. Esto permite complementar el modelo predictivo con reglas agronómicas.
+
+\section{Clasificación del riesgo}
+\begin{equation}
+riesgo=\begin{cases}
+alto & \text{si } score\geq 55 \\
+bajo & \text{si } score\leq 18 \\
+medio & \text{en otro caso}
+\end{cases}
+\end{equation}
+
+\textbf{Interpretación.} Esta regla convierte el puntaje numérico de riesgo en una categoría comprensible para el usuario.
+
+\section{Sistema combinado de dos capas}
+\begin{equation}
+score_{final}=\begin{cases}
+\max(score_{ML},score_{reglas}) & \text{si existen alertas críticas} \\
+score_{ML} & \text{en otro caso}
+\end{cases}
+\end{equation}
+
+\textbf{Interpretación.} Esta regla evita que el sistema subestime riesgo cuando hay condiciones extremas. Aunque el modelo estime buen rendimiento, una lectura crítica puede elevar el riesgo final.
+
+\section{Desviación porcentual para alertas}
+\begin{equation}
+\Delta_v=\begin{cases}
+\frac{v_{min}-x}{v_{min}}\times 100 & \text{si } x<v_{min} \\
+\frac{x-v_{max}}{v_{max}}\times 100 & \text{si } x>v_{max} \\
+0 & \text{si } v_{min}\leq x\leq v_{max}
+\end{cases}
+\end{equation}
+
+\textbf{Interpretación.} Mide cuánto se aleja una variable de su rango óptimo. Permite clasificar alertas y asociarlas con recomendaciones.
+
+\section{Isolation Forest para detección de anomalías}
+\begin{equation}
+s(\mathbf{x},n)=2^{-\frac{E[h(\mathbf{x})]}{c(n)}}
+\end{equation}
+
+\textbf{Interpretación.} Una observación anómala suele aislarse con menos particiones. Por eso, el puntaje permite detectar entradas climáticas o de sensores que se alejan del patrón esperado.
+
+\section{Monitoreo de data drift}
+\begin{align}
+z_j &= \left|\frac{x_j-\mu_j}{\sigma_j}\right| \\
+sim_j &= clip(100-22z_j,0,100) \\
+\bar{sim} &= \frac{1}{p}\sum_{j=1}^{p}sim_j
+\end{align}
+
+\textbf{Interpretación.} Estas fórmulas comparan entradas actuales contra el perfil de entrenamiento. Si $\bar{sim}$ baja demasiado, el sistema puede indicar data drift y recomendar cautela o reentrenamiento.
+
+\section{Cache de pronóstico meteorológico}
+\begin{equation}
+usar\ cache=\begin{cases}
+si & \text{si } t_{actual}-t_{consulta}<\Delta t \\
+no & \text{en otro caso}
+\end{cases}
+\end{equation}
+
+\textbf{Interpretación.} Esta regla indica cuándo reutilizar datos de pronóstico ya consultados para reducir solicitudes repetidas a Open-Meteo.
+
+% ===================== CONCLUSIONES =====================
+\chapter*{Conclusiones}
+\addcontentsline{toc}{chapter}{Conclusiones}
+\begin{enumerate}
+\item AgroClima GT demuestra que es técnicamente viable integrar datos climáticos, edáficos y agronómicos en una plataforma web para estimar rendimiento agrícola y riesgo agroclimático en Guatemala.
+\item El modelo XGBoost fue el algoritmo con mejor desempeño interno frente a Random Forest, con $R^2=0.6334$, MAE = 5.91 y RMSE = 7.68 sobre la comparación registrada en el proyecto.
+\item La incorporación de fuentes como ERA5-Land, NASA POWER, SoilGrids, Open-Meteo, INSIVUMEH procesado y FAOSTAT permite construir un dataset más robusto que una fuente única.
+\item La interfaz web facilita la interpretación de resultados mediante dashboard, reportes, dataset filtrable, exportación CSV, mapa de riesgo, alertas y visualización de lecturas Arduino.
+\item El componente Arduino está implementado a nivel de software y simulación, pero requiere calibración, instalación y validación en campo antes de presentarlo como sistema IoT operativo.
+\item Las alertas funcionan como validación funcional basada en reglas y anomalías, pero la evaluación con precisión, recall y F1 requiere eventos reales etiquetados.
+\end{enumerate}
+
+\chapter*{Recomendaciones}
+\addcontentsline{toc}{chapter}{Recomendaciones}
+\begin{enumerate}
+\item Realizar una prueba piloto en campo con sensores calibrados para validar temperatura, humedad de suelo, luminosidad e índice de verdor.
+\item Construir un conjunto de eventos etiquetados para evaluar anomalías y alertas con matriz de confusión, precisión, recall y F1-score.
+\item Comparar ERA5-Land con estaciones INSIVUMEH mediante MAE, RMSE, sesgo y correlación por variable.
+\item Documentar capturas actualizadas del sistema: dashboard, dataset con tendencia, mapa, alertas, Arduino, reporte y panel de modelos.
+\item Mantener \codigo{model\_comparison.json} actualizado cada vez que se reentrene para evitar contradicciones en la tesis.
+\item Separar claramente implementado, simulado y trabajo futuro en cada capítulo.
+\item Ampliar el componente de seguridad si el prototipo se despliega fuera del entorno local, especialmente autenticación, tokens, CORS y protección de credenciales.
+\end{enumerate}
+
+% ===================== REFERENCIAS =====================
+\chapter*{Referencias}
+\addcontentsline{toc}{chapter}{Referencias}
+
+\begin{hangparas}{.5in}{1}
+AgGateway. (2025). \textit{Data ethics and stewardship white paper}. AgGateway.\\
+
+Chen, T., \& Guestrin, C. (2016). XGBoost: A scalable tree boosting system. En \textit{Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining} (pp. 785--794). Association for Computing Machinery. https://doi.org/10.1145/2939672.2939785\\
+
+Docker. (s.f.). \textit{Docker Compose overview}. Docker Docs. https://docs.docker.com/compose/\\
+
+FastAPI. (s.f.). \textit{FastAPI documentation}. https://fastapi.tiangolo.com/\\
+
+Gutiérrez, F., Htun, N. N., Schlenz, F., Kasimati, A., \& Verbert, K. (2022). Developing visual-assisted decision support systems across diverse agricultural use cases. \textit{Agriculture, 12}(7), 1027. https://doi.org/10.3390/agriculture12071027\\
+
+ISRIC. (s.f.). \textit{SoilGrids}. https://soilgrids.org/\\
+
+Liu, F. T., Ting, K. M., \& Zhou, Z.-H. (2008). Isolation forest. En \textit{2008 Eighth IEEE International Conference on Data Mining} (pp. 413--422). IEEE. https://doi.org/10.1109/ICDM.2008.17\\
+
+Muñoz-Sabater, J., Dutra, E., Agustí-Panareda, A., Albergel, C., Arduini, G., Balsamo, G., Boussetta, S., Choulga, M., Harrigan, S., Hersbach, H., Martens, B., Miralles, D. G., Piles, M., Rodríguez-Fernández, N. J., Zsoter, E., Buontempo, C., \& Thépaut, J.-N. (2021). ERA5-Land: A state-of-the-art global reanalysis dataset for land applications. \textit{Earth System Science Data, 13}, 4349--4383. https://doi.org/10.5194/essd-13-4349-2021\\
+
+NASA POWER. (s.f.). \textit{Prediction of Worldwide Energy Resources}. NASA. https://power.larc.nasa.gov/\\
+
+Open-Meteo. (s.f.). \textit{Weather forecast API}. https://open-meteo.com/\\
+
+PostgreSQL Global Development Group. (s.f.). \textit{PostgreSQL documentation}. https://www.postgresql.org/docs/\\
+
+React. (s.f.). \textit{React documentation}. https://react.dev/\\
+
+scikit-learn Developers. (s.f.). \textit{scikit-learn: Machine learning in Python}. https://scikit-learn.org/\\
+
+XGBoost Developers. (s.f.). \textit{XGBoost documentation}. https://xgboost.readthedocs.io/\\
+\end{hangparas}
+
+% ===================== APENDICE IMAGENES =====================
+\appendix
+\chapter{Lista consolidada de imágenes por insertar}
+
+\begin{enumerate}
+\item Mapa de regiones agroclimáticas de Guatemala.
+\item Mapa o captura del área de referencia: Altiplano Occidental.
+\item Diagrama de flujo metodológico del prototipo.
+\item Tabla o diagrama de fuentes de datos integradas.
+\item Diagrama de integración de datos históricos y lecturas locales/simuladas.
+\item Arquitectura general: React/Vite, FastAPI, PostgreSQL, modelos, datasets, Open-Meteo y Arduino.
+\item Diagrama de casos de uso de alto nivel.
+\item Pipeline operativo del sistema.
+\item Captura de login.
+\item Captura de dashboard principal.
+\item Captura de resultado de predicción.
+\item Captura del dataset con filtros, tendencia de \codigo{yield\_pct} y exportación CSV.
+\item Captura del mapa de riesgo o coroplético.
+\item Captura del módulo de pronóstico.
+\item Captura del módulo Arduino.
+\item Captura del módulo de alertas con historial de lecturas.
+\item Captura de reportes generados.
+\item Captura del panel administrativo o módulo de modelos.
+\item Gráfica de comparación XGBoost vs Random Forest con métricas actualizadas.
+\end{enumerate}
+
+\end{document}

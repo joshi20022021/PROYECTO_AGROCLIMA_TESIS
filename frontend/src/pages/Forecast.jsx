@@ -59,7 +59,7 @@ function formatDate(iso) {
 function RainBar({ prob }) {
   const color = prob >= 75 ? "#2563eb" : prob >= 40 ? "#60a5fa" : "#bfdbfe";
   return (
-    <div style={{ height: 4, borderRadius: 2, background: "#e5e7eb", overflow: "hidden", marginTop: 4 }}>
+    <div style={{ height: 4, borderRadius: 2, background: "var(--surface-hover)", overflow: "hidden", marginTop: 4 }}>
       <div style={{ height: "100%", width: `${prob}%`, background: color, borderRadius: 2, transition: "width .4s" }} />
     </div>
   );

@@ -1,0 +1,943 @@
+' ============================================================
+' AgroClima GT - Diagramas PlantUML v2
+' Actualizados segun estructura real del proyecto
+' Incluye: CDU, despliegue, sensores, pipeline de datos, BD
+' ============================================================
+
+
+' ── 1. Alto nivel ────────────────────────────────────────────
+
+@startuml AgroClimaGT_AltoNivel
+title AgroClima GT - Diagrama CORE
+top to bottom direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam actorStyle stickman
+skinparam defaultTextAlignment center
+skinparam usecase {
+  BackgroundColor white
+  BorderColor #666666
+}
+
+actor "Servicio\nOpen-Meteo" as OpenMeteo
+actor "Usuario\nAgricola" as Usuario
+actor "Administrador" as Admin
+actor "Arduino /\nSensores" as Arduino
+actor "Servidor\nSMTP" as SMTP
+actor "PostgreSQL /\nDatasets /\nModelo ML" as DataActor
+
+usecase "AgroClima GT" as CORE
+
+OpenMeteo --> CORE
+Usuario --> CORE
+Admin --> CORE
+Arduino --> CORE
+SMTP --> CORE
+DataActor --> CORE
+@enduml
+
+
+' ── 2. Primera descomposicion ────────────────────────────────
+
+@startuml AgroClimaGT_CDU_PrimeraDescomposicion
+title AgroClima GT - Diagrama de Primera Descomposicion
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam actorStyle stickman
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor white
+  BorderColor #666666
+}
+
+actor "Usuario Agricola" as Usuario
+actor "Administrador" as Admin
+actor "Dispositivo Arduino" as Arduino
+actor "Open-Meteo" as Meteo
+actor "Servidor SMTP" as SMTP
+actor "PostgreSQL / Modelo ML" as DataLayer
+
+rectangle "Sistema AgroClima GT" {
+  usecase "CDU 100: Acceso\ny gestion de sesion" as CDU100
+  usecase "CDU 200: Analisis de\nrendimiento agroclimatico" as CDU200
+  usecase "CDU 300: Pronostico y\napoyo agronomico" as CDU300
+  usecase "CDU 400: Monitoreo de\nsensores y alertas" as CDU400
+  usecase "CDU 500: Gestion de datos\ny retroalimentacion" as CDU500
+  usecase "CDU 600: Administracion de\nplataforma y modelo ML" as CDU600
+}
+
+Usuario --> CDU100
+Usuario --> CDU200
+Usuario --> CDU300
+Usuario --> CDU400
+Usuario --> CDU500
+
+Admin --> CDU100
+Admin --> CDU400
+Admin --> CDU500
+Admin --> CDU600
+
+Arduino --> CDU400
+Meteo --> CDU300
+SMTP --> CDU400
+SMTP --> CDU600
+DataLayer --> CDU200
+DataLayer --> CDU500
+DataLayer --> CDU600
+@enduml
+
+
+' ── 3. CDU 100 - Acceso ──────────────────────────────────────
+
+@startuml AgroClimaGT_CDU_Expandido_01
+title AgroClima GT - CDU 100 Acceso y gestion de sesion
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam actorStyle stickman
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor white
+  BorderColor #666666
+}
+
+actor "Usuario Agricola" as Usuario
+actor "Administrador" as Admin
+
+rectangle "CDU 100 - Acceso y gestion de sesion" {
+  usecase "CDU 101: Ingresar\ncomo usuario" as U1
+  usecase "CDU 102: Ingresar\ncomo administrador" as U2
+  usecase "CDU 103: Validar\ncredenciales (bcrypt)" as U3
+  usecase "CDU 104: Cargar panel\nsegun rol" as U4
+  usecase "CDU 105: Cerrar\nsesion" as U5
+  usecase "CDU 106: Persistir\nsesion (sessionStorage)" as U6
+}
+
+Usuario --> U1
+Admin --> U2
+Usuario --> U5
+Admin --> U5
+
+U2 .> U3 : <<include>>
+U1 .> U3 : <<include>>
+U1 .> U4 : <<include>>
+U2 .> U4 : <<include>>
+U4 .> U6 : <<include>>
+@enduml
+
+
+' ── 4. CDU 200 - Analisis de rendimiento ─────────────────────
+
+@startuml AgroClimaGT_CDU_Expandido_02
+title AgroClima GT - CDU 200 Analisis de rendimiento agroclimatico
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam actorStyle stickman
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor white
+  BorderColor #666666
+}
+
+actor "Usuario Agricola" as Usuario
+actor "PostgreSQL / Modelo ML" as DataLayer
+actor "Open-Meteo" as Meteo
+
+rectangle "CDU 200 - Analisis de rendimiento agroclimatico" {
+  usecase "CDU 201: Consultar\nmetricas climaticas" as U1
+  usecase "CDU 202: Ingresar variables\ndel cultivo y ambiente" as U2
+  usecase "CDU 203: Autocompletar\ndesde Open-Meteo" as U3
+  usecase "CDU 204: Predecir\nrendimiento (XGBoost)" as U4
+  usecase "CDU 205: Explicar prediccion\n(SHAP e intervalo 95%)" as U5
+  usecase "CDU 206: Clasificar nivel\nde riesgo" as U6
+  usecase "CDU 207: Evaluar anomalia\nde sensores" as U7
+  usecase "CDU 208: Evaluar drift\nde datos" as U8
+  usecase "CDU 209: Ver mapa\nde riesgo por departamento" as U9
+  usecase "CDU 210: Consultar estado\nvs rango optimo del cultivo" as U10
+  usecase "CDU 211: Consultar\nrecomendaciones agronomicas" as U11
+}
+
+Usuario --> U1
+Usuario --> U2
+Usuario --> U4
+Usuario --> U9
+Meteo --> U3
+DataLayer --> U4
+
+U2 .> U3 : <<extend>>
+U4 .> U5 : <<include>>
+U4 .> U6 : <<include>>
+U4 .> U7 : <<include>>
+U4 .> U8 : <<include>>
+U4 .> U10 : <<extend>>
+U4 .> U11 : <<extend>>
+@enduml
+
+
+' ── 5. CDU 300 - Pronostico ──────────────────────────────────
+
+@startuml AgroClimaGT_CDU_Expandido_03
+title AgroClima GT - CDU 300 Pronostico y apoyo agronomico
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam actorStyle stickman
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor white
+  BorderColor #666666
+}
+
+actor "Usuario Agricola" as Usuario
+actor "Servicio Meteorologico\nOpen-Meteo" as Meteo
+
+rectangle "CDU 300 - Pronostico y apoyo agronomico" {
+  usecase "CDU 301: Seleccionar\nmunicipio o departamento" as U1
+  usecase "CDU 302: Consultar pronostico\nde 7 dias" as U2
+  usecase "CDU 303: Ver resumen\nsemanal del cultivo" as U3
+  usecase "CDU 304: Mostrar alertas\nmeteorologicas semanales" as U4
+  usecase "CDU 305: Calcular deficit\nhidrico y riego" as U5
+  usecase "CDU 306: Consultar calendario\nde siembra y cosecha" as U6
+  usecase "CDU 307: Calcular apoyo\nde fertilizacion" as U7
+}
+
+Usuario --> U1
+Usuario --> U2
+Usuario --> U5
+Usuario --> U6
+Meteo --> U2
+
+U2 .> U3 : <<include>>
+U2 .> U4 : <<include>>
+U2 .> U5 : <<extend>>
+U2 .> U6 : <<extend>>
+U5 .> U7 : <<extend>>
+@enduml
+
+
+' ── 6. CDU 400 - Sensores y alertas ──────────────────────────
+
+@startuml AgroClimaGT_CDU_Expandido_04
+title AgroClima GT - CDU 400 Monitoreo de sensores y alertas
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam actorStyle stickman
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor white
+  BorderColor #666666
+}
+
+actor "Usuario Agricola" as Usuario
+actor "Administrador" as Admin
+actor "Dispositivo Arduino" as Arduino
+actor "Servidor SMTP" as SMTP
+
+rectangle "CDU 400 - Monitoreo de sensores y alertas" {
+  usecase "CDU 401: Conectar o\ndesconectar Arduino" as U1
+  usecase "CDU 402: Configurar cultivo\ny municipio del lote" as U2
+  usecase "CDU 403: Transmitir lecturas\nde sensores" as U3
+  usecase "CDU 404: Simular\nlecturas" as U4
+  usecase "CDU 405: Procesar lectura\nen backend" as U5
+  usecase "CDU 406: Generar prediccion\nautomatica" as U6
+  usecase "CDU 407: Evaluar alertas\npor umbrales" as U7
+  usecase "CDU 408: Notificar alertas\ncriticas por correo" as U8
+  usecase "CDU 409: Publicar datos\npor WebSocket" as U9
+  usecase "CDU 410: Visualizar panel\nen tiempo real" as U10
+  usecase "CDU 411: Configurar destinatarios\nde alertas criticas" as U11
+  usecase "CDU 412: Enviar correo\nde prueba" as U12
+}
+
+Usuario --> U1
+Usuario --> U2
+Usuario --> U4
+Usuario --> U10
+Admin --> U1
+Admin --> U2
+Admin --> U11
+Admin --> U10
+Arduino --> U3
+SMTP --> U8
+
+U3 .> U5 : <<include>>
+U4 .> U5 : <<include>>
+U5 .> U6 : <<include>>
+U5 .> U7 : <<include>>
+U7 .> U8 : <<extend>>
+U5 .> U9 : <<include>>
+U9 .> U10 : <<include>>
+U11 .> U12 : <<extend>>
+@enduml
+
+
+' ── 7. CDU 500 - Datos y retroalimentacion ───────────────────
+
+@startuml AgroClimaGT_CDU_Expandido_05
+title AgroClima GT - CDU 500 Gestion de datos y retroalimentacion
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam actorStyle stickman
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor white
+  BorderColor #666666
+}
+
+actor "Usuario Agricola" as Usuario
+actor "Administrador" as Admin
+
+rectangle "CDU 500 - Gestion de datos y retroalimentacion" {
+  usecase "CDU 501: Consultar\ndataset operativo" as U1
+  usecase "CDU 502: Exportar datos\ncomo CSV" as U2
+  usecase "CDU 503: Cargar\ndataset CSV" as U3
+  usecase "CDU 504: Registrar inventario\nde datasets y fuentes" as U4
+  usecase "CDU 505: Consultar predicciones\nhistoricas" as U5
+  usecase "CDU 506: Consultar lecturas\nhistoricas de Arduino" as U6
+  usecase "CDU 507: Registrar feedback\nreal del rendimiento" as U7
+  usecase "CDU 508: Evaluar umbral de\nreentrenamiento" as U8
+  usecase "CDU 509: Generar reporte\nde resultados" as U9
+}
+
+Usuario --> U1
+Usuario --> U2
+Usuario --> U7
+Usuario --> U9
+Admin --> U1
+Admin --> U2
+Admin --> U3
+Admin --> U5
+Admin --> U6
+
+U3 .> U4 : <<include>>
+U7 .> U8 : <<include>>
+U9 .> U2 : <<extend>>
+@enduml
+
+
+' ── 8. CDU 600 - Administracion ──────────────────────────────
+
+@startuml AgroClimaGT_CDU_Expandido_06
+title AgroClima GT - CDU 600 Administracion de plataforma y modelo ML
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam actorStyle stickman
+skinparam packageStyle rectangle
+skinparam usecase {
+  BackgroundColor white
+  BorderColor #666666
+}
+
+actor "Administrador" as Admin
+actor "Servidor SMTP" as SMTP
+
+rectangle "CDU 600 - Administracion de plataforma y modelo ML" {
+  usecase "CDU 601: Consultar dashboard\nadministrativo (KPIs)" as U1
+  usecase "CDU 602: Consultar informacion\ndel modelo activo" as U2
+  usecase "CDU 603: Comparar\nmodelos ML" as U3
+  usecase "CDU 604: Reentrenar\nmodelo XGBoost" as U4
+  usecase "CDU 605: Consultar uso\nde Open-Meteo API" as U5
+  usecase "CDU 606: Gestionar inventario\nde datasets" as U6
+  usecase "CDU 607: Consultar predicciones\nregistradas" as U7
+  usecase "CDU 608: Consultar lecturas\nde Arduino" as U8
+  usecase "CDU 609: Configurar destinatarios\nde alertas" as U9
+  usecase "CDU 610: Enviar correo\nde prueba" as U10
+}
+
+Admin --> U1
+Admin --> U2
+Admin --> U3
+Admin --> U4
+Admin --> U5
+Admin --> U6
+Admin --> U7
+Admin --> U8
+Admin --> U9
+Admin --> U10
+SMTP --> U10
+
+U3 .> U2 : <<extend>>
+U4 .> U2 : <<extend>>
+U9 .> U10 : <<extend>>
+@enduml
+
+
+' ── 9. Sensores y Arduino ─────────────────────────────────────
+
+@startuml AgroClimaGT_Diagrama_Sensores
+title AgroClima GT - Diagrama de sensores y conexion Arduino
+left to right direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam componentStyle rectangle
+
+node "Modulo fisico de sensores" {
+  component "Arduino UNO/MEGA" as Arduino
+  component "Protoboard 830" as Proto
+  component "DS18B20\nTemperatura" as DS18B20
+  component "Higrometro capacitivo\nHumedad del suelo" as Soil
+  component "TSL2561\nIntensidad de luz" as Light
+  component "TCS3200\nColor RGB / verdor" as Color
+  component "Bateria 9V + clip\nAlimentacion auxiliar" as Battery
+  component "Resistencias, jumpers,\nalambres y aislante" as Wiring
+}
+
+node "Computadora local" {
+  component "Backend FastAPI\ncore/arduino_reader.py\nPySerial + WebSocket" as Backend
+  component "Frontend React/Vite\nPagina Arduino" as Frontend
+}
+
+cloud "Red local / WiFi" as Wifi
+
+DS18B20 --> Proto : senal 1-Wire
+Soil --> Proto : salida analogica
+Light --> Proto : I2C
+Color --> Proto : senales digitales RGB
+Battery --> Proto : alimentacion auxiliar
+Wiring --> Proto : conexion fisica
+Proto --> Arduino : pines de entrada/salida
+Arduino --> Backend : USB tipo B / serial
+Backend --> Frontend : WebSocket :8000/ws/arduino
+Frontend --> Wifi : acceso desde navegador
+@enduml
+
+
+' ── 10. Despliegue ───────────────────────────────────────────
+
+@startuml AgroClimaGT_Despliegue
+title AgroClima GT - Diagrama de Despliegue
+left to right direction
+skinparam componentStyle rectangle
+
+cloud "GitHub Pages" as GitHubPages {
+  artifact "Frontend publicado\nbuild / dist" as FrontendDeploy
+}
+
+node "PC / Laptop del usuario" as ClientNode {
+  artifact "Navegador Web" as Browser
+}
+
+node "Host local Windows" as Host {
+  node "Proceso Uvicorn :8000" as Uvicorn {
+    artifact "FastAPI\nbackend/api.py" as API
+    folder "backend/core/" as Core {
+      artifact "ml_insights.py\nXGBoost + SHAP + anomalia" as ML
+      artifact "arduino_reader.py\nPySerial + WebSocket" as Reader
+      artifact "alert_engine.py\nUmbrales y severidad" as AlertEngine
+      artifact "email_notifier.py\nSMTP + throttle" as Mailer
+    }
+    folder "backend/database/" as DB {
+      artifact "connection.py\npsycopg2 pool" as DBConn
+      artifact "repository.py\nCRUD y sincronizacion" as DBRepo
+    }
+  }
+
+  folder "backend/data/models/" as ModelStore {
+    artifact "xgboost_yield.joblib" as ModelFile
+    artifact "label_encoders.joblib" as Encoders
+    artifact "isolation_forest_sensor.joblib" as IsoForest
+    artifact "drift_profile.json" as DriftProfile
+    artifact "model_comparison.json" as ModelComp
+    artifact "dataset_meta.json" as DatasetMeta
+  }
+
+  folder "backend/data/datasets/" as Datasets {
+    artifact "dataset_faostat.csv\n(2.1 M filas)" as FAOData
+    artifact "dataset_combinado.csv" as CombData
+    artifact "crop_optimal_conditions.csv" as CropRef
+    artifact "recommendations.csv" as RecomData
+  }
+
+  folder "backend/logs/" as Logs {
+    artifact "uvicorn.out.log" as LogOut
+    artifact "uvicorn.err.log" as LogErr
+  }
+
+  node "Docker Engine" as Docker {
+    node "Contenedor PostgreSQL 16" as PgContainer {
+      database "agroclima_db :5435" as PostgreSQL
+    }
+  }
+}
+
+node "Dispositivo fisico" as Edge {
+  device "Arduino + sensores\n(DS18B20, TSL2561,\nTCS3200, Higrometro)" as Arduino
+}
+
+cloud "API Open-Meteo (gratuita)" as OpenMeteo
+cloud "Servidor SMTP" as SMTP
+
+Browser --> GitHubPages : abre pagina web
+GitHubPages --> Browser : entrega interfaz React
+Browser --> API : HTTP REST / WebSocket
+API --> PostgreSQL : predicciones, lecturas, alertas
+API --> ModelFile : carga modelo XGBoost
+API --> FAOData : dataset entrenamiento/mapa
+API --> CropRef : rangos optimos por cultivo
+Reader --> Arduino : USB serial (PySerial)
+API --> OpenMeteo : pronostico 7 dias
+Mailer --> SMTP : alertas criticas por correo
+API --> Logs : registro de errores
+@enduml
+
+
+' ── 11. Pipeline de datos ─────────────────────────────────────
+
+@startuml AgroClimaGT_Pipeline_Datos
+title AgroClima GT - Pipeline de datos y entrenamiento
+top to bottom direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam componentStyle rectangle
+
+folder "Fuentes externas" as Sources {
+  component "ERA5-Land\n(CDS API)" as ERA5
+  component "FAOSTAT\n(rendimientos GT)" as FAOSTAT
+  component "INSIVUMEH\n(estaciones meteorologicas)" as INSIVUMEH
+  component "NASA POWER\n(climatologia)" as NASA
+  component "SoilGrids\n(propiedades suelo)" as SoilGrids
+  component "Open-Meteo\n(pronostico en vivo)" as OpenMeteo
+}
+
+folder "scripts/download/" as Download {
+  component "era5_client.py" as DL_ERA5
+  component "insivumeh_client.py" as DL_INSI
+  component "nasa_power_client.py" as DL_NASA
+  component "soilgrids_client.py" as DL_SOIL
+  component "open_meteo_client.py" as DL_OM
+  component "download_faostat.py" as DL_FAO
+}
+
+folder "data/raw/" as Raw {
+  artifact "era5/*.nc (2010-2026)" as RawERA5
+  artifact "insivumeh/\nstation_catalog.json\nstations_daily.csv" as RawINSI
+  artifact "nasa_power/\nmunicipos.json" as RawNASA
+  artifact "openmeteo/\nmunicipos.json" as RawOM
+}
+
+folder "scripts/processing/" as Processing {
+  component "process_era5.py" as P_ERA5
+  component "build_source_csvs.py" as P_BUILD
+  component "agronomic_indices.py" as P_AGRO
+  component "enrich_local_altitude.py" as P_ALT
+}
+
+folder "data/sources/" as ProcessedSrc {
+  artifact "era5_mensual.csv" as SRC_ERA5
+  artifact "faostat_yields_guatemala.csv" as SRC_FAO
+  artifact "insivumeh_recent_mensual.csv" as SRC_INSI
+  artifact "nasa_power_mensual.csv" as SRC_NASA
+  artifact "soilgrids_suelo.csv" as SRC_SOIL
+}
+
+folder "scripts/datasets/" as Datasets {
+  component "generate_dataset_era5.py" as GEN_ERA5
+  component "generate_dataset_openmeteo.py" as GEN_OM
+  component "merge_datasets.py" as MERGE
+  component "crop_reference.py" as CROP_REF
+  component "recommendations_dataset.py" as RECOM
+}
+
+folder "data/datasets/" as FinalData {
+  artifact "dataset_faostat.csv\n(2.1 M filas)" as DS_FAO
+  artifact "dataset_combinado.csv" as DS_COMB
+  artifact "crop_optimal_conditions.csv" as DS_CROP
+  artifact "recommendations.csv" as DS_RECOM
+}
+
+folder "scripts/training/" as Training {
+  component "model_xgboost.py\ntrain / evaluate / compare" as TRAIN
+}
+
+folder "data/models/" as Models {
+  artifact "xgboost_yield.joblib" as MDL_XGB
+  artifact "label_encoders.joblib" as MDL_ENC
+  artifact "isolation_forest_sensor.joblib" as MDL_ISO
+  artifact "drift_profile.json" as MDL_DRIFT
+  artifact "model_comparison.json" as MDL_COMP
+}
+
+folder "scripts/db/" as DBScripts {
+  component "seed_database.py" as SEED
+  component "seed_recommendations.py" as SEED_REC
+  component "import_csv_to_db.py" as IMPORT
+}
+
+database "PostgreSQL\nagroclima_db" as PG
+
+ERA5 --> DL_ERA5
+FAOSTAT --> DL_FAO
+INSIVUMEH --> DL_INSI
+NASA --> DL_NASA
+SoilGrids --> DL_SOIL
+OpenMeteo --> DL_OM
+
+DL_ERA5 --> RawERA5
+DL_INSI --> RawINSI
+DL_NASA --> RawNASA
+DL_OM --> RawOM
+
+RawERA5 --> P_ERA5
+RawINSI --> P_BUILD
+RawNASA --> P_BUILD
+P_ERA5 --> SRC_ERA5
+P_BUILD --> SRC_INSI
+P_BUILD --> SRC_NASA
+DL_FAO --> SRC_FAO
+DL_SOIL --> SRC_SOIL
+P_AGRO --> SRC_ERA5
+P_ALT --> SRC_ERA5
+
+SRC_ERA5 --> GEN_ERA5
+SRC_FAO --> GEN_ERA5
+SRC_INSI --> GEN_OM
+SRC_SOIL --> GEN_ERA5
+GEN_ERA5 --> DS_FAO
+GEN_OM --> DS_COMB
+MERGE --> DS_COMB
+CROP_REF --> DS_CROP
+RECOM --> DS_RECOM
+
+DS_FAO --> TRAIN
+DS_COMB --> TRAIN
+TRAIN --> MDL_XGB
+TRAIN --> MDL_ENC
+TRAIN --> MDL_ISO
+TRAIN --> MDL_DRIFT
+TRAIN --> MDL_COMP
+
+DS_CROP --> SEED
+DS_RECOM --> SEED_REC
+DS_FAO --> IMPORT
+SEED --> PG
+SEED_REC --> PG
+IMPORT --> PG
+@enduml
+
+
+' ── 12. Esquema de base de datos ─────────────────────────────
+
+@startuml AgroClimaGT_Esquema_BD
+title AgroClima GT - Esquema de base de datos PostgreSQL
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam linetype ortho
+
+entity "usuarios" as USR {
+  * id : SERIAL <<PK>>
+  --
+  nombre : VARCHAR(100)
+  email : VARCHAR(150) <<UNIQUE>>
+  password_hash : VARCHAR(255)
+  rol : VARCHAR(20)
+  creado_en : TIMESTAMP
+}
+
+entity "predicciones" as PRED {
+  * id : SERIAL <<PK>>
+  --
+  timestamp : TIMESTAMP
+  municipio : VARCHAR(100)
+  cultivo : VARCHAR(100)
+  mes : SMALLINT
+  temperatura : FLOAT
+  precipitacion : FLOAT
+  humedad : FLOAT
+  ph_suelo : FLOAT
+  soil_moisture : FLOAT
+  light_lux : FLOAT
+  greenness_idx : FLOAT
+  swvl2 : FLOAT
+  swvl3 : FLOAT
+  soil_temp : FLOAT
+  temp_max : FLOAT
+  temp_min : FLOAT
+  wind_speed : FLOAT
+  yield_pct : FLOAT
+  yield_level : VARCHAR(20)
+  fuente : VARCHAR(20)
+  modelo_ver : VARCHAR(50)
+}
+
+entity "lecturas_arduino" as LECT {
+  * id : SERIAL <<PK>>
+  --
+  timestamp : TIMESTAMP
+  municipio : VARCHAR(100)
+  cultivo : VARCHAR(100)
+  temperatura : FLOAT
+  humedad : FLOAT
+  soil_moisture : FLOAT
+  light_lux : FLOAT
+  greenness_idx : FLOAT
+  ph_suelo : FLOAT
+  precipitacion : FLOAT
+  raw_json : JSONB
+}
+
+entity "alertas" as ALERT {
+  * id : SERIAL <<PK>>
+  --
+  timestamp : TIMESTAMP
+  prediccion_id : INTEGER <<FK>>
+  municipio : VARCHAR(100)
+  cultivo : VARCHAR(100)
+  variable : VARCHAR(50)
+  condicion : VARCHAR(20)
+  severidad : VARCHAR(20)
+  mensaje : TEXT
+}
+
+entity "modelos_ml" as MDL {
+  * id : SERIAL <<PK>>
+  --
+  nombre : VARCHAR(100)
+  version : VARCHAR(50)
+  fecha_entrenamiento : TIMESTAMP
+  dataset_usado : VARCHAR(200)
+  n_filas : INTEGER
+  n_features : INTEGER
+  r2_test : FLOAT
+  mae : FLOAT
+  rmse : FLOAT
+  precision : FLOAT
+  recall : FLOAT
+  f1 : FLOAT
+  low_yield_threshold : INTEGER
+  crossval_r2 : FLOAT
+  crossval_std : FLOAT
+  hiperparametros : JSONB
+  activo : BOOLEAN
+}
+
+entity "datasets_registrados" as DS {
+  * id : SERIAL <<PK>>
+  --
+  nombre_archivo : VARCHAR(200) <<UNIQUE>>
+  tipo : VARCHAR(50)
+  origen : VARCHAR(100)
+  periodo : VARCHAR(50)
+  total_filas : INTEGER
+  total_columnas : INTEGER
+  columnas : JSONB
+  metadata : JSONB
+  activo : BOOLEAN
+  fecha_carga : TIMESTAMP
+}
+
+entity "fuentes_datos" as FUENTE {
+  * id : SERIAL <<PK>>
+  --
+  nombre_archivo : VARCHAR(200) <<UNIQUE>>
+  categoria : VARCHAR(50)
+  periodo : VARCHAR(50)
+  total_filas : INTEGER
+  total_columnas : INTEGER
+  columnas : JSONB
+  metadata : JSONB
+  fecha_carga : TIMESTAMP
+}
+
+entity "metricas_climaticas" as MET {
+  * id : SERIAL <<PK>>
+  --
+  municipio : VARCHAR(100)
+  temperatura : FLOAT
+  precipitacion : FLOAT
+  humedad : FLOAT
+  soil_moisture : FLOAT
+  fuente : VARCHAR(50)
+  periodo : VARCHAR(50)
+  fecha_carga : TIMESTAMP
+}
+
+entity "dataset_entrenamiento" as DSET {
+  * id : BIGSERIAL <<PK>>
+  --
+  dataset_nombre : VARCHAR(200)
+  municipio : VARCHAR(100)
+  cultivo : VARCHAR(100)
+  mes : SMALLINT
+  anio : SMALLINT
+  temperatura : FLOAT
+  precipitacion : FLOAT
+  humedad : FLOAT
+  ph_suelo : FLOAT
+  soil_moisture : FLOAT
+  light_lux : FLOAT
+  greenness_idx : FLOAT
+  swvl2 : FLOAT
+  swvl3 : FLOAT
+  soil_temp : FLOAT
+  temp_max : FLOAT
+  temp_min : FLOAT
+  wind_speed : FLOAT
+  yield_pct : FLOAT
+  fecha_carga : TIMESTAMP
+}
+
+entity "recomendaciones_cultivo" as RECOM {
+  * id : SERIAL <<PK>>
+  --
+  cultivo : VARCHAR(100)
+  variable : VARCHAR(50)
+  condicion : VARCHAR(20)
+  umbral_min : FLOAT
+  umbral_max : FLOAT
+  nivel : VARCHAR(20)
+  icono : VARCHAR(10)
+  titulo : VARCHAR(120)
+  recomendacion : TEXT
+  fuente : VARCHAR(200)
+  activo : BOOLEAN
+}
+
+entity "model_feedback" as FEED {
+  * id : SERIAL <<PK>>
+  --
+  created_at : TIMESTAMP
+  municipio : VARCHAR(100)
+  cultivo : VARCHAR(100)
+  mes : SMALLINT
+  predicted_yield : FLOAT
+  actual_yield : FLOAT
+  abs_error : FLOAT
+  notes : TEXT
+  processed_retrain : BOOLEAN
+}
+
+entity "email_config" as MAIL_CFG {
+  * id : SERIAL <<PK>>
+  --
+  email_to : TEXT
+  cultivo : VARCHAR(100)
+  severidad_min : VARCHAR(20)
+  activo : BOOLEAN
+  actualizado : TIMESTAMP
+}
+
+entity "email_log" as MAIL_LOG {
+  * id : SERIAL <<PK>>
+  --
+  timestamp : TIMESTAMP
+  cultivo : VARCHAR(100)
+  municipio : VARCHAR(100)
+  variables : JSONB
+  destinatarios : TEXT
+  ok : BOOLEAN
+  error_msg : TEXT
+}
+
+ALERT::prediccion_id }o--|| PRED::id
+@enduml
+
+
+' ── 13. Arquitectura de componentes frontend/backend ─────────
+
+@startuml AgroClimaGT_Componentes
+title AgroClima GT - Arquitectura de componentes
+top to bottom direction
+skinparam shadowing false
+skinparam backgroundColor white
+skinparam componentStyle rectangle
+
+package "Frontend React (Vite)" as FE {
+  package "Paginas - Usuario" as PU {
+    component "Dashboard\n(prediccion + metricas)" as P_DASH
+    component "Metricas\n(datos climaticos)" as P_MET
+    component "Mapa de Riesgo\n(departamentos GT)" as P_MAP
+    component "Alertas\n(umbrales y acciones)" as P_ALERT
+    component "Resultados\n(reporte y feedback)" as P_REP
+    component "Pronostico\n(7 dias + calendario)" as P_FORE
+    component "Arduino\n(sensores en vivo)" as P_ARD
+  }
+
+  package "Paginas - Admin" as PA {
+    component "AdminDashboard\n(KPIs del sistema)" as A_DASH
+    component "AdminDatasets\n(inventario de datos)" as A_DS
+    component "AdminPredictions\n(historial)" as A_PRED
+    component "AdminReadings\n(lecturas Arduino)" as A_READ
+    component "Models\n(modelo ML + comparacion)" as A_MDL
+  }
+
+  package "Servicios" as SVC {
+    component "api.js\n(cliente HTTP REST)" as API_SVC
+    component "Login / Auth\n(sessionStorage)" as AUTH
+  }
+}
+
+package "Backend FastAPI :8000" as BE {
+  package "Endpoints REST" as EP {
+    component "POST /predict" as EP1
+    component "GET /metrics" as EP2
+    component "GET /forecast/{mun}" as EP3
+    component "GET /risk-map" as EP4
+    component "GET /alerts" as EP5
+    component "GET /dataset" as EP6
+    component "POST /feedback" as EP7
+    component "GET /model-info" as EP8
+    component "POST /admin/train" as EP9
+    component "POST /auth/login" as EP10
+    component "GET /admin/datasets" as EP11
+    component "GET /predictions" as EP12
+    component "GET /arduino/readings" as EP13
+  }
+
+  component "WebSocket /ws/arduino" as WS
+
+  package "core/" as CORE {
+    component "ml_insights.py" as ML
+    component "alert_engine.py" as AE
+    component "arduino_reader.py" as AR
+    component "email_notifier.py" as EN
+  }
+
+  package "database/" as DBPKG {
+    component "repository.py" as REPO
+    component "connection.py" as CONN
+  }
+}
+
+P_DASH --> API_SVC
+P_MET --> API_SVC
+P_MAP --> API_SVC
+P_ALERT --> API_SVC
+P_REP --> API_SVC
+P_FORE --> API_SVC
+P_ARD --> API_SVC
+A_DASH --> API_SVC
+A_DS --> API_SVC
+A_PRED --> API_SVC
+A_READ --> API_SVC
+A_MDL --> API_SVC
+P_ARD --> WS
+
+API_SVC --> EP1
+API_SVC --> EP2
+API_SVC --> EP3
+API_SVC --> EP4
+API_SVC --> EP5
+API_SVC --> EP6
+API_SVC --> EP7
+API_SVC --> EP8
+API_SVC --> EP9
+API_SVC --> EP10
+API_SVC --> EP11
+API_SVC --> EP12
+API_SVC --> EP13
+
+EP1 --> ML
+EP3 --> ML
+EP4 --> ML
+EP5 --> AE
+WS --> AR
+AE --> EN
+EP1 --> REPO
+EP8 --> REPO
+EP9 --> ML
+REPO --> CONN
+@enduml

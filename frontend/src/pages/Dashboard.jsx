@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import ChartCanvas from "../components/ChartCanvas";
 import { cropOptions, municipioOptions, TRAINED_CROPS } from "../data/constants";
-import { getCropOptimalConditions, getSatelliteNdvi } from "../services/api";
+import { getCropOptimalConditions } from "../services/api";
 import { getRiskLabel, getRecommendation } from "../utils/riskUtils";
 
 const MONTHS_ES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
@@ -142,8 +142,8 @@ function comparisonStatusCopy(status) {
 }
 
 function ndviStatusCopy(value) {
-  if (value == null) return { label: "Sin NDVI", color: "#64748b", bg: "rgba(100,116,139,0.1)", note: "Aun no hay indice calculado." };
-  if (value >= 0.65) return { label: "Vigor alto", color: "#16a34a", bg: "rgba(22,163,74,0.12)", note: "La cobertura vegetal luce sana en la observacion satelital." };
+  if (value == null) return { label: "Sin NDVI", color: "#64748b", bg: "rgba(100,116,139,0.1)", note: "" };
+  if (value >= 0.65) return { label: "Vigor alto", color: "#16a34a", bg: "rgba(22,163,74,0.12)", note: "" };
   if (value >= 0.45) return { label: "Vigor medio", color: "#d97706", bg: "rgba(245,158,11,0.12)", note: "Se observa cobertura aceptable, pero conviene vigilar cambios." };
   return { label: "Vigor bajo", color: "#dc2626", bg: "rgba(220,38,38,0.12)", note: "La vegetacion luce debil o con menor cobertura de lo esperado." };
 }
@@ -158,8 +158,6 @@ function formatSceneDate(value) {
 export default function Dashboard({ form, selectedEntry, predictionRisk, trendSeries, avgRisk, yieldResult, analysisReady, apiOnline, updateForm, submitForm, submitting, weatherLoading, weatherSource }) {
   const [optimal, setOptimal] = useState(null);
   const [optimalLoading, setOptimalLoading] = useState(false);
-  const [satellite, setSatellite] = useState(null);
-  const [satelliteLoading, setSatelliteLoading] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -185,29 +183,6 @@ export default function Dashboard({ form, selectedEntry, predictionRisk, trendSe
     };
   }, [form.crop]);
 
-  useEffect(() => {
-    let cancelled = false;
-    if (!apiOnline || !form.municipality) {
-      setSatellite(null);
-      return;
-    }
-
-    setSatelliteLoading(true);
-    getSatelliteNdvi(form.municipality)
-      .then((data) => {
-        if (!cancelled) setSatellite(data);
-      })
-      .catch(() => {
-        if (!cancelled) setSatellite(null);
-      })
-      .finally(() => {
-        if (!cancelled) setSatelliteLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [form.municipality]);
 
   // ── Gráfica de líneas – variables climáticas (eje dual) ────
   const climateChart = useMemo(() => ({
@@ -484,8 +459,6 @@ export default function Dashboard({ form, selectedEntry, predictionRisk, trendSe
         ? { label: yieldResult.yield_pct >= 80 ? "Produccion esperada aceptable" : yieldBand(yieldResult.yield_pct).label, color: "#d97706", text: "Corrige los factores en alerta para mantener un rendimiento estable." }
         : yieldBand(yieldResult.yield_pct)
     : null;
-  const ndviValue = satellite?.ndvi?.available ? satellite.ndvi.latest_mean : null;
-  const ndviStatus = ndviStatusCopy(ndviValue);
 
   return (
     <div className="page-content">
@@ -632,8 +605,8 @@ export default function Dashboard({ form, selectedEntry, predictionRisk, trendSe
               {!analysisReady ? (
                 <div style={{
                   marginTop: "0.8rem",
-                  background: "rgba(15,23,42,0.03)",
-                  border: "1px dashed rgba(15,23,42,0.15)",
+                  background: "var(--surface-alt)",
+                  border: "1px dashed var(--border-strong)",
                   borderRadius: 12,
                   padding: "1rem",
                 }}>
@@ -697,7 +670,7 @@ export default function Dashboard({ form, selectedEntry, predictionRisk, trendSe
                               <span style={{ fontSize: "0.7rem", color: "var(--text-secondary)", width: 80, flexShrink: 0, textAlign: "right" }}>
                                 {c.label}
                               </span>
-                              <div style={{ flex: 1, height: 8, borderRadius: 4, background: "rgba(0,0,0,0.07)", overflow: "hidden" }}>
+                              <div style={{ flex: 1, height: 8, borderRadius: 4, background: "var(--surface-hover)", overflow: "hidden" }}>
                                 <div style={{
                                   height: "100%", width: `${barWidth}%`, borderRadius: 4,
                                   background: isPos ? "#16a34a" : "#dc2626",
@@ -786,13 +759,13 @@ export default function Dashboard({ form, selectedEntry, predictionRisk, trendSe
                         const est = yieldResult.yield_pct;
                         const barColor = predictionRisk.level === "low" ? "#16a34a" : predictionRisk.level === "medium" ? "#d97706" : "#dc2626";
                         return (
-                          <div style={{ marginTop: "0.55rem", background: "rgba(0,0,0,0.03)", border: "1px solid var(--border)", borderRadius: 8, padding: "0.6rem 0.75rem" }}>
+                          <div style={{ marginTop: "0.55rem", background: "var(--surface-alt)", border: "1px solid var(--border)", borderRadius: 8, padding: "0.6rem 0.75rem" }}>
                             <p style={{ margin: "0 0 0.4rem", fontSize: "0.68rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", color: "var(--text-muted)" }}>
                               Intervalo de confianza (95%)
                             </p>
                             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                               <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--text-secondary)", minWidth: 30 }}>{lo}%</span>
-                              <div style={{ flex: 1, position: "relative", height: 10, background: "rgba(0,0,0,0.08)", borderRadius: 5 }}>
+                              <div style={{ flex: 1, position: "relative", height: 10, background: "var(--surface-hover)", borderRadius: 5 }}>
                                 <div style={{
                                   position: "absolute", left: `${lo}%`, width: `${hi - lo}%`,
                                   height: "100%", background: `${barColor}55`, borderRadius: 5,
@@ -926,14 +899,14 @@ export default function Dashboard({ form, selectedEntry, predictionRisk, trendSe
                     <span className="legend-pill" style={{ color: "#16a34a", borderColor: "rgba(22,163,74,0.25)", background: "rgba(22,163,74,0.07)" }}>
                       <span className="legend-pill-dot" style={{ background: "#16a34a" }} />Rango ideal
                     </span>
-                    <span className="legend-pill" style={{ color: "#0f172a", borderColor: "rgba(15,23,42,0.15)", background: "rgba(15,23,42,0.04)" }}>
-                      <span className="legend-pill-dot" style={{ background: "#0f172a" }} />Valor actual
+                    <span className="legend-pill" style={{ color: "var(--text-secondary)", borderColor: "var(--border-strong)", background: "var(--surface-hover)" }}>
+                      <span className="legend-pill-dot" style={{ background: "var(--text-primary)" }} />Valor actual
                     </span>
                   </div>
                 </div>
                 <div style={{ display: "grid", gap: "0.9rem" }}>
                   {optimalLoading ? (
-                    <div style={{ padding: "1rem", borderRadius: 12, background: "rgba(15,23,42,0.03)", color: "var(--text-secondary)", fontSize: "0.82rem" }}>
+                    <div style={{ padding: "1rem", borderRadius: 12, background: "var(--surface-alt)", color: "var(--text-secondary)", fontSize: "0.82rem" }}>
                       Cargando rangos optimos del cultivo...
                     </div>
                   ) : comparisonRows.length ? comparisonRows.map((row) => {
@@ -956,16 +929,16 @@ export default function Dashboard({ form, selectedEntry, predictionRisk, trendSe
                             </span>
                           </div>
                         </div>
-                        <div style={{ position: "relative", marginTop: "0.7rem", height: 12, borderRadius: 999, background: "rgba(15,23,42,0.08)", overflow: "hidden" }}>
+                        <div style={{ position: "relative", marginTop: "0.7rem", height: 12, borderRadius: 999, background: "var(--surface-hover)", overflow: "hidden" }}>
                           <div style={{ position: "absolute", left: `${row.idealLeft}%`, width: `${row.idealWidth}%`, top: 0, bottom: 0, background: "rgba(22,163,74,0.35)" }} />
                           {row.markerLeft != null && (
-                            <div style={{ position: "absolute", left: `${row.markerLeft}%`, top: "50%", transform: "translate(-50%, -50%)", width: 12, height: 12, borderRadius: 999, background: row.color, border: "2px solid #fff", boxShadow: "0 0 0 1px rgba(15,23,42,0.08)" }} />
+                            <div style={{ position: "absolute", left: `${row.markerLeft}%`, top: "50%", transform: "translate(-50%, -50%)", width: 12, height: 12, borderRadius: 999, background: row.color, border: "2px solid var(--surface)", boxShadow: "0 0 0 1px var(--border)" }} />
                           )}
                         </div>
                       </div>
                     );
                   }) : (
-                    <div style={{ padding: "1rem", borderRadius: 12, background: "rgba(15,23,42,0.03)", color: "var(--text-secondary)", fontSize: "0.82rem", lineHeight: 1.6 }}>
+                    <div style={{ padding: "1rem", borderRadius: 12, background: "var(--surface-alt)", color: "var(--text-secondary)", fontSize: "0.82rem", lineHeight: 1.6 }}>
                       No hay referencia disponible para este cultivo.
                     </div>
                   )}
@@ -977,96 +950,6 @@ export default function Dashboard({ form, selectedEntry, predictionRisk, trendSe
                 </div>
               </div>
 
-              <div className="chart-card">
-                <div className="chart-card-header">
-                  <div>
-                    <h4>Vigor vegetal satelital</h4>
-                    <p className="chart-card-sub">Sentinel-2 sobre {form.municipality}</p>
-                  </div>
-                  <div className="chart-legend-pills">
-                    <span className="legend-pill" style={{ color: "#16a34a", borderColor: "rgba(22,163,74,0.25)", background: "rgba(22,163,74,0.07)" }}>
-                      <span className="legend-pill-dot" style={{ background: "#16a34a" }} />NDVI
-                    </span>
-                    <span className="legend-pill" style={{ color: "#64748b", borderColor: "rgba(100,116,139,0.2)", background: "rgba(100,116,139,0.07)" }}>
-                      <span className="legend-pill-dot" style={{ background: "#64748b" }} />Escena reciente
-                    </span>
-                  </div>
-                </div>
-
-                {satelliteLoading ? (
-                  <div style={{ padding: "1rem", borderRadius: 12, background: "rgba(15,23,42,0.03)", color: "var(--text-secondary)", fontSize: "0.82rem" }}>
-                    Consultando observacion satelital para Guatemala...
-                  </div>
-                ) : satellite ? (
-                  <div style={{ display: "grid", gap: "0.9rem" }}>
-                    <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.4fr) minmax(220px, 0.9fr)", gap: "0.9rem" }}>
-                      <div style={{ background: "var(--surface-alt)", border: "1px solid var(--border)", borderRadius: 12, padding: "0.95rem" }}>
-                        <p style={{ margin: 0, fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-muted)", fontWeight: 800 }}>
-                          Estado satelital
-                        </p>
-                        <div style={{ display: "flex", alignItems: "baseline", gap: "0.55rem", marginTop: "0.4rem", flexWrap: "wrap" }}>
-                          <span style={{ fontSize: "2rem", fontWeight: 900, color: ndviStatus.color, lineHeight: 1 }}>
-                            {ndviValue == null ? "--" : ndviValue.toFixed(2)}
-                          </span>
-                          <span style={{ fontSize: "0.78rem", color: "var(--text-secondary)" }}>
-                            NDVI actual
-                          </span>
-                        </div>
-                        <div style={{ marginTop: "0.55rem", display: "inline-flex", fontSize: "0.72rem", fontWeight: 800, padding: "0.3rem 0.6rem", borderRadius: 999, background: ndviStatus.bg, color: ndviStatus.color }}>
-                          {ndviStatus.label}
-                        </div>
-                        <p style={{ margin: "0.6rem 0 0", fontSize: "0.78rem", color: "var(--text-secondary)", lineHeight: 1.55 }}>
-                          {satellite.ndvi?.available
-                            ? ndviStatus.note
-                            : satellite.ndvi?.message || "Solo se encontro la escena reciente; no hay indice disponible en este momento."}
-                        </p>
-                        {satellite.ndvi?.available && satellite.ndvi.latest_interval && (
-                          <p style={{ margin: "0.45rem 0 0", fontSize: "0.72rem", color: "var(--text-muted)" }}>
-                            Ventana NDVI: {formatSceneDate(satellite.ndvi.latest_interval.from)} - {formatSceneDate(satellite.ndvi.latest_interval.to)}
-                          </p>
-                        )}
-                      </div>
-
-                      <div style={{ background: "var(--surface-alt)", border: "1px solid var(--border)", borderRadius: 12, padding: "0.95rem" }}>
-                        <p style={{ margin: 0, fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-muted)", fontWeight: 800 }}>
-                          Ultima escena
-                        </p>
-                        <p style={{ margin: "0.45rem 0 0", fontSize: "0.92rem", fontWeight: 800, color: "var(--text-primary)" }}>
-                          {formatSceneDate(satellite.latest_scene?.datetime)}
-                        </p>
-                        <p style={{ margin: "0.3rem 0 0", fontSize: "0.78rem", color: "var(--text-secondary)" }}>
-                          Nubes: <strong>{satellite.latest_scene?.cloud_cover ?? "s/d"}%</strong>
-                        </p>
-                        <p style={{ margin: "0.3rem 0 0", fontSize: "0.78rem", color: "var(--text-secondary)" }}>
-                          Plataforma: <strong>{satellite.latest_scene?.platform || "Sentinel-2"}</strong>
-                        </p>
-                        <p style={{ margin: "0.3rem 0 0", fontSize: "0.72rem", color: "var(--text-muted)", lineHeight: 1.55 }}>
-                          {satellite.configured_for_ndvi
-                            ? "Tu backend esta listo para calcular NDVI sobre la escena mas reciente."
-                            : "Sin credenciales CDSE: por ahora solo se muestra la escena publica mas reciente."}
-                        </p>
-                      </div>
-                    </div>
-
-                    {satellite.latest_scene?.thumbnail && (
-                      <div style={{ background: "var(--surface-alt)", border: "1px solid var(--border)", borderRadius: 12, padding: "0.9rem" }}>
-                        <p style={{ margin: "0 0 0.55rem", fontSize: "0.72rem", textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-muted)", fontWeight: 800 }}>
-                          Vista satelital reciente
-                        </p>
-                        <img
-                          src={satellite.latest_scene.thumbnail}
-                          alt={`Escena satelital reciente de ${form.municipality}`}
-                          style={{ width: "100%", borderRadius: 10, border: "1px solid rgba(15,23,42,0.08)", objectFit: "cover", maxHeight: 220 }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div style={{ padding: "1rem", borderRadius: 12, background: "rgba(15,23,42,0.03)", color: "var(--text-secondary)", fontSize: "0.82rem", lineHeight: 1.6 }}>
-                    No se pudo cargar la referencia satelital para este municipio.
-                  </div>
-                )}
-              </div>
 
             </div>
           </div>

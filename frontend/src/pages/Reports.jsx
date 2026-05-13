@@ -439,7 +439,7 @@ export default function Reports({
                 fontWeight: 700,
                 padding: "0.35rem 0.7rem",
                 borderRadius: 999,
-                background: "rgba(15,23,42,0.05)",
+                background: "var(--surface-hover)",
                 color: "var(--text-secondary)",
               }}
             >

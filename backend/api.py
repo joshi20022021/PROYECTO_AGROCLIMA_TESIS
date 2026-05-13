@@ -37,10 +37,10 @@ from pydantic import BaseModel
 from psycopg2.extras import Json
 import bcrypt
 
-from arduino_reader  import reader as arduino_reader
-from alert_engine    import check_alerts
-from email_notifier  import notify_critical_alerts, is_configured as email_configured
-from ml_insights import (
+from core.arduino_reader  import reader as arduino_reader
+from core.alert_engine    import check_alerts
+from core.email_notifier  import notify_critical_alerts, is_configured as email_configured
+from core.ml_insights import (
     prepare_input_row,
     predict_with_interval,
     explain_prediction_shap,

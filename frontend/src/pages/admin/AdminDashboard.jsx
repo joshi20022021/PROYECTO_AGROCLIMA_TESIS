@@ -106,7 +106,7 @@ export default function AdminDashboard() {
               background: "rgba(239,68,68,0.06)", border: "1px solid rgba(239,68,68,0.2)",
               borderRadius: 8, fontSize: "0.82rem", color: "#ef4444",
             }}>
-              Base de datos no disponible. Ejecuta: <code style={{ fontFamily: "monospace", background: "rgba(0,0,0,0.06)", padding: "0.1rem 0.4rem", borderRadius: 4 }}>docker-compose up -d</code>
+              Base de datos no disponible. Ejecuta: <code style={{ fontFamily: "monospace", background: "var(--surface-hover)", padding: "0.1rem 0.4rem", borderRadius: 4 }}>docker-compose up -d</code>
             </div>
           )}
         </div>

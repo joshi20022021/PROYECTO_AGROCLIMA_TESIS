@@ -143,7 +143,7 @@ function AlertCard({ alert, sourceLabel }) {
               fontWeight: 700,
               padding: "0.18rem 0.5rem",
               borderRadius: 999,
-              background: "rgba(15,23,42,0.06)",
+              background: "var(--surface-hover)",
               color: "var(--text-secondary)",
             }}
           >
@@ -177,8 +177,8 @@ function AlertCard({ alert, sourceLabel }) {
           marginTop: "0.65rem",
           padding: "0.75rem 0.85rem",
           borderRadius: 8,
-          background: "rgba(255,255,255,0.72)",
-          border: "1px solid rgba(15,23,42,0.08)",
+          background: "var(--surface-alt)",
+          border: "1px solid var(--border)",
         }}
       >
         <div style={{ fontSize: "0.72rem", fontWeight: 800, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em" }}>

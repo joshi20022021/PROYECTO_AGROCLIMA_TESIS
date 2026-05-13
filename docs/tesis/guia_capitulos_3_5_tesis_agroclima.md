@@ -1185,7 +1185,7 @@ Tabla 3.1. Fuentes de datos integradas en AgroClima GT.
 | ERA5-Land | `era5_mensual.csv`, NetCDF anuales | temperatura, lluvia, humedad, humedad de suelo, temperatura de suelo | base climatica historica |
 | NASA POWER | `nasa_power_mensual.csv` | temperatura maxima, temperatura minima, viento | variables meteorologicas complementarias |
 | SoilGrids | `soilgrids_suelo.csv` | pH y propiedades edaficas | referencia de suelo |
-| INSIVUMEH | `insivumeh_recent_mensual.csv`, `insivumeh_stations_daily.csv` | observaciones recientes procesadas | contraste nacional y contexto |
+| INSIVUMEH | `insivumeh_recent_mensual.csv` | observaciones recientes procesadas | contraste nacional y contexto |
 | Open-Meteo | API y archivos raw | pronostico, clima historico/diario | autocompletado y pronostico |
 | FAOSTAT | `faostat_yields_guatemala.csv` | rendimiento agricola | calibracion de `yield_pct` |
 
@@ -1320,8 +1320,8 @@ El sistema combina dos tipos de datos. Los datos historicos alimentan el entrena
 
 ### Evidencia del proyecto
 
-- `backend/arduino_reader.py`
-- `backend/alert_engine.py`
+- `backend/core/arduino_reader.py`
+- `backend/core/alert_engine.py`
 - Endpoint `POST /arduino/simulate`
 - WebSocket `WS /ws/arduino`
 - Frontend `frontend/src/pages/Alerts.jsx` y `frontend/src/pages/Arduino.jsx`
@@ -1447,7 +1447,7 @@ El titulo del PDF menciona "horas frio", pero el proyecto no muestra una formula
 
 ### Contenido sugerido
 
-AgroClima GT incorpora variables derivadas para representar condiciones que no siempre se capturan directamente desde el formulario del usuario. Entre ellas estan temperatura de suelo, humedad de suelo en capas, temperatura maxima, temperatura minima, velocidad de viento, altitud, indice de verdor y un indice de estres hidrico disponible en `water_stress_index.csv`. Estas variables amplian el contexto del modelo y permiten relacionar condiciones climaticas con respuesta agricola.
+AgroClima GT incorpora variables derivadas para representar condiciones que no siempre se capturan directamente desde el formulario del usuario. Entre ellas estan temperatura de suelo, humedad de suelo en capas, temperatura maxima, temperatura minima, velocidad de viento, altitud, indice de verdor y un indice de estres hidrico disponible en `backend/data/processed/water_stress_index.csv`. Estas variables amplian el contexto del modelo y permiten relacionar condiciones climaticas con respuesta agricola.
 
 ### Formula recomendada: indice de verdor
 
@@ -1466,7 +1466,7 @@ G = \frac{G_{raw}}{R_{raw}+G_{raw}+B_{raw}} \times 100
 
 ### Ajuste recomendado
 
-El proyecto no contiene una variable explicita de fase fenologica por cultivo. Lo que si existe es `month`, calendario de siembra (`sowing_calendar.csv`) y rangos optimos por cultivo. Por eso, este inciso debe redactarse como aproximacion temporal/fenologica.
+El proyecto no contiene una variable explicita de fase fenologica por cultivo. Lo que si existe es `month`, calendario de siembra (`backend/data/processed/sowing_calendar.csv`) y rangos optimos por cultivo (`backend/data/datasets/crop_optimal_conditions.csv`). Por eso, este inciso debe redactarse como aproximacion temporal/fenologica.
 
 ### Contenido sugerido
 
@@ -1479,7 +1479,7 @@ Tabla 3.6. Representacion temporal y fenologica aproximada.
 | Elemento | Estado en proyecto | Uso |
 |---|---|---|
 | `month` | implementado | variable temporal del modelo |
-| `sowing_calendar.csv` | implementado | recomendacion de meses favorables |
+| `backend/data/processed/sowing_calendar.csv` | implementado | recomendacion de meses favorables |
 | fase fenologica observada | no implementada | trabajo futuro |
 
 ---
@@ -1748,7 +1748,7 @@ Tabla 4.1. Estado del componente de sensores.
 
 | Componente | Estado actual | Evidencia |
 |---|---|---|
-| Conexion Arduino serial | implementada | `arduino_reader.py`, endpoints `/arduino/*` |
+| Conexion Arduino serial | implementada | `core/arduino_reader.py`, endpoints `/arduino/*` |
 | Simulacion de lecturas | implementada | `POST /arduino/simulate` |
 | WebSocket en vivo | implementado | `WS /ws/arduino` |
 | Grafica historica frontend | implementada | `Alerts.jsx` |
@@ -1894,8 +1894,8 @@ La validacion funcional del sistema de alertas se realiza mediante entradas manu
 
 - Endpoint `POST /alerts/check`
 - Endpoint `POST /arduino/simulate`
-- `alert_engine.py`
-- `email_notifier.py`
+- `backend/core/alert_engine.py`
+- `backend/core/email_notifier.py`
 - Tabla `alertas`
 - Vista `Alerts.jsx`
 
