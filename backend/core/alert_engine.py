@@ -7,9 +7,10 @@ y devuelve alertas priorizadas con recomendaciones químicas/biológicas.
 import os
 import pandas as pd
 
-BASE_DIR      = os.path.dirname(__file__)
-OPTIMAL_PATH  = os.path.join(BASE_DIR, "data", "processed", "crop_optimal_conditions.csv")
-RECS_PATH     = os.path.join(BASE_DIR, "data", "processed", "recommendations.csv")
+BACKEND_DIR   = os.path.dirname(os.path.dirname(__file__))
+DATASETS_DIR  = os.path.join(BACKEND_DIR, "data", "datasets")
+OPTIMAL_PATH  = os.path.join(DATASETS_DIR, "crop_optimal_conditions.csv")
+RECS_PATH     = os.path.join(DATASETS_DIR, "recommendations.csv")
 
 # Porcentaje de desviación fuera del rango óptimo para cada nivel
 SEVERITY_THRESHOLDS = {"leve": 10, "moderado": 25, "severo": 50}
@@ -24,6 +25,19 @@ SENSOR_VARIABLE_MAP = {
     "humidity":      ("humidity_min", "humidity_max"),
     "rainfall":      ("rain_min",     "rain_max"),
     "soil_ph":       ("ph_min",       "ph_max"),
+}
+
+RECOMMENDATION_VARIABLE_MAP = {
+    "temperature": "temperatura",
+    "rainfall": "precipitacion",
+    "humidity": "humedad",
+    "soil_ph": "ph_suelo",
+}
+
+SEVERITY_LEVEL_MAP = {
+    "severo": "critica",
+    "moderado": "advertencia",
+    "leve": "info",
 }
 
 _optimal_df:  pd.DataFrame = None
@@ -56,14 +70,26 @@ def _find_recommendation(variable: str, condition: str, severity: str, crop: str
     3. Genérico (Todos) + severidad exacta
     4. Genérico (Todos) + cualquier severidad
     """
+    rec_variable = RECOMMENDATION_VARIABLE_MAP.get(variable, variable)
+    conditions = (
+        ["muy_alto", "alto"] if condition == "alto" and severity == "severo"
+        else ["alto", "muy_alto"] if condition == "alto"
+        else ["muy_bajo", "bajo"] if severity == "severo"
+        else ["bajo", "muy_bajo"]
+    )
+    level = SEVERITY_LEVEL_MAP.get(severity)
+
     df = _recs_df
     for crop_filter in [crop, "Todos"]:
-        mask = (df["variable"] == variable) & (df["condition"] == condition) & (df["crop"] == crop_filter)
+        mask = (
+            (df["variable"] == rec_variable)
+            & (df["condicion"].isin(conditions))
+            & (df["cultivo"] == crop_filter)
+        )
         candidates = df[mask]
         if candidates.empty:
             continue
-        # Intentar match exacto de severidad
-        exact = candidates[candidates["severity"] == severity]
+        exact = candidates[candidates["nivel"] == level] if level else candidates.iloc[0:0]
         row = exact.iloc[0] if not exact.empty else candidates.iloc[0]
         return row.to_dict()
     return {}
@@ -117,6 +143,19 @@ def check_alerts(sensors: dict, crop: str) -> list[dict]:
 
         severity = _severity_from_pct(pct_out)
         rec      = _find_recommendation(sensor_key, condition, severity, crop)
+        if rec:
+            rec = {
+                **rec,
+                "problem": rec.get("titulo", ""),
+                "consequence": f"Fuente: {rec.get('fuente')}" if rec.get("fuente") else "",
+                "action": rec.get("recomendacion", ""),
+                "remedy_type": "",
+                "remedy_name": "",
+                "formula": "",
+                "dose": "",
+                "application": "",
+                "notes": rec.get("fuente", ""),
+            }
 
         # Mapeo de nivel UI
         level_map = {"severo": "high", "moderado": "medium", "leve": "low"}

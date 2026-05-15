@@ -1,0 +1,371 @@
+\documentclass[conference,a4paper]{IEEEtran}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{url}
+\usepackage{tabularx}
+\usepackage{float}
+
+\newcommand{\figplaceholder}[2]{%
+\begin{figure}[!t]
+\centering
+\fbox{%
+\begin{minipage}{0.92\linewidth}
+\vspace{0.15cm}
+\textbf{Imagen pendiente:} #1\\[0.08cm]
+\textit{Indicación:} #2
+\vspace{0.15cm}
+\end{minipage}}
+\caption{#1}
+\end{figure}}
+
+\begin{document}
+
+\title{Un sistema de alerta temprana basado en XGBoost para evaluar el riesgo de bajo rendimiento agrícola mediante datos agroclimáticos y sensores IoT de bajo costo}
+
+\author{\IEEEauthorblockN{Edgar Josías Cán Ajquejay}
+\IEEEauthorblockA{Escuela de Ingeniería en Ciencias y Sistemas\\
+Universidad de San Carlos de Guatemala\\
+Guatemala, Guatemala\\
+Correo: [colocar correo institucional o personal]}
+}
+
+\maketitle
+
+\begin{abstract}
+La variabilidad climática afecta el rendimiento agrícola en Guatemala, especialmente en cultivos sensibles a cambios de temperatura, precipitación, humedad ambiental y condiciones edáficas. Aunque existen fuentes abiertas como ERA5-Land, NASA POWER, SoilGrids, Open-Meteo, INSIVUMEH y FAOSTAT, su integración en herramientas operativas de apoyo a la decisión agrícola sigue siendo limitada. Este artículo presenta AgroClima GT, un prototipo web que combina datos climáticos, variables de suelo, aprendizaje automático, reglas agronómicas y un módulo de adquisición local basado en Arduino para estimar el porcentaje esperado de rendimiento agrícola y generar alertas tempranas. El nodo sensor contempla DS18B20 para temperatura, higrómetro capacitivo para humedad del suelo, TSL2561 para luminosidad y TCS3200 para canales RGB e índice de verdor. Las lecturas se envían al backend mediante conexión USB serial, se validan en FastAPI y se transmiten al frontend React/Vite mediante WebSocket. El sistema utiliza un modelo XGBoost entrenado sobre un dataset tabular calibrado con FAOSTAT, mientras Random Forest se emplea como línea base comparativa. La evaluación interna registró para XGBoost un $R^2$ de 0.6334, MAE de 5.91 y RMSE de 7.68, superando a Random Forest. La validación corresponde a una etapa técnica y funcional; la calibración del nodo sensor, instalación en parcela y evaluación con productores quedan como trabajo futuro.
+\end{abstract}
+
+\begin{IEEEkeywords}
+XGBoost, agricultura inteligente, alerta temprana, rendimiento agrícola, sensores IoT, Arduino, WebSocket, FastAPI, React, Isolation Forest, FAOSTAT, Guatemala.
+\end{IEEEkeywords}
+
+\section{Introducción}
+La agricultura guatemalteca depende de condiciones climáticas que varían significativamente entre regiones, temporadas y cultivos. La precipitación irregular, los cambios de temperatura, la humedad ambiental, las propiedades del suelo y la disponibilidad de agua influyen en el desarrollo de los cultivos y en el rendimiento esperado. En este contexto, los productores y técnicos agrícolas requieren herramientas que transformen datos climáticos y agronómicos en información comprensible para la toma de decisiones.
+
+El problema no se limita a la falta de datos. Existen fuentes climáticas y agronómicas abiertas, pero estas suelen estar dispersas, presentan diferentes escalas espaciales o temporales y no siempre se traducen en recomendaciones prácticas. Además, los sistemas de monitoreo institucional pueden operar a escala regional o departamental, mientras que las decisiones agrícolas requieren mayor granularidad por cultivo, municipio o parcela.
+
+Este trabajo propone AgroClima GT, un prototipo web de apoyo a la decisión agrícola orientado a identificar escenarios de bajo rendimiento. A diferencia de una herramienta puramente meteorológica, el sistema integra datos históricos, pronóstico externo, variables edáficas, modelos de aprendizaje automático, reglas agronómicas y una interfaz web que presenta predicciones, riesgo y recomendaciones.
+
+Las principales contribuciones del trabajo son: (i) integración de fuentes climáticas, edáficas y agronómicas en un dataset tabular calibrado con FAOSTAT; (ii) entrenamiento de un modelo XGBoost para estimar la variable objetivo \textit{yield\_pct}; (iii) comparación con Random Forest como línea base; (iv) uso de Isolation Forest y reglas agronómicas para apoyar la detección de condiciones atípicas; (v) implementación de una arquitectura web compuesta por FastAPI, React/Vite y PostgreSQL; y (vi) integración técnica de un nodo Arduino con sensores de temperatura, humedad de suelo, luz y color, conectado a la aplicación mediante USB serial y WebSocket.
+
+\section{Trabajos relacionados}
+\subsection{Agricultura de precisión e IoT}
+La agricultura de precisión utiliza sensores, plataformas digitales y análisis de datos para monitorear condiciones de cultivo y apoyar decisiones sobre riego, fertilización, sanidad vegetal y manejo de riesgo. En sistemas agrícolas inteligentes, los dispositivos IoT permiten capturar variables como temperatura, humedad, luminosidad y humedad de suelo. Sin embargo, en zonas rurales con infraestructura limitada, la conectividad, el costo de despliegue y la calibración de sensores siguen siendo barreras importantes.
+
+En el presente trabajo, la capa IoT se aborda como una integración técnica inicial. AgroClima GT contempla un nodo Arduino conectado por USB serial, simulación de lecturas y transmisión mediante WebSocket hacia el frontend. El montaje experimental utiliza sensores de bajo costo: DS18B20 para temperatura, higrómetro capacitivo para humedad del suelo, TSL2561 para intensidad luminosa y TCS3200 para color. Tecnologías como MQTT, LoRaWAN o edge computing se consideran alternativas de ampliación futura, no componentes desplegados en la versión actual.
+
+\subsection{Aprendizaje automático para predicción agrícola}
+Los modelos de aprendizaje automático son útiles para trabajar con datos tabulares heterogéneos, donde variables climáticas, edáficas, temporales y geográficas influyen de forma no lineal sobre el rendimiento. XGBoost es un algoritmo de ensamble basado en árboles de decisión que construye modelos secuenciales y corrige errores de iteraciones previas mediante gradiente boosting \cite{chen2016xgboost}. Esta característica lo hace adecuado para datasets con múltiples variables y relaciones no lineales.
+
+En AgroClima GT, XGBoost se utiliza como modelo principal para predecir \textit{yield\_pct}, una variable continua en escala de 0 a 100 que representa el porcentaje estimado de rendimiento agrícola esperado. Random Forest se emplea como comparación interna para evaluar si el modelo principal aporta mejor desempeño.
+
+\subsection{Detección de anomalías y alertas}
+La detección de anomalías permite identificar entradas que se alejan del comportamiento esperado. Isolation Forest es un método no supervisado que identifica observaciones atípicas a partir de la facilidad con que pueden ser aisladas mediante particiones aleatorias \cite{liu2008isolation}. En este prototipo, dicho enfoque se complementa con validación de rangos fisiológicamente plausibles y reglas agronómicas por cultivo.
+
+La literatura suele tratar por separado sensores, pronóstico climático, modelos predictivos y recomendaciones. AgroClima GT integra estos elementos en una sola plataforma web, de manera que el usuario no solo obtiene un valor estimado, sino también un nivel de riesgo y una recomendación asociada.
+
+\section{Materiales y métodos}
+\subsection{Arquitectura general}
+El prototipo se compone de cuatro capas principales. La primera es el frontend desarrollado con React/Vite, responsable de presentar dashboard, formularios, alertas, reportes, mapa de riesgo y panel administrativo. La segunda es el backend FastAPI, encargado de validar entradas, ejecutar el modelo, consultar pronósticos y exponer servicios REST/WebSocket. La tercera es la persistencia en PostgreSQL y archivos locales CSV/JSON/Joblib. La cuarta corresponde a los módulos analíticos: XGBoost, Random Forest, Isolation Forest, reglas agronómicas y monitoreo de data drift.
+
+\figplaceholder{Arquitectura general de AgroClima GT}{Insertar el diagrama de despliegue o arquitectura general. Debe mostrar React/Vite, FastAPI, PostgreSQL, archivos locales, modelo XGBoost, Open-Meteo y Arduino por serial/simulación.}
+
+\subsection{Fuentes de datos}
+El sistema integra fuentes públicas y procesadas localmente. ERA5-Land se utiliza como base climática histórica; NASA POWER aporta variables meteorológicas complementarias; SoilGrids se emplea para propiedades edáficas como pH; Open-Meteo se usa para pronóstico operativo; INSIVUMEH se considera referencia nacional procesada; FAOSTAT permite calibrar el rendimiento agrícola; y Arduino aporta la capa de lectura local o simulada.
+
+\begin{table}[!t]
+\caption{Fuentes de datos integradas en AgroClima GT}
+\centering
+\scriptsize
+\begin{tabularx}{\linewidth}{p{1.8cm}X X}
+\toprule
+\textbf{Fuente} & \textbf{Variables} & \textbf{Uso} \\
+\midrule
+ERA5-Land & Temperatura, lluvia, humedad de suelo, temperatura de suelo & Base climática histórica \\
+NASA POWER & Temperatura máxima, mínima y viento & Enriquecimiento meteorológico \\
+SoilGrids & pH y propiedades de suelo & Variables edáficas \\
+Open-Meteo & Pronóstico, temperatura, lluvia, humedad & Consulta operativa \\
+INSIVUMEH & Datos meteorológicos nacionales procesados & Referencia local \\
+FAOSTAT & Rendimiento agrícola por cultivo & Calibración de \textit{yield\_pct} \\
+Arduino & Temperatura, humedad de suelo, luz y color/verdor & Lecturas locales, simuladas y transmisión WebSocket \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+El dataset final utilizado por el entrenamiento actual es \texttt{dataset\_faostat.csv}, con 2,111,220 registros. También existen versiones intermedias como \texttt{dataset\_preliminar.csv}, \texttt{dataset\_openmeteo.csv}, \texttt{dataset\_v2.csv} y \texttt{dataset\_combinado.csv}, que documentan la evolución del procesamiento.
+
+\subsection{Nodo sensor y flujo hacia la aplicación web}
+El componente de monitoreo local se diseñó como un nodo experimental de bajo costo conectado a un Arduino. Su función dentro del prototipo no es ejecutar acciones físicas sobre el cultivo, sino capturar o simular variables ambientales que alimentan el backend y permiten validar el flujo completo desde hardware hasta dashboard. La comunicación se realiza mediante cable USB tipo B hacia el equipo donde se ejecuta el backend; FastAPI recibe las lecturas mediante PySerial, valida rangos, calcula variables derivadas y publica los cambios hacia el frontend mediante WebSocket.
+
+\begin{table}[!t]
+\caption{Componentes funcionales del nodo sensor}
+\centering
+\scriptsize
+\begin{tabularx}{\linewidth}{p{2.4cm}p{2.2cm}X}
+\toprule
+\textbf{Componente} & \textbf{Variable} & \textbf{Uso dentro del prototipo} \\
+\midrule
+DS18B20 & Temperatura & Entrada climática local para predicción y alertas térmicas. \\
+Higrómetro capacitivo & Humedad del suelo & Apoyo al análisis de estrés hídrico y reglas agronómicas. \\
+TSL2561 & Intensidad luminosa & Evaluación de exposición lumínica y condiciones de crecimiento. \\
+TCS3200 & Canales RGB & Cálculo auxiliar del índice de verdor de la vegetación. \\
+Arduino UNO/MEGA & Adquisición serial & Puente entre sensores, backend FastAPI y WebSocket. \\
+Protoboard, jumpers y resistencias & Montaje & Ensamble experimental y pruebas de conexión. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+El costo de adquisición del material reportado para el montaje fue de aproximadamente Q440.50, incluyendo sensores, protoboard, jumpers, resistencias, batería de 9 V, conector, cable USB, alambre para protoboard, estaño y cinta de aislar. En el artículo se reportan los componentes funcionales porque son los que inciden directamente en las variables del sistema; el inventario completo puede documentarse en anexos de tesis.
+
+\figplaceholder{Flujo de integración sensor-aplicación web}{Insertar un diagrama donde se observe: sensores físicos, protoboard, Arduino, conexión USB serial, backend FastAPI/PySerial, motor de predicción/alertas, WebSocket y dashboard React/Vite.}
+
+La cadena operativa del módulo se resume como:
+\begin{equation}
+\begin{aligned}
+&\text{Sensores} \rightarrow \text{Arduino} \rightarrow \text{USB serial} \\
+&\rightarrow \text{FastAPI} \rightarrow \text{WebSocket} \rightarrow \text{React}.
+\end{aligned}
+\end{equation}
+Esta secuencia indica que el nodo sensor no funciona como sistema autónomo de mitigación, sino como entrada local para el análisis y la visualización del prototipo.
+
+\subsection{Variables del modelo}
+El modelo recibe variables categóricas codificadas y variables numéricas asociadas al contexto agroclimático. Entre las variables se incluyen municipio codificado, cultivo codificado, mes, temperatura, precipitación, humedad relativa, pH del suelo, humedad de suelo, luz, índice de verdor, humedad de suelo en capas derivadas, temperatura de suelo, temperatura máxima, temperatura mínima, velocidad del viento y altitud.
+
+El vector de entrada usado por el modelo se representa con las 17 variables reales de entrenamiento:
+\begin{equation}
+\begin{aligned}
+\mathbf{x}_i = [&m_i, c_i, t_i, T_i, R_i, H_i, pH_i, \theta_{1i}, L_i, G_i, \\
+&\theta_{2i}, \theta_{3i}, T_{s,i}, z_i, T_{max,i}, T_{min,i}, v_{w,i}].
+\end{aligned}
+\end{equation}
+
+donde $m_i$ representa el municipio codificado, $c_i$ el cultivo codificado, $t_i$ el mes, $T_i$ la temperatura media, $R_i$ la precipitación, $H_i$ la humedad relativa, $pH_i$ el pH del suelo, $\theta_{1i}$ la humedad superficial del suelo, $L_i$ la luminosidad, $G_i$ el índice de verdor, $\theta_{2i}$ y $\theta_{3i}$ las humedades de suelo en capas derivadas o procesadas, $T_{s,i}$ la temperatura del suelo, $z_i$ la altitud, $T_{max,i}$ y $T_{min,i}$ las temperaturas máxima y mínima, y $v_{w,i}$ la velocidad del viento. Esta formulación coincide con la matriz tabular usada para estimar el rendimiento agrícola esperado.
+
+El índice de verdor se aproxima a partir de canales RGB mediante:
+\begin{equation}
+G = \frac{G_{raw}}{R_{raw}+G_{raw}+B_{raw}}\times 100.
+\end{equation}
+
+La interpretación de (2) es directa: un valor mayor indica que el canal verde domina en la lectura de color. En el prototipo se usa como indicador auxiliar de condición vegetal, no como sustituto de una medición agronómica de laboratorio.
+
+La humedad del suelo proveniente del higrómetro capacitivo se normaliza a partir de valores de referencia en seco y húmedo:
+\begin{equation}
+\theta_1 = \mathrm{clip}\left(\frac{A_{seco}-A_{raw}}{A_{seco}-A_{humedo}},0,1\right),
+\end{equation}
+\begin{equation}
+SM_{\%}=100\theta_1.
+\end{equation}
+En esta normalización, $A_{raw}$ es la lectura analógica del sensor, $A_{seco}$ representa la lectura de referencia en suelo seco y $A_{humedo}$ la lectura de referencia en suelo húmedo. Esta normalización permite transformar una lectura eléctrica en un porcentaje operativo de humedad del suelo. En una fase de campo, estos valores deben calibrarse con muestras reales del suelo.
+
+La luminosidad medida por el TSL2561 se interpreta como una lectura en lux:
+\begin{equation}
+L = L_{lux}.
+\end{equation}
+Para el DS18B20, la temperatura usada por el sistema corresponde a la lectura digital de la sonda:
+\begin{equation}
+T = T_{DS18B20}.
+\end{equation}
+Estas expresiones son simples porque ambos sensores ya entregan valores físicos interpretables por librerías de adquisición. La validez agronómica depende de calibración, ubicación del sensor y condiciones de instalación.
+
+\subsection{Modelo predictivo}
+El modelo principal es \texttt{XGBRegressor}. Su función objetivo puede expresarse como:
+\begin{equation}
+\mathcal{L}(\theta)=\sum_{i=1}^{n}l(y_i,\hat{y}_i)+\sum_{k=1}^{K}\Omega(f_k),
+\end{equation}
+
+donde $l(y_i,\hat{y}_i)$ mide el error entre el valor real y el valor predicho, y $\Omega(f_k)$ penaliza la complejidad de cada árbol. La regularización se define como:
+\begin{equation}
+\Omega(f)=\gamma T + \frac{1}{2}\lambda\sum_{j=1}^{T}w_j^2.
+\end{equation}
+
+En esta expresión, $T$ representa el número de hojas del árbol, $\gamma$ penaliza la complejidad estructural y $\lambda$ controla la magnitud de los pesos. Esto ayuda a reducir sobreajuste en un contexto donde los datos pueden contener ruido, agregación espacial o valores aproximados.
+
+Los hiperparámetros registrados para XGBoost incluyen 400 árboles, profundidad máxima 6, tasa de aprendizaje 0.05, submuestreo 0.8, \texttt{colsample\_bytree} de 0.8, \texttt{min\_child\_weight} de 3, regularización L1 de 0.1 y regularización L2 de 1.0.
+
+\subsection{Alertas, anomalías y drift}
+La detección de condiciones atípicas combina tres mecanismos. Primero, el backend valida rangos plausibles antes de ejecutar inferencia. Segundo, Isolation Forest estima si una entrada se aleja del comportamiento esperado. Tercero, las reglas agronómicas comparan lecturas contra rangos óptimos por cultivo.
+
+El puntaje de anomalía de Isolation Forest se expresa como:
+\begin{equation}
+s(x,n)=2^{-\frac{E[h(x)]}{c(n)}},
+\end{equation}
+
+donde $E[h(x)]$ es la longitud esperada del camino para aislar una observación y $c(n)$ es un factor de normalización. Una observación anómala suele aislarse con menos particiones, por lo que puede generar un puntaje de alerta mayor.
+
+La desviación porcentual usada por las reglas de alerta se calcula como:
+\begin{equation}
+\Delta_v =
+\begin{cases}
+\frac{v_{min}-x}{\max(v_{max}-v_{min},1)}\times 100, & x<v_{min}\\
+\frac{x-v_{max}}{\max(v_{max}-v_{min},1)}\times 100, & x>v_{max}\\
+0, & v_{min}\leq x \leq v_{max}.
+\end{cases}
+\end{equation}
+
+Si $\Delta_v$ es menor a 10\%, no se genera alerta; entre 10\% y 25\% se clasifica como leve; entre 25\% y 50\% como moderada; y desde 50\% como severa. Esta regla convierte diferencias numéricas en mensajes accionables para el usuario.
+
+El motor de alertas se basa en dos archivos de soporte agronómico: \texttt{crop\_optimal\_conditions.csv} y \texttt{recommendations.csv}. Para mantener consistencia operativa con la estructura actual del proyecto, dichos archivos deben consumirse desde \texttt{backend/data/datasets/}; por tanto, cualquier implementación del módulo de alertas debe apuntar a esa ruta o incluir un mecanismo de respaldo equivalente. Esta aclaración evita confundir el diseño conceptual de reglas agronómicas con una ruta local incorrecta dentro del backend.
+
+El monitoreo de deriva de datos compara cada entrada contra el perfil estadístico de entrenamiento. Para una variable $j$ se estima:
+\begin{equation}
+z_j=\left|\frac{x_j-\mu_j}{\sigma_j}\right|,
+\end{equation}
+\begin{equation}
+\mathrm{sim}_j=\mathrm{clip}(100-22z_j,0,100),
+\end{equation}
+donde $x_j$ es el valor observado, $\mu_j$ y $\sigma_j$ son la media y desviación estándar de entrenamiento, y $\mathrm{sim}_j$ expresa la similitud porcentual. Una similitud baja advierte que la entrada actual se aleja de la distribución con la que se entrenó el modelo.
+
+\section{Implementación del sistema}
+\subsection{Backend FastAPI}
+El backend implementa servicios para predicción, pronóstico, simulación Arduino, WebSocket, administración de modelo, consulta de datasets y registro de resultados. La Tabla II resume los endpoints principales.
+
+\begin{table}[!t]
+\caption{Servicios principales del backend}
+\centering
+\scriptsize
+\begin{tabularx}{\linewidth}{p{2.8cm}X}
+\toprule
+\textbf{Servicio} & \textbf{Función} \\
+\midrule
+\texttt{POST /predict} & Ejecuta la predicción de rendimiento con XGBoost \\
+\texttt{GET /forecast/\{municipio\}} & Consulta pronóstico meteorológico \\
+\texttt{POST /arduino/simulate} & Genera lectura simulada de sensores \\
+\texttt{WS /ws/arduino} & Transmite lecturas hacia el frontend \\
+\texttt{GET /admin/model-info} & Devuelve información del modelo \\
+\texttt{POST /admin/retrain} & Ejecuta reentrenamiento controlado \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Frontend React/Vite}
+La interfaz presenta módulos de dashboard, predicción, pronóstico, alertas, Arduino, mapas, reportes y administración. El objetivo de diseño es reducir la complejidad técnica y presentar al usuario el rendimiento estimado, el nivel de riesgo y la recomendación asociada.
+
+\figplaceholder{Dashboard principal de AgroClima GT}{Insertar captura del dashboard donde se observe el formulario de entrada, métricas generales, resultado de predicción, riesgo y recomendaciones.}
+
+\figplaceholder{Módulo de alertas y recomendaciones}{Insertar captura donde se visualicen alertas generadas por variables fuera de rango, severidad y recomendación agronómica.}
+
+\subsection{Base de datos y persistencia}
+PostgreSQL almacena usuarios, predicciones, lecturas Arduino, alertas, información del modelo, datasets registrados, recomendaciones y configuración operativa. Los datasets y modelos se conservan adicionalmente como archivos locales para facilitar ejecución académica y reproducción del prototipo.
+
+\subsection{Componente Arduino e integración WebSocket}
+El módulo Arduino se diseñó para conectar sensores locales de bajo costo con la aplicación web. El DS18B20 aporta temperatura, el higrómetro capacitivo aporta humedad del suelo, el TSL2561 mide luminosidad y el TCS3200 captura canales RGB para estimar verdor. El backend recibe la cadena serial, la transforma en una estructura de datos y la distribuye hacia los clientes conectados mediante WebSocket.
+
+\begin{table}[!t]
+\caption{Formato lógico de una lectura local}
+\centering
+\scriptsize
+\begin{tabularx}{\linewidth}{p{2.8cm}X}
+\toprule
+\textbf{Campo} & \textbf{Descripción} \\
+\midrule
+\texttt{temperature} & Temperatura local en grados Celsius. \\
+\texttt{soil\_moisture} & Humedad del suelo normalizada. \\
+\texttt{light\_lux} & Intensidad luminosa en lux. \\
+\texttt{red}, \texttt{green}, \texttt{blue} & Canales de color para cálculo de verdor. \\
+\texttt{municipio}, \texttt{crop} & Contexto seleccionado por el usuario. \\
+\texttt{timestamp} & Momento de recepción de la lectura. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+La lectura serial puede representarse como un vector operativo:
+\begin{equation}
+\mathbf{s}_t=[T_t,\theta_{1,t},L_t,R_{raw,t},G_{raw,t},B_{raw,t}],
+\end{equation}
+que luego se integra con las variables del formulario, fuentes climáticas y reglas agronómicas. Esta integración permite validar el flujo hardware-software antes de un despliegue agrícola real. La calibración de sensores, montaje en campo y comparación contra instrumentos de referencia quedan como fase posterior.
+
+\figplaceholder{Módulo Arduino con lectura local o simulada}{Insertar captura de la pantalla Arduino donde aparezca estado de conexión, configuración de municipio/cultivo, variables simuladas y gráfico de historial.}
+
+\section{Resultados}
+\subsection{Evaluación del modelo}
+La evaluación se realiza como problema de regresión porque la variable objetivo es \textit{yield\_pct}. Las métricas utilizadas son MAE, RMSE y $R^2$:
+\begin{equation}
+MAE=\frac{1}{n}\sum_{i=1}^{n}|y_i-\hat{y}_i|,
+\end{equation}
+\begin{equation}
+RMSE=\sqrt{\frac{1}{n}\sum_{i=1}^{n}(y_i-\hat{y}_i)^2},
+\end{equation}
+\begin{equation}
+R^2=1-\frac{\sum_{i=1}^{n}(y_i-\hat{y}_i)^2}{\sum_{i=1}^{n}(y_i-\bar{y})^2}.
+\end{equation}
+
+El MAE se interpreta como el error absoluto promedio en puntos porcentuales de \textit{yield\_pct}. El RMSE penaliza más los errores grandes, por lo que ayuda a detectar fallos fuertes del modelo. El coeficiente $R^2$ mide la proporción de variabilidad explicada por el modelo.
+
+\begin{table}[!t]
+\caption{Comparación interna de modelos}
+\centering
+\scriptsize
+\begin{tabular}{lccc}
+\toprule
+\textbf{Modelo} & \textbf{$R^2$} & \textbf{MAE} & \textbf{RMSE} \\
+\midrule
+XGBoost & 0.6334 & 5.91 & 7.68 \\
+Random Forest & 0.3474 & 8.26 & 10.25 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Los resultados muestran que XGBoost supera a Random Forest en capacidad explicativa y error promedio. Aunque el valor de $R^2$ no representa una validación agronómica definitiva, sí evidencia que XGBoost se ajusta mejor al dataset tabular construido.
+
+\figplaceholder{Comparación visual de métricas entre XGBoost y Random Forest}{Insertar gráfica de barras con $R^2$, MAE y RMSE. Usar los valores corregidos: XGBoost 0.6334/5.91/7.68 y Random Forest 0.3474/8.26/10.25.}
+
+\subsection{Validación funcional del flujo sensor-dashboard}
+La integración de sensores se validó como flujo técnico del prototipo. La prueba esperada consiste en generar o recibir una lectura local, enviarla al backend, validar sus rangos, calcular variables derivadas, registrar la lectura y visualizarla en el dashboard. El flujo funcional es:
+\begin{equation}
+\text{lectura} \rightarrow \text{backend} \rightarrow \text{validación} \rightarrow \text{alerta} \rightarrow \text{dashboard}.
+\end{equation}
+Este resultado confirma que la arquitectura puede transportar variables ambientales locales hacia la aplicación web. No obstante, no debe interpretarse como validación agronómica del nodo sensor, ya que aún faltan calibración, instalación en parcela y comparación con instrumentos de referencia.
+
+\figplaceholder{Validación del flujo sensor-dashboard}{Insertar captura o diagrama donde se vea la lectura Arduino/simulación recibida en backend y reflejada en el dashboard o módulo Arduino.}
+
+\subsection{Validación funcional de alertas}
+Las alertas fueron revisadas mediante escenarios controlados y simulación de entradas fuera de rango. Esta validación confirma que el sistema genera advertencias cuando una variable se aleja del rango óptimo del cultivo y que la respuesta incluye recomendación asociada. Sin embargo, todavía no existe un conjunto de eventos reales etiquetados para calcular precisión, recall o F1-score.
+
+\subsection{Visualización y soporte a decisiones}
+El prototipo permite visualizar predicciones, pronóstico, dataset filtrable, historial Arduino, mapa de riesgo, reportes y panel administrativo. Esta capa es relevante porque transforma salidas técnicas en información interpretable. En vez de mostrar únicamente un número de rendimiento, AgroClima GT presenta riesgo, explicación y acción recomendada.
+
+\figplaceholder{Mapa de riesgo o visualización coroplética}{Insertar captura del mapa de riesgo por departamento o municipio, mostrando colores de riesgo y filtros disponibles.}
+
+\section{Discusión}
+\subsection{Valor del enfoque integrado}
+El principal valor de AgroClima GT es integrar componentes que suelen analizarse por separado: datos históricos, pronóstico, modelo predictivo, reglas agronómicas, detección de anomalías, simulación de sensores y dashboard web. Este enfoque es adecuado para agricultura porque una predicción numérica aislada no siempre es suficiente para tomar decisiones; el usuario necesita interpretar qué variable generó el riesgo y qué acción puede realizar.
+
+\subsection{Limitaciones}
+El sistema presenta limitaciones importantes. La validación física de sensores en parcelas reales está pendiente; los sensores de bajo costo requieren calibración específica por suelo, ubicación y condiciones ambientales; el higrómetro capacitivo necesita referencias de suelo seco y húmedo; FAOSTAT opera a escala agregada y no a nivel de parcela; las anomalías aún no se han evaluado con eventos reales etiquetados; y el rendimiento estimado \textit{yield\_pct} debe entenderse como una aproximación operacional, no como medición directa de cosecha.
+
+También se debe evitar afirmar que la arquitectura IoT completa está desplegada. La versión actual soporta Arduino por serial, simulación y WebSocket. MQTT, LoRaWAN y edge computing deben tratarse como continuidad futura para escenarios rurales con conectividad limitada.
+
+\subsection{Amenazas a la validez}
+La validez interna depende de la calidad de los datos procesados, la codificación de variables categóricas y la consistencia de las fuentes integradas. La validez externa se ve limitada por la ausencia de pruebas con productores y sensores calibrados en campo. La validez de constructo depende de que \textit{yield\_pct} represente adecuadamente el rendimiento esperado, considerando que fue construido como variable operacional calibrada con fuentes históricas.
+
+\section{Conclusiones}
+Este artículo presentó AgroClima GT, un prototipo funcional de alerta temprana agrícola que integra datos agroclimáticos, aprendizaje automático, reglas agronómicas, visualización web y un nodo Arduino de bajo costo conectado por serial y visualizado mediante WebSocket. El modelo XGBoost obtuvo mejor desempeño interno que Random Forest, con $R^2=0.6334$, MAE de 5.91 y RMSE de 7.68 para la estimación de \textit{yield\_pct}. La arquitectura demuestra factibilidad técnica al combinar FastAPI, React/Vite, PostgreSQL, Open-Meteo, datasets locales, XGBoost, Isolation Forest y lecturas locales de sensores en una plataforma única.
+
+El sistema no debe interpretarse todavía como una solución IoT validada en campo, sino como un prototipo técnico y funcional. Como trabajo futuro se propone realizar pruebas piloto con sensores calibrados, construir un conjunto de eventos etiquetados para evaluar anomalías, comparar ERA5-Land con estaciones observadas mediante MAE/RMSE/sesgo/correlación y evaluar la utilidad de las recomendaciones con productores o técnicos agrícolas.
+
+\section*{Agradecimientos}
+El autor agradece a la Universidad de San Carlos de Guatemala, a la Facultad de Ingeniería, a la Escuela de Ingeniería en Ciencias y Sistemas y al asesor del proyecto por el acompañamiento académico. También se reconoce el uso de fuentes abiertas y procesadas como ERA5-Land, NASA POWER, SoilGrids, Open-Meteo, INSIVUMEH y FAOSTAT.
+
+\begin{thebibliography}{00}
+\bibitem{munoz2021era5} J. Muñoz-Sabater \textit{et al.}, ``ERA5-Land: A state-of-the-art global reanalysis dataset for land applications,'' \textit{Earth System Science Data}, vol. 13, no. 9, pp. 4349--4383, 2021.
+\bibitem{chen2016xgboost} T. Chen and C. Guestrin, ``XGBoost: A scalable tree boosting system,'' in \textit{Proc. 22nd ACM SIGKDD Int. Conf. Knowledge Discovery and Data Mining}, 2016, pp. 785--794.
+\bibitem{liu2008isolation} F. T. Liu, K. M. Ting, and Z.-H. Zhou, ``Isolation forest,'' in \textit{Proc. 8th IEEE Int. Conf. Data Mining}, 2008, pp. 413--422.
+\bibitem{friha2021iot} O. Friha, M. A. Ferrag, L. Shu, L. Maglaras, and X. Wang, ``Internet of Things for the future of smart agriculture: A comprehensive survey of emerging technologies,'' \textit{IEEE/CAA Journal of Automatica Sinica}, vol. 8, no. 4, pp. 718--752, 2021.
+\bibitem{nasa_power} NASA POWER Project, ``Prediction of Worldwide Energy Resources,'' NASA Langley Research Center. [Online]. Available: https://power.larc.nasa.gov/
+\bibitem{openmeteo} Open-Meteo, ``Weather Forecast API.'' [Online]. Available: https://open-meteo.com/
+\bibitem{faostat} FAO, ``FAOSTAT: Crops and livestock products.'' [Online]. Available: https://www.fao.org/faostat/
+\bibitem{soilgrids} ISRIC, ``SoilGrids: Global gridded soil information.'' [Online]. Available: https://soilgrids.org/
+\bibitem{xgboost_docs} XGBoost Developers, ``XGBoost documentation.'' [Online]. Available: https://xgboost.readthedocs.io/
+\bibitem{sklearn_docs} Scikit-learn Developers, ``IsolationForest.'' [Online]. Available: https://scikit-learn.org/
+\end{thebibliography}
+
+\end{document}

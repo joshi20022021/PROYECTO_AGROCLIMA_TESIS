@@ -39,14 +39,23 @@ export const adminSections = {
 
 export default function AdminSidebar({ activeSection, onNavigate, onLogout, isOpen, onClose }) {
   return (
-    <aside className={`sidebar ${isOpen ? "mobile-open" : ""}`} style={{ background: "#1a0a2e", borderRight: "1px solid rgba(124,58,237,0.2)" }}>
-      <div className="brand">
-        <div className="brand-icon">AD</div>
-        <div className="brand-text">
-          <h1 style={{ color: "#e9d5ff" }}>AgroClima GT</h1>
-          <p style={{ color: "rgba(233,213,255,0.55)" }}>Panel Administrador</p>
+    <aside className={`sidebar admin-sidebar ${isOpen ? "mobile-open" : ""}`} style={{ background: "#0a1628", borderRight: "1px solid rgba(96,165,250,0.18)" }}>
+      <div className="brand" style={{ padding: "0.75rem 0.85rem", position: "relative" }}>
+        <div style={{
+          background: "rgba(255,255,255,0.92)", borderRadius: 10,
+          padding: "0.3rem 0.7rem",
+          boxShadow: "0 1px 8px rgba(0,0,0,0.24)",
+          width: "100%", boxSizing: "border-box",
+          display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          <img
+            src="/logo-transparent.png"
+            alt="AgroClima GT"
+            style={{ width: "100%", maxWidth: 176, height: "auto", objectFit: "contain", display: "block" }}
+          />
         </div>
-        <button className="sidebar-close" onClick={onClose} aria-label="Cerrar menú">✕</button>
+        <button className="sidebar-close" onClick={onClose} aria-label="Cerrar menú"
+          style={{ position: "absolute", top: "0.5rem", right: "0.5rem" }}>✕</button>
       </div>
 
       <nav className="nav-section" aria-label="Navegacion admin">
@@ -68,8 +77,8 @@ export default function AdminSidebar({ activeSection, onNavigate, onLogout, isOp
 
       <div className="sidebar-footer">
         <div style={{
-          background: "rgba(124,58,237,0.12)",
-          border: "1px solid rgba(124,58,237,0.25)",
+          background: "rgba(37,99,235,0.12)",
+          border: "1px solid rgba(37,99,235,0.25)",
           borderRadius: 8,
           padding: "0.6rem 0.8rem",
           marginBottom: "0.75rem",
@@ -77,9 +86,9 @@ export default function AdminSidebar({ activeSection, onNavigate, onLogout, isOp
           alignItems: "center",
           gap: "0.5rem",
         }}>
-          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#a78bfa", flexShrink: 0 }} />
-          <span style={{ fontSize: "0.75rem", color: "#c4b5fd", fontWeight: 600 }}>admin</span>
-          <span style={{ fontSize: "0.7rem", color: "rgba(196,181,253,0.5)", marginLeft: "auto" }}>Sesion activa</span>
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "#60a5fa", flexShrink: 0 }} />
+          <span style={{ fontSize: "0.75rem", color: "#bfdbfe", fontWeight: 600 }}>admin</span>
+          <span style={{ fontSize: "0.7rem", color: "rgba(191,219,254,0.5)", marginLeft: "auto" }}>Sesion activa</span>
         </div>
         <button
           onClick={onLogout}

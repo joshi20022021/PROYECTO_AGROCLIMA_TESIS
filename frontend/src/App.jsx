@@ -65,16 +65,15 @@ function SessionPopup({ mode, role, user }) {
   return (
     <div className="welcome-popup-backdrop" role="alertdialog" aria-modal="true" aria-label={title}>
       <div className={`welcome-popup-card ${isAdmin ? "admin" : "user"}`}>
-        <div className="welcome-popup-orb" />
-        <div className="welcome-popup-icon">{isLogin ? (isAdmin ? "AD" : "US") : "BY"}</div>
+        <div className="welcome-popup-icon" aria-hidden="true">
+          <div className="welcome-popup-logo-wrap">
+            <img src="/logo.png" alt="AgroClima GT" className="welcome-popup-logo-img" />
+          </div>
+        </div>
         <p className="welcome-popup-kicker">{kicker}</p>
         <h2>{title}</h2>
         <p>{subtitle}</p>
-        <div className="welcome-popup-loader" aria-hidden="true">
-          <span />
-          <span />
-          <span />
-        </div>
+        <div className="welcome-popup-spinner" aria-hidden="true" />
       </div>
     </div>
   );
@@ -314,9 +313,10 @@ function UserApp({ onLogout, userEmail, theme, onToggleTheme }) {
             : item
         )));
         showToast(`Rendimiento estimado: ${result.yield_pct}% — ${entry.crop} en ${entry.municipality}.`);
-      } catch {
+      } catch (err) {
         setYieldResult(null);
-        showToast(`Analisis actualizado — ${entry.crop} en ${entry.municipality}.`);
+        showToast(`Error al predecir: ${err.message}`);
+        console.error("[predict]", err.message);
       }
     } else {
       setYieldResult(null);

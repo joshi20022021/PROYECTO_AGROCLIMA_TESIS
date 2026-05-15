@@ -1,24 +1,31 @@
 {
-  "compared_at": "2026-05-10T23:37:14.025352",
+  "compared_at": "2026-05-13T22:07:35.011685",
   "n_train": 1688976,
   "n_test": 422244,
   "n_features": 17,
+  "low_yield_threshold": 50,
   "results": {
     "XGBoost": {
       "r2": 0.6334,
       "mae": 5.91,
       "rmse": 7.68,
+      "precision": 0.6545,
+      "recall": 0.105,
+      "f1": 0.1809,
       "crossval_r2": 0.6051,
       "crossval_std": 0.0083,
-      "train_time_s": 44.8
+      "train_time_s": 56.1
     },
     "RandomForest": {
       "r2": 0.3474,
       "mae": 8.26,
       "rmse": 10.25,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
       "crossval_r2": 0.3479,
       "crossval_std": 0.0046,
-      "train_time_s": 86.5
+      "train_time_s": 119.6
     }
   }
 }

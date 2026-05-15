@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { getAdminDatasets, uploadDataset, getDatasetTemplateUrl, retrainModel } from "../../services/api";
 
 const ZONAS = [
-  { zona: "Region I (Metropolitana)", departamentos: ["Guatemala"], color: "#16a34a" },
+  { zona: "Region I (Metropolitana)", departamentos: ["Guatemala"], color: "#2563eb" },
   { zona: "Region II (Norte)", departamentos: ["Alta Verapaz", "Baja Verapaz"], color: "#0ea5e9" },
   { zona: "Region III (Nororiente)", departamentos: ["Chiquimula", "El Progreso", "Izabal", "Zacapa"], color: "#8b5cf6" },
   { zona: "Region IV (Suroriente)", departamentos: ["Jutiapa", "Jalapa", "Santa Rosa"], color: "#f59e0b" },
@@ -113,8 +113,8 @@ export default function AdminDatasets() {
         <div className="card-body" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0.75rem" }}>
           {[
             { label: "Datasets detectados", value: summary.datasets, color: "#2563eb" },
-            { label: "Fuentes procesadas", value: summary.sources, color: "#16a34a" },
-            { label: "Cargas manuales", value: summary.uploads, color: "#b45309" },
+            { label: "Fuentes procesadas", value: summary.sources, color: "#1d4ed8" },
+            { label: "Cargas manuales", value: summary.uploads, color: "#0284c7" },
             { label: "Dataset activo", value: summary.active, color: "var(--text-primary)" },
           ].map((item) => (
             <div key={item.label} style={{ padding: "0.8rem 0.9rem", borderRadius: 10, border: "1px solid var(--border)", background: "var(--surface)" }}>
@@ -319,7 +319,7 @@ export default function AdminDatasets() {
               </div>
               <input ref={fileInputRef} type="file" accept=".csv" style={{ display: "none" }} onChange={handleUpload} />
               {uploadMsg && (
-                <p style={{ margin: 0, fontSize: "0.78rem", fontWeight: 600, color: uploadMsg.startsWith("Error") ? "#dc2626" : "#16a34a" }}>
+                <p style={{ margin: 0, fontSize: "0.78rem", fontWeight: 600, color: uploadMsg.startsWith("Error") ? "#dc2626" : "#2563eb" }}>
                   {uploadMsg}
                 </p>
               )}
@@ -329,7 +329,7 @@ export default function AdminDatasets() {
                 {retraining ? "Iniciando..." : "Reentrenar modelo"}
               </button>
               {retrainMsg && (
-                <p style={{ margin: 0, fontSize: "0.78rem", fontWeight: 600, color: retrainMsg.startsWith("Error") ? "#dc2626" : "#16a34a" }}>
+                <p style={{ margin: 0, fontSize: "0.78rem", fontWeight: 600, color: retrainMsg.startsWith("Error") ? "#dc2626" : "#2563eb" }}>
                   {retrainMsg}
                 </p>
               )}

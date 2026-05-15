@@ -4,9 +4,9 @@ import { compareModels, getModelInfo, retrainModel } from "../services/api";
 
 const GROUP_COLOR = {
   clima: { bar: "#2563eb", bg: "rgba(37,99,235,0.12)", label: "Clima" },
-  suelo: { bar: "#16a34a", bg: "rgba(22,163,74,0.12)", label: "Suelo" },
-  cultivo: { bar: "#b45309", bg: "rgba(180,83,9,0.12)", label: "Cultivo" },
-  sensor: { bar: "#7c3aed", bg: "rgba(124,58,237,0.12)", label: "Sensor" },
+  suelo: { bar: "#1d4ed8", bg: "rgba(29,78,216,0.12)", label: "Suelo" },
+  cultivo: { bar: "#0284c7", bg: "rgba(2,132,199,0.12)", label: "Cultivo" },
+  sensor: { bar: "#0891b2", bg: "rgba(8,145,178,0.12)", label: "Sensor" },
   tiempo: { bar: "#0891b2", bg: "rgba(8,145,178,0.12)", label: "Tiempo" },
   lugar: { bar: "#64748b", bg: "rgba(100,116,139,0.12)", label: "Lugar" },
   otros: { bar: "#475569", bg: "rgba(71,85,105,0.12)", label: "Otros" },
@@ -499,13 +499,13 @@ export default function Models() {
                     return (
                       <tr key={key} style={{ borderBottom: "1px solid var(--border)" }}>
                         <td style={{ padding: "8px 12px", color: "var(--text-secondary)" }}>{label}</td>
-                        <td style={{ padding: "8px 12px", textAlign: "center", fontWeight: 700, color: xWins ? "#16a34a" : "var(--text-primary)" }}>
+                        <td style={{ padding: "8px 12px", textAlign: "center", fontWeight: 700, color: xWins ? "#2563eb" : "var(--text-primary)" }}>
                           {xVal != null ? fmt(xVal) : "N/D"}
-                          {xWins && <span style={{ marginLeft: 6, fontSize: 11, color: "#16a34a" }}>▲</span>}
+                          {xWins && <span style={{ marginLeft: 6, fontSize: 11, color: "#2563eb" }}>▲</span>}
                         </td>
-                        <td style={{ padding: "8px 12px", textAlign: "center", fontWeight: 600, color: rWins ? "#16a34a" : rVal == null ? "var(--text-secondary)" : "var(--text-primary)" }}>
+                        <td style={{ padding: "8px 12px", textAlign: "center", fontWeight: 600, color: rWins ? "#2563eb" : rVal == null ? "var(--text-secondary)" : "var(--text-primary)" }}>
                           {rVal != null ? fmt(rVal) : <span style={{ fontSize: 12, fontStyle: "italic" }}>pendiente</span>}
-                          {rWins && <span style={{ marginLeft: 6, fontSize: 11, color: "#16a34a" }}>▲</span>}
+                          {rWins && <span style={{ marginLeft: 6, fontSize: 11, color: "#2563eb" }}>▲</span>}
                         </td>
                       </tr>
                     );

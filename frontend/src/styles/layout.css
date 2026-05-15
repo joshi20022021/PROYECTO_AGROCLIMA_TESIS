@@ -6,7 +6,7 @@
   position: sticky; top: 0; height: 100vh; overflow-y: auto;
   scrollbar-width: thin; display: flex; flex-direction: column; padding: 0;
   background: #0c1a0b;
-  border-right: 1px solid rgba(76,175,114,0.12);
+  border-right: 1px solid rgba(76,175,114,0.18);
   color: #ddebd8;
   transition: transform 320ms cubic-bezier(0.4,0,0.2,1);
   box-shadow: 4px 0 24px rgba(0,0,0,0.18);
@@ -14,7 +14,7 @@
 
 .brand {
   display: flex; align-items: center; gap: 0.75rem;
-  padding: 1.35rem 1.15rem 1.15rem;
+  padding: 0.85rem 1rem;
   border-bottom: 1px solid rgba(255,255,255,0.07);
   margin-bottom: 0.65rem;
 }
@@ -54,7 +54,7 @@
   position: relative; display: flex; align-items: center; gap: 0.7rem;
   width: 100%; padding: 0.67rem 0.85rem;
   border: 1px solid transparent; border-radius: var(--radius-sm);
-  background: transparent; color: rgba(221,235,216,0.45);
+  background: transparent; color: rgba(221,235,216,0.78);
   font-family: inherit; font-size: 0.83rem; font-weight: 500;
   cursor: pointer; transition: all var(--t-base); text-align: left; letter-spacing: -0.012em;
 }
@@ -72,7 +72,7 @@
   background: #4caf72;
   box-shadow: 0 0 8px rgba(76,175,114,0.6);
 }
-.menu-icon { flex-shrink: 0; opacity: 0.5; display: flex; transition: opacity var(--t-base), transform var(--t-base); }
+.menu-icon { flex-shrink: 0; opacity: 0.72; display: flex; transition: opacity var(--t-base), transform var(--t-base); }
 .menu-item:hover  .menu-icon { opacity: 0.88; transform: scale(1.08); }
 .menu-item.active .menu-icon { opacity: 1; filter: drop-shadow(0 0 4px rgba(140,232,164,0.5)); }
 

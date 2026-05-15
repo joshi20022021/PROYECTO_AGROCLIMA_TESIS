@@ -370,6 +370,7 @@ def _build_training_matrix(df: pd.DataFrame, encoders: dict[str, Any]) -> pd.Dat
         "temp_max": 30.0,
         "temp_min": 16.0,
         "wind_speed": 2.5,
+        "altitud_m": 800.0,
     }
     for col, default in required_cols.items():
         if col not in data.columns:
@@ -412,6 +413,7 @@ def _train_anomaly_and_profile(encoders: dict[str, Any]) -> tuple[IsolationFores
                 "temp_max": 31.0,
                 "temp_min": 16.0,
                 "wind_speed": 2.5,
+                "altitud_m": 800.0,
             }.items()}
             for _ in range(32)
         ])
@@ -433,6 +435,7 @@ def _train_anomaly_and_profile(encoders: dict[str, Any]) -> tuple[IsolationFores
         "score_p95": float(np.percentile(train_scores, 95)),
     }
 
+    available = [f for f in SENSOR_FEATURES if f in X.columns]
     profile = {
         "features": {
             feat: {
@@ -441,7 +444,7 @@ def _train_anomaly_and_profile(encoders: dict[str, Any]) -> tuple[IsolationFores
                 "p05": float(X[feat].quantile(0.05)),
                 "p95": float(X[feat].quantile(0.95)),
             }
-            for feat in SENSOR_FEATURES
+            for feat in available
         }
     }
 

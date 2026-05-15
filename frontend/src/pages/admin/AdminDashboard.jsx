@@ -30,6 +30,7 @@ const STAT_ICONS = {
 export default function AdminDashboard() {
   const [stats, setStats]       = useState(null);
   const [modelInfo, setModelInfo] = useState(null);
+  const [modelOk, setModelOk]     = useState(null);
   const [dbOk, setDbOk]         = useState(null);
   const [apiOk, setApiOk]       = useState(null);
   const [loading, setLoading]   = useState(true);
@@ -43,6 +44,7 @@ export default function AdminDashboard() {
     ]).then(([health, adminStats, info]) => {
       setApiOk(!!health);
       setDbOk(health?.db_online ?? false);
+      setModelOk(Boolean(health?.model_ready || info?.model?.status === "Activo" || adminStats?.modelo_disponible));
       setStats(adminStats);
       setModelInfo(info?.model ?? null);
       setLoading(false);
@@ -50,10 +52,10 @@ export default function AdminDashboard() {
   }, []);
 
   const statCards = stats ? [
-    { key: "predicciones", label: "Predicciones totales",  value: stats.predicciones ?? 0,  color: "#16a34a" },
-    { key: "lecturas",     label: "Lecturas Arduino",       value: stats.lecturas_arduino ?? 0, color: "#2563eb" },
-    { key: "alertas",      label: "Alertas registradas",    value: stats.alertas ?? 0,       color: "#b45309" },
-    { key: "modelo",       label: "Version modelo activo",  value: stats.modelo_activo ?? "v2.0", color: "#7c3aed" },
+    { key: "predicciones", label: "Predicciones totales",  value: stats.predicciones ?? 0,  color: "#2563eb" },
+    { key: "lecturas",     label: "Lecturas Arduino",       value: stats.lecturas_arduino ?? 0, color: "#0284c7" },
+    { key: "alertas",      label: "Alertas registradas",    value: stats.alertas ?? 0,       color: "#1d4ed8" },
+    { key: "modelo",       label: "Version modelo activo",  value: stats.modelo_activo ?? "v2.0", color: "#3b82f6" },
   ] : [];
 
   const fmtNum = (n) => n != null ? Number(n).toLocaleString("es-GT") : "—";
@@ -88,7 +90,7 @@ export default function AdminDashboard() {
             {[
               { label: "API FastAPI",    ok: apiOk },
               { label: "PostgreSQL DB",  ok: dbOk  },
-              { label: "Modelo XGBoost", ok: !!stats?.modelo_activo },
+              { label: "Modelo XGBoost", ok: modelOk },
             ].map((s) => (
               <div key={s.label} className={`status-badge ${s.ok === null ? "unknown" : s.ok ? "ok" : "error"}`}>
                 <div className="status-badge-dot" />

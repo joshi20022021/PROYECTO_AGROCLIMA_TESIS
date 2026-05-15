@@ -64,6 +64,26 @@ except ImportError:
 
 ADMIN_TOKEN = "agroclima-admin-2024"
 
+
+def _json_safe(value):
+    """Convierte valores de Pandas/NumPy no serializables a JSON valido."""
+    if isinstance(value, dict):
+        return {k: _json_safe(v) for k, v in value.items()}
+    if isinstance(value, list):
+        return [_json_safe(v) for v in value]
+    if isinstance(value, tuple):
+        return [_json_safe(v) for v in value]
+    try:
+        if pd.isna(value):
+            return None
+    except (TypeError, ValueError):
+        pass
+    if isinstance(value, np.integer):
+        return int(value)
+    if isinstance(value, np.floating):
+        return float(value) if np.isfinite(value) else None
+    return value
+
 # ---------------------------------------------------------------------------
 # App
 # ---------------------------------------------------------------------------
@@ -791,10 +811,11 @@ def _on_arduino_data(raw: dict):
         except Exception:
             pass
 
-    asyncio.run_coroutine_threadsafe(
-        ws_manager.broadcast(result),
-        _event_loop,
-    )
+    if _event_loop and _event_loop.is_running():
+        asyncio.run_coroutine_threadsafe(
+            ws_manager.broadcast(result),
+            _event_loop,
+        )
 
 
 # Config dinámica del Arduino (crop/municipio elegidos desde el frontend)
@@ -945,14 +966,21 @@ def insivumeh_daily(municipio: str = None, station: str = None, days: int = 30):
 
 @app.post("/predict")
 def predict(req: PredictRequest):
-    result = run_prediction(
-        req.municipio, req.crop, req.month,
-        req.temperature, req.soil_moisture,
-        req.light_lux, req.greenness_idx,
-        req.rainfall, req.humidity, req.soil_ph,
-        req.swvl2, req.swvl3, req.soil_temp,
-        req.temp_max, req.temp_min, req.wind_speed,
-    )
+    try:
+        result = run_prediction(
+            req.municipio, req.crop, req.month,
+            req.temperature, req.soil_moisture,
+            req.light_lux, req.greenness_idx,
+            req.rainfall, req.humidity, req.soil_ph,
+            req.swvl2, req.swvl3, req.soil_temp,
+            req.temp_max, req.temp_min, req.wind_speed,
+        )
+    except HTTPException:
+        raise
+    except Exception as exc:
+        import traceback
+        detail = f"{type(exc).__name__}: {exc}\n{traceback.format_exc()}"
+        raise HTTPException(status_code=500, detail=detail)
     if _DB_MODULE and db_available():
         try:
             with get_cursor() as cur:
@@ -1114,6 +1142,31 @@ def retrain_status():
 @app.get("/risk-map")
 def risk_map(crop: Optional[str] = None):
     rows = []
+    baseline_rows = []
+    df = pd.DataFrame()
+    # El mapa debe mantener cobertura nacional. Las predicciones de la DB
+    # complementan el dataset base, no lo reemplazan cuando solo hay pocas filas.
+    for csv_path in [
+        DATASET_FAO_PATH,
+        os.path.join(BASE_DIR, "data", "datasets", "dataset_combinado.csv"),
+        os.path.join(BASE_DIR, "data", "datasets", "dataset_openmeteo.csv"),
+    ]:
+        if os.path.exists(csv_path):
+            try:
+                df = pd.read_csv(csv_path, usecols=["municipio", "crop", "yield_pct"])
+                break
+            except Exception:
+                continue
+    if not df.empty:
+        if crop:
+            df = df[df["crop"].str.lower() == crop.lower()]
+        if not df.empty:
+            baseline_rows = (
+                df.groupby("municipio", as_index=False)
+                .agg(avg_yield=("yield_pct", "mean"), samples=("yield_pct", "size"))
+                .to_dict(orient="records")
+            )
+
     if _DB_MODULE and db_available():
         try:
             with get_cursor() as cur:
@@ -1138,28 +1191,25 @@ def risk_map(crop: Optional[str] = None):
         except Exception:
             rows = []
 
-    if not rows:
-        df = pd.DataFrame()
-        # Priorizar FAOSTAT (2.1M filas) sobre dataset legado
-        for csv_path in [
-            DATASET_FAO_PATH,
-            os.path.join(BASE_DIR, "data", "datasets", "dataset_combinado.csv"),
-            os.path.join(BASE_DIR, "data", "datasets", "dataset_openmeteo.csv"),
-        ]:
-            if os.path.exists(csv_path):
-                try:
-                    df = pd.read_csv(csv_path, usecols=["municipio", "crop", "yield_pct"])
-                    break
-                except Exception:
-                    continue
-        if not df.empty:
-            if crop:
-                df = df[df["crop"].str.lower() == crop.lower()]
-            agg = (
-                df.groupby("municipio", as_index=False)
-                .agg(avg_yield=("yield_pct", "mean"), samples=("yield_pct", "size"))
-            )
-            rows = agg.to_dict(orient="records")
+    merged = {}
+    for source_row in [*baseline_rows, *rows]:
+        municipio = source_row["municipio"]
+        samples = max(int(source_row.get("samples", 0) or 0), 1)
+        avg_yield = float(source_row["avg_yield"])
+        key = _normalize_location_key(municipio)
+        if key not in merged:
+            merged[key] = {"municipio": municipio, "yield_sum": 0.0, "samples": 0}
+        merged[key]["yield_sum"] += avg_yield * samples
+        merged[key]["samples"] += samples
+
+    rows = [
+        {
+            "municipio": row["municipio"],
+            "avg_yield": row["yield_sum"] / row["samples"],
+            "samples": row["samples"],
+        }
+        for row in merged.values()
+    ]
 
     points = []
     for row in rows:
@@ -1661,10 +1711,11 @@ def get_recommendations(cultivo: str,
 
     result = []
     for r in all_rows:
+        r = _json_safe(dict(r))
         var = r["variable"]
         # Recomendaciones generales: siempre incluir
         if var in ("general", "plaga", "enfermedad"):
-            result.append(dict(r))
+            result.append(r)
             continue
         # Recomendaciones de variable: filtrar por umbrales si tenemos el valor
         val = param_map.get(var)
@@ -1679,7 +1730,7 @@ def get_recommendations(cultivo: str,
         elif cond in ("muy_bajo", "bajo") and hi is not None:
             matches = val <= hi
         if matches:
-            result.append(dict(r))
+            result.append(r)
 
     deduped = []
     seen_recommendations = set()
@@ -1698,7 +1749,7 @@ def get_recommendations(cultivo: str,
             seen_recommendations.add(key)
         deduped.append(item)
 
-    return deduped
+    return _json_safe(deduped)
 
 
 @app.get("/dataset")
@@ -2414,6 +2465,7 @@ def admin_stats(x_admin_token: str = Header(None)):
         "lecturas_arduino": 0,
         "alertas": 0,
         "modelo_activo": None,
+        "modelo_disponible": os.path.exists(MODEL_PATH),
         "ultimas_predicciones": [],
     }
     if db_ok:
@@ -2442,6 +2494,8 @@ def admin_stats(x_admin_token: str = Header(None)):
                 stats["ultimas_predicciones"] = rows
         except Exception:
             pass
+    if stats["modelo_disponible"] and not stats["modelo_activo"]:
+        stats["modelo_activo"] = "v2.0"
     return stats
 
 

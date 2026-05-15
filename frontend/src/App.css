@@ -71,22 +71,27 @@
 
 .welcome-popup-icon {
   position: relative;
-  width: 72px;
-  height: 72px;
   margin: 0 auto 1rem;
-  display: grid;
-  place-items: center;
-  border-radius: 22px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  color: #f8fff8;
-  background: #246222;
-  box-shadow: 0 8px 24px rgba(38, 99, 36, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.welcome-popup-card.admin .welcome-popup-icon {
-  background: #0f5b85;
-  box-shadow: 0 8px 24px rgba(15, 91, 133, 0.35);
+.welcome-popup-logo-wrap {
+  background: #fff;
+  border-radius: 10px;
+  padding: 0.3rem 0.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.22);
+}
+
+.welcome-popup-logo-img {
+  width: 130px;
+  height: auto;
+  display: block;
+  object-fit: contain;
 }
 
 .welcome-popup-kicker {
@@ -112,25 +117,18 @@
   font-size: 0.95rem;
 }
 
-.welcome-popup-loader {
-  display: inline-flex;
-  gap: 0.45rem;
+.welcome-popup-spinner {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.18);
+  border-top-color: rgba(255, 255, 255, 0.90);
+  animation: welcomeSpin 700ms linear infinite;
+  margin: 0 auto;
 }
 
-.welcome-popup-loader span {
-  width: 10px;
-  height: 10px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.88);
-  animation: welcomePulse 900ms ease-in-out infinite;
-}
-
-.welcome-popup-loader span:nth-child(2) {
-  animation-delay: 120ms;
-}
-
-.welcome-popup-loader span:nth-child(3) {
-  animation-delay: 240ms;
+@keyframes welcomeSpin {
+  to { transform: rotate(360deg); }
 }
 
 @keyframes pulse {

@@ -1,29 +1,29 @@
-/* admin.css — Panel Admin v5 · Soft Slate Corporate */
+/* admin.css — Panel Admin v5 · Blue Corporate */
 
 .admin-theme {
-  --bg:            #f2f4f7;
-  --bg-inner:      #ebeef3;
+  --bg:            #f0f5fb;
+  --bg-inner:      #e6eef7;
   --surface:       #ffffff;
-  --surface-alt:   #f8fafc;
-  --surface-hover: #f1f5f9;
-  --text-primary:  #1e293b;
-  --text-secondary:#475569;
+  --surface-alt:   #f4f8fd;
+  --surface-hover: #eaf1f9;
+  --text-primary:  #0f172a;
+  --text-secondary:#334155;
   --text-muted:    #64748b;
   --text-faint:    #94a3b8;
-  --border:        rgba(100,116,139,0.12);
-  --border-strong: rgba(100,116,139,0.24);
-  --border-focus:  rgba(100,116,139,0.48);
-  --green:         #475569;
-  --green-light:   #64748b;
-  --green-vivid:   #7c8fa1;
-  --green-soft:    rgba(100,116,139,0.08);
-  --green-mid:     rgba(100,116,139,0.16);
-  --green-glow:    rgba(100,116,139,0.22);
-  --shadow-xs: 0 1px 2px rgba(15,23,42,0.04);
-  --shadow-sm: 0 1px 4px rgba(15,23,42,0.07), 0 1px 2px rgba(15,23,42,0.04);
-  --shadow-md: 0 4px 14px rgba(15,23,42,0.07), 0 2px 5px rgba(15,23,42,0.04);
-  --shadow-lg: 0 10px 36px rgba(15,23,42,0.08), 0 4px 10px rgba(15,23,42,0.04);
-  --shadow-xl: 0 22px 50px rgba(15,23,42,0.10), 0 8px 18px rgba(15,23,42,0.05);
+  --border:        rgba(37,99,235,0.10);
+  --border-strong: rgba(37,99,235,0.20);
+  --border-focus:  rgba(37,99,235,0.45);
+  --green:         #1d4ed8;
+  --green-light:   #3b82f6;
+  --green-vivid:   #2563eb;
+  --green-soft:    rgba(37,99,235,0.07);
+  --green-mid:     rgba(37,99,235,0.14);
+  --green-glow:    rgba(37,99,235,0.22);
+  --shadow-xs: 0 1px 2px rgba(10,22,40,0.05);
+  --shadow-sm: 0 1px 4px rgba(10,22,40,0.08), 0 1px 2px rgba(10,22,40,0.04);
+  --shadow-md: 0 4px 14px rgba(10,22,40,0.08), 0 2px 5px rgba(10,22,40,0.04);
+  --shadow-lg: 0 10px 36px rgba(10,22,40,0.09), 0 4px 10px rgba(10,22,40,0.05);
+  --shadow-xl: 0 22px 50px rgba(10,22,40,0.11), 0 8px 18px rgba(10,22,40,0.06);
   --radius-lg: 16px;
   background-color: var(--bg);
   color: var(--text-primary);
@@ -105,12 +105,12 @@
 
 .admin-theme::before {
   content: ""; position: fixed; top: -15%; right: -8%; width: 55vw; height: 55vh;
-  background: radial-gradient(ellipse, rgba(100,116,139,0.05) 0%, transparent 65%);
+  background: radial-gradient(ellipse, rgba(37,99,235,0.05) 0%, transparent 65%);
   pointer-events: none; z-index: 0;
 }
 
 .admin-theme .card { background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-sm); }
-.admin-theme .card:hover { box-shadow: var(--shadow-md); border-color: rgba(100,116,139,0.22); }
+.admin-theme .card:hover { box-shadow: var(--shadow-md); border-color: rgba(37,99,235,0.20); }
 .admin-theme .card-header { border-bottom: 1px solid var(--border); background: var(--surface-alt); }
 .admin-theme .card-header h3 { color: var(--text-primary); }
 
@@ -134,26 +134,24 @@
 
 /* Admin sidebar */
 .admin-sidebar {
-  background: #1a2535 !important;
-  border-right: 1px solid rgba(255,255,255,0.06) !important;
-  z-index: 100; box-shadow: 4px 0 20px rgba(0,0,0,0.14) !important;
+  background: #0a1628 !important;
+  border-right: 1px solid rgba(96,165,250,0.12) !important;
+  z-index: 100; box-shadow: 4px 0 24px rgba(0,0,0,0.22) !important;
 }
-.admin-sidebar .brand { border-bottom: 1px solid rgba(255,255,255,0.06) !important; }
-.admin-sidebar .brand-text h1 { color: #f1f5f9 !important; font-weight: 800; }
-.admin-sidebar .brand-text p  { color: rgba(148,163,184,0.5) !important; }
-.admin-sidebar .brand-icon { background: #334155 !important; box-shadow: 0 0 0 1px rgba(255,255,255,0.10), 0 4px 10px rgba(0,0,0,0.22) !important; color: #ffffff !important; }
-.admin-sidebar .menu-item       { color: #7c8fa1 !important; }
-.admin-sidebar .menu-item:hover { background: rgba(100,116,139,0.14) !important; color: #e2e8f0 !important; border-color: rgba(100,116,139,0.18) !important; }
+.admin-sidebar .brand { border-bottom: 1px solid rgba(96,165,250,0.12) !important; }
+.admin-sidebar .menu-item       { color: rgba(186,214,254,0.72) !important; }
+.admin-sidebar .menu-item:hover { background: rgba(59,130,246,0.12) !important; color: #e0eeff !important; border-color: rgba(59,130,246,0.18) !important; }
 .admin-sidebar .menu-item.active {
-  background: rgba(56,189,248,0.12) !important; color: #bae6fd !important; border-color: rgba(56,189,248,0.20) !important;
+  background: rgba(59,130,246,0.18) !important; color: #bfdbfe !important; border-color: rgba(59,130,246,0.28) !important;
 }
 .admin-sidebar .menu-item.active::before {
-  background: #38bdf8 !important;
-  box-shadow: 0 0 8px rgba(56,189,248,0.5) !important;
+  background: #60a5fa !important;
+  box-shadow: 0 0 8px rgba(96,165,250,0.55) !important;
 }
-.admin-sidebar .menu-item.active .menu-icon { filter: drop-shadow(0 0 4px rgba(56,189,248,0.5)) !important; }
-.admin-sidebar .nav-label { color: rgba(148,163,184,0.35) !important; }
-.admin-sidebar .sidebar-footer { background: rgba(56,189,248,0.05) !important; border-color: rgba(56,189,248,0.12) !important; }
+.admin-sidebar .menu-item.active .menu-icon { filter: drop-shadow(0 0 4px rgba(96,165,250,0.5)) !important; opacity: 1 !important; }
+.admin-sidebar .menu-item .menu-icon { opacity: 0.72 !important; }
+.admin-sidebar .nav-label { color: rgba(148,163,184,0.38) !important; }
+.admin-sidebar .sidebar-footer { background: rgba(59,130,246,0.05) !important; border-color: rgba(59,130,246,0.12) !important; }
 .admin-sidebar .sidebar-logout-btn { color: #fca5a5 !important; border-color: rgba(239,68,68,0.22) !important; }
 
 /* Status */
@@ -175,6 +173,10 @@
 .status-badge.ok    .status-badge-dot { background: #10b981; box-shadow: 0 0 8px rgba(16,185,129,0.6); }
 .status-badge.error .status-badge-dot { background: #ef4444; box-shadow: 0 0 8px rgba(239,68,68,0.6); }
 .status-badge.unknown .status-badge-dot { background: #94a3b8; }
+
+/* Status badge "ok" overridden to blue in admin panel */
+.admin-theme .status-badge.ok { background: rgba(37,99,235,0.08); border-color: rgba(37,99,235,0.22); color: #1d4ed8; }
+.admin-theme .status-badge.ok .status-badge-dot { background: #3b82f6; box-shadow: 0 0 8px rgba(59,130,246,0.6); }
 
 .admin-theme .btn-secondary { background: var(--surface-hover); border: 1px solid var(--border); color: var(--text-primary); }
 .admin-theme .btn-secondary:hover:not(:disabled) { background: var(--surface-alt); border-color: var(--border-strong); }
